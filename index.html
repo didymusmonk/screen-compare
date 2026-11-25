@@ -270,7 +270,9 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 (() => {
 "use strict";
 // ---------- Device data: [name, category, diagonal inches, width px, height px] ----------
-const CATS = { phone: "Phones", tablet: "Tablets", ereader: "E-readers", tabletpc: "Tablet PCs & 2-in-1s", laptop: "Laptops", monitor: "Monitors", custom: "Your screens" };
+const CATS = { phone: "Phones", tablet: "Tablets", ereader: "E-readers", tabletpc: "Tablet PCs & 2-in-1s", laptop: "Laptops", monitor: "Monitors", paper: "Paper & books", custom: "Your screens" };
+// short size label: diagonal for screens, width × height for paper
+const sizeTag = dev => dev.sheet ? `${+(dev.h).toFixed(2)}×${+(dev.w).toFixed(2)}″` : `${dev.d}″`;
 // The built-in device list lives in devices.csv next to this page.
 const catKey = c => c === "tablet pc" ? "tabletpc" : c;
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -297,8 +299,13 @@ async function loadDevices() {
   const col = k => head.indexOf(k);
   BUILTIN = rows.map(r => {
     const n = r[col("name")], d = +r[col("diagonal")], w = +r[col("width")], h = +r[col("height")];
-    if (!n || !(d > 0) || !(w > 0) || !(h > 0)) return null; // skip broken lines instead of failing
-    return { id: slug(n), n, c: catKey((r[col("type")] || "").toLowerCase()), d, w: Math.max(w, h), h: Math.min(w, h) };
+    if ((r[col("type")] || "").toLowerCase() !== "paper" && (!n || !(d > 0) || !(w > 0) || !(h > 0))) return null; // skip broken lines instead of failing
+    const c = catKey((r[col("type")] || "").toLowerCase());
+    if (c === "paper") { // paper sizes give width and height in inches and no diagonal
+      if (!n || !(w > 0) || !(h > 0)) return null;
+      return { id: slug(n), n, c, d: +Math.hypot(w, h).toFixed(2), w: Math.max(w, h), h: Math.min(w, h), aspectOnly: true, sheet: true };
+    }
+    return { id: slug(n), n, c, d, w: Math.max(w, h), h: Math.min(w, h) };
   }).filter(d => d && CATS[d.c]);
 }
 
@@ -374,14 +381,14 @@ function pageFit(g, paper, fit = S.fit) {
 
 // ---------- Search & categories ----------
 function renderCats() {
-  const keys = ["all", "phone", "tablet", "tabletpc", "laptop", "ereader", "monitor"].concat(custom.length ? ["custom"] : []);
+  const keys = ["all", "phone", "tablet", "tabletpc", "laptop", "ereader", "monitor", "paper"].concat(custom.length ? ["custom"] : []);
   $("#cats").innerHTML = keys.map(k => `<button class="chip" data-k="${k}" aria-pressed="${S.cat === k}">${k === "all" ? "All" : CATS[k]}</button>`).join("");
 }
 function renderResults() {
   const q = $("#q").value.trim().toLowerCase();
   const terms = q.split(/\s+/).filter(Boolean);
   let list = all().filter(d => (S.cat === "all" || d.c === S.cat) && terms.every(t => (d.n + " " + CATS[d.c]).toLowerCase().includes(t.replace(/["″]/g, ""))));
-  const order = ["custom", "tabletpc", "tablet", "phone", "laptop", "ereader", "monitor"];
+  const order = ["custom", "tabletpc", "tablet", "phone", "laptop", "ereader", "monitor", "paper"];
   let html = "";
   for (const c of order) {
     const items = list.filter(d => d.c === c);
@@ -389,7 +396,7 @@ function renderResults() {
     html += `<h3>${CATS[c]}</h3>`;
     html += items.map(d => {
       const on = S.sel.some(s => s.id === d.id);
-      const spec = d.aspectOnly ? `${d.d}″ · ${aspectLabel(d.w, d.h)}` : `${d.d}″ · ${Math.round(Math.hypot(d.w, d.h) / d.d)} ppi`;
+      const spec = d.sheet ? `${sizeTag(d)}` : d.aspectOnly ? `${d.d}″ · ${aspectLabel(d.w, d.h)}` : `${d.d}″ · ${Math.round(Math.hypot(d.w, d.h) / d.d)} ppi`;
       return `<button class="res" role="option" data-id="${esc(d.id)}" aria-disabled="${on}" aria-selected="${on}"><span>${on ? "✓ " : ""}${esc(d.n)}</span><small>${spec}</small></button>`;
     }).join("");
   }
@@ -449,14 +456,18 @@ function renderStage() {
   for (const x of drawOrder) {
     const i = items.indexOf(x), r = x.r, col = `var(${x.color})`;
     out += `<g class="scr" data-i="${i}">`;
-    out += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="${rad}" fill="${col}" fill-opacity="${paper ? 0.08 : 0.12}" stroke="${col}" stroke-width="2"/>`;
-    if (paper) out += drawPage(x, r, s, paper, i, col);
+    if (x.dev.sheet) { // paper and books: a sheet with a dashed edge, no page preview inside
+      out += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="var(--paper)" fill-opacity="0.6" stroke="${col}" stroke-width="2" stroke-dasharray="7 4"/>`;
+    } else {
+      out += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="${rad}" fill="${col}" fill-opacity="${paper ? 0.08 : 0.12}" stroke="${col}" stroke-width="2"/>`;
+      if (paper) out += drawPage(x, r, s, paper, i, col);
+    }
     if (side) {
       out += `<text x="${r.x + r.w / 2}" y="${r.y + r.h + 18}" text-anchor="middle" font-size="12" fill="${col}" font-weight="500">${esc(trunc(x.dev.n, Math.max(8, Math.floor(r.w / 7.2))))}</text>`;
-      const sub = r.w > 82 ? `${x.dev.d}″${x.g.ppi ? " · " + Math.round(x.g.ppi) + " ppi" : ""}` : `${x.dev.d}″`;
+      const sub = r.w > 82 ? `${sizeTag(x.dev)}${x.g.ppi ? " · " + Math.round(x.g.ppi) + " ppi" : ""}` : sizeTag(x.dev);
       out += `<text x="${r.x + r.w / 2}" y="${r.y + r.h + 33}" text-anchor="middle" font-size="11" fill="var(--muted)">${sub}</text>`;
     } else {
-      const label = arr ? `${x.dev.d}″ ${trunc(x.dev.n, Math.max(4, Math.floor((r.w - 40) / 7)))}` : `${x.dev.d}″`;
+      const label = arr ? `${sizeTag(x.dev)} ${trunc(x.dev.n, Math.max(4, Math.floor((r.w - 40) / 7)))}` : sizeTag(x.dev);
       out += `<text x="${r.x + 6}" y="${r.y + 15}" font-size="11.5" fill="${col}" font-weight="500" style="paint-order:stroke" stroke="var(--sunk)" stroke-width="3">${esc(label)}</text>`;
     }
     if (arr && r.w > 40 && r.h > 40) {
@@ -613,7 +624,7 @@ function renderCards() {
     const g = geom(x.dev, x.s.flip);
     const ppi = g.ppi;
     let pdfHtml = "";
-    if (paper) {
+    if (paper && !x.dev.sheet) {
       const fit = fitOf(x.s);
       const f = pageFit(g, spreadOf(x.s, paper), fit);
       const pct = f.k * 100;
@@ -643,12 +654,12 @@ function renderCards() {
         <button class="icon-btn" data-act="remove" data-i="${x.i}" title="Remove" aria-label="Remove ${esc(x.dev.n)}">✕</button>
       </div>
       <div class="card-ctrl"><span class="seg mini" role="group" aria-label="Orientation"><button data-act="orient" data-v="portrait" data-i="${x.i}" aria-pressed="${isPortrait(x.s)}">Portrait</button><button data-act="orient" data-v="landscape" data-i="${x.i}" aria-pressed="${!isPortrait(x.s)}">Landscape</button></span></div>
-      <div class="ppi-big" style="color:var(--fg)">${ppi ? `<b>${Math.round(ppi)}</b><span>pixels per inch (PPI)</span>` : `<b>–</b><span>PPI unknown, add the pixel count</span>`}</div>
+      <div class="ppi-big" style="color:var(--fg)">${x.dev.sheet ? `<b>${fmtLen(g.w)} × ${fmtLen(g.h)}</b>` : ppi ? `<b>${Math.round(ppi)}</b><span>pixels per inch (PPI)</span>` : `<b>–</b><span>PPI unknown, add the pixel count</span>`}</div>
       <dl style="color:var(--fg)">
-        <dt>Diagonal</dt><dd>${S.units === "cm" ? (x.dev.d * 2.54).toFixed(1) + " cm" : x.dev.d + "″"}</dd>
+        ${x.dev.sheet ? "" : `<dt>Diagonal</dt>`}<dd ${x.dev.sheet ? "hidden" : ""}>${S.units === "cm" ? (x.dev.d * 2.54).toFixed(1) + " cm" : x.dev.d + "″"}</dd>
         ${x.dev.aspectOnly ? "" : `<dt>Resolution</dt><dd>${g.pxW} × ${g.pxH}</dd>`}
         <dt>Aspect ratio</dt><dd>${aspectLabel(x.dev.w, x.dev.h)}</dd>
-        <dt>Screen size</dt><dd>${dims}</dd>
+        ${x.dev.sheet ? "" : `<dt>Screen size</dt><dd>${dims}</dd>`}
         <dt>Area</dt><dd>${areaTxt}</dd>
       </dl>
       <div class="bar" title="Area compared with the largest screen here"><i style="width:${(areaIn / maxArea * 100).toFixed(1)}%"></i></div>

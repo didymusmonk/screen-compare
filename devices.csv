@@ -1,5 +1,6 @@
 # True Size Screens device list. One screen per line. Diagonal is in inches; width and height are the screen's pixel count.
-# type is one of: phone, tablet, ereader, tablet pc, laptop, monitor
+# type is one of: phone, tablet, ereader, tablet pc, laptop, monitor, paper
+# For paper, leave diagonal empty and give width and height in inches instead of pixels.
 name,type,diagonal,width,height
 iPhone Duo (inner),phone,7.6,2670,1878
 iPhone Duo (front),phone,5.4,2034,1398
@@ -200,6 +201,36 @@ Boox Go 6 / Go 6 (Gen II),ereader,6.0,1448,1072
 Boox Palma 3,ereader,6.13,1648,824
 Boox Palma / Palma 2 / Palma 2 Pro,ereader,6.13,1648,824
 Boox Picco,ereader,3.97,800,480
+US Letter paper,paper,,8.5,11
+US Legal paper,paper,,8.5,14
+Tabloid / Ledger paper,paper,,11,17
+Half Letter / Statement paper,paper,,5.5,8.5
+Executive paper,paper,,7.25,10.5
+A3 paper,paper,,11.693,16.535
+A4 paper,paper,,8.268,11.693
+A5 paper,paper,,5.827,8.268
+A6 paper,paper,,4.134,5.827
+B5 paper (ISO),paper,,6.929,9.843
+B5 paper (JIS),paper,,7.165,10.118
+B6 paper (JIS),paper,,5.039,7.165
+Index card 3 × 5,paper,,3,5
+Index card / photo 4 × 6,paper,,4,6
+Index card 5 × 8,paper,,5,8
+Mass-market paperback,paper,,4.25,6.875
+Trade paperback 5.5 × 8.5,paper,,5.5,8.5
+Digest book 5.5 × 8.25,paper,,5.5,8.25
+Novel 5 × 8,paper,,5,8
+Book 6 × 9 (trade / hardcover),paper,,6,9
+Royal book 6.14 × 9.21,paper,,6.14,9.21
+Crown quarto book,paper,,7.44,9.69
+Textbook / workbook 8.5 × 11,paper,,8.5,11
+US comic book,paper,,6.625,10.25
+Manga (tankobon),paper,,5.039,7.165
+Graphic novel 6.625 × 10.25,paper,,6.625,10.25
+Notebook pocket 3.5 × 5.5,paper,,3.5,5.5
+Notebook large 5 × 8.25,paper,,5,8.25
+Credit card,paper,,2.125,3.37
+Business card (US),paper,,2,3.5
 Pixel 10 Pro XL,phone,6.8,2992,1344
 Pixel 9 Pro XL,phone,6.8,2992,1344
 Pixel 9 Pro,phone,6.3,2856,1280

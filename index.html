@@ -584,9 +584,9 @@ function drawPage(x, r, s, paper0, i, col) {
   const fit = fitOf(x.s);
   const { k } = pageFit(x.g, paper, fit);
   const pw = paper.w * k * s, ph = paper.h * k * s;
-  // always center the page (or spread) on the screen, even when it's bigger than the screen
+  // center the page (or spread) on the screen; Fit width starts at the top when the page is taller than the screen
   const px = r.x + (r.w - pw) / 2;
-  const py = r.y + (r.h - ph) / 2;
+  const py = fit === "width" && ph > r.h ? r.y : r.y + (r.h - ph) / 2;
   const one = spread ? pw / 2 : pw;
   let g = `<g clip-path="url(#clip${i})">`;
   for (let n = 0; n < (spread ? 2 : 1); n++) {

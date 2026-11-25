@@ -309,15 +309,29 @@ async function loadDevices() {
   }).filter(d => d && CATS[d.c]);
 }
 
-// ---------- Paper sizes (inches, portrait) ----------
-const MM = 1 / 25.4;
-const PAPERS = [
-  ["none", "None", 0, 0], ["letter", "US Letter (8.5 × 11 in)", 8.5, 11], ["legal", "US Legal (8.5 × 14 in)", 8.5, 14], ["tabloid", "Tabloid (11 × 17 in)", 11, 17],
-  ["half", "Half Letter / Statement (5.5 × 8.5 in)", 5.5, 8.5], ["exec", "Executive (7.25 × 10.5 in)", 7.25, 10.5],
-  ["a3", "A3 (297 × 420 mm)", 297 * MM, 420 * MM], ["a4", "A4 (210 × 297 mm)", 210 * MM, 297 * MM], ["a5", "A5 (148 × 210 mm)", 148 * MM, 210 * MM], ["a6", "A6 (105 × 148 mm)", 105 * MM, 148 * MM],
-  ["b5", "B5 (176 × 250 mm)", 176 * MM, 250 * MM], ["comic", "US comic book (6.625 × 10.25 in)", 6.625, 10.25], ["trade", "Paperback 6 × 9 in", 6, 9],
-  ["upload", "Your PDF (upload below)", 0, 0],
-];
+// ---------- Page sizes ----------
+// The page size menu is built from the "paper" lines in devices.csv.
+const OLD_PAPER_IDS = { letter: "us-letter-paper", legal: "us-legal-paper", tabloid: "tabloid-ledger-paper", half: "half-letter-statement-paper", exec: "executive-paper",
+  a3: "a3-paper", a4: "a4-paper", a5: "a5-paper", a6: "a6-paper", b5: "b5-paper-iso", comic: "us-comic-book", trade: "book-6-9-trade-hardcover" };
+const sheetGroup = d => /\bpaper\b/i.test(d.n) ? "Paper" : /card|notebook|photo/i.test(d.n) ? "Everyday objects" : "Books";
+const sheetLabel = d => {
+  const metric = /^(A\d|B\d)|manga/i.test(d.n);
+  const dims = metric ? `${Math.round(d.h * 25.4)} × ${Math.round(d.w * 25.4)} mm` : `${+d.h.toFixed(3)} × ${+d.w.toFixed(3)} in`;
+  return `${d.n.replace(/ paper\b/i, "")} (${dims})`;
+};
+function buildPaperMenu() {
+  const sheets = BUILTIN.filter(d => d.sheet);
+  if (OLD_PAPER_IDS[S.paper]) S.paper = OLD_PAPER_IDS[S.paper];
+  if (S.paper !== "none" && S.paper !== "upload" && !sheets.some(d => d.id === S.paper)) S.paper = sheets.length ? (sheets.find(d => d.id === "us-letter-paper") || sheets[0]).id : "none";
+  let html = `<option value="none">None</option>`;
+  for (const g of ["Paper", "Books", "Everyday objects"]) {
+    const list = sheets.filter(d => sheetGroup(d) === g);
+    if (list.length) html += `<optgroup label="${g}">` + list.map(d => `<option value="${esc(d.id)}">${esc(sheetLabel(d))}</option>`).join("") + `</optgroup>`;
+  }
+  html += `<option value="upload">Your PDF (upload below)</option>`;
+  $("#paper").innerHTML = html;
+  $("#paper").value = S.paper;
+}
 
 // ---------- State ----------
 const store = {
@@ -327,7 +341,7 @@ const store = {
 const S = Object.assign({
   sel: [{ id: "surface-pro-11th-edition-13" }, { id: "ipad-pro-11-inch-m4-m5" }, { id: "kindle-scribe-1st-2nd-gen" }, { id: "iphone-17-pro" }],
   mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
-  paper: "letter", paperOrient: "portrait", fit: "page", cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
+  paper: "us-letter-paper", paperOrient: "portrait", fit: "page", cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
 }, store.get("state", {}));
 let custom = store.get("custom", []);
 let ppiCal = store.get("ppiCal", 96);
@@ -365,9 +379,9 @@ const fmtLen = (inch, dp = 2) => S.units === "cm" ? `${(inch * 2.54).toFixed(dp 
 const paperDims = () => {
   if (S.paper === "none") return null;
   if (S.paper === "upload") return pdf.img ? { w: pdf.w, h: pdf.h, name: pdf.name || "Your PDF" } : null;
-  const p = PAPERS.find(p => p[0] === S.paper); if (!p) return null;
+  const p = byId(S.paper); if (!p || !p.sheet) return null;
   const land = S.paperOrient === "landscape";
-  return { w: land ? p[3] : p[2], h: land ? p[2] : p[3], name: p[1].split(" (")[0] };
+  return { w: land ? p.w : p.h, h: land ? p.h : p.w, name: p.n.replace(/ paper\b/i, "") };
 };
 const spreadOf = (sel, paper) => paper && sel && sel.spread ? { ...paper, w: paper.w * 2, single: paper.w } : paper;
 const fitOf = sel => (sel && sel.fit) || S.fit;
@@ -697,8 +711,6 @@ function syncMixed() {
 }
 function renderAll() { syncSpreadAll(); syncMixed(); syncVisibility(); renderCats(); renderResults(); renderStage(); renderCards(); }
 
-$("#paper").innerHTML = PAPERS.map(p => `<option value="${p[0]}">${p[1]}</option>`).join("");
-$("#paper").value = S.paper;
 $("#paper").addEventListener("change", e => { S.paper = e.target.value; save(); renderAll(); if (S.paper === "upload" && !pdf.img) $("#pdf-file").click(); });
 ["mode", "order", "anchor", "units", "scaleMode", "paperOrient"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
 // these two set every screen at once; each card can then change its own
@@ -817,7 +829,7 @@ $("#pg-prev").addEventListener("click", () => turn(-1));
 $("#pg-next").addEventListener("click", () => turn(1));
 
 // the uploaded PDF isn't kept between visits, so fall back to Letter
-if (S.paper === "upload") S.paper = "letter", $("#paper").value = "letter";
+if (S.paper === "upload") S.paper = "us-letter-paper";
 let rz; new ResizeObserver(() => { cancelAnimationFrame(rz); rz = requestAnimationFrame(renderStage); }).observe($("#stage"));
 $("#results").innerHTML = `<div class="empty">Loading devices…</div>`;
 loadDevices().catch(err => {
@@ -826,6 +838,7 @@ loadDevices().catch(err => {
 }).finally(() => {
   S.sel = S.sel.filter(s => byId(s.id));
   S.sel.forEach(s => { if (!s.uid) s.uid = newUid(); });
+  buildPaperMenu();
   renderAll();
 });
 })();

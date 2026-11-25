@@ -136,6 +136,7 @@ dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-num
 .pdfbox strong { font-weight: 600; }
 .pdf-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; justify-content: space-between; }
 .seg.mini button { padding: 3px 8px; font-size: 12px; }
+.card-ctrl { display: flex; flex-wrap: wrap; gap: 6px; }
 .pct { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .bar { height: 6px; border-radius: 3px; background: var(--sunk); overflow: hidden; }
 .bar > i { display: block; height: 100%; background: currentColor; }
@@ -251,7 +252,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <h2>What the numbers mean</h2>
         <div class="glossary">
           <div><b>PPI (pixels per inch)</b>How many screen pixels fit in one inch. Higher means sharper text. Phones are usually 400 to 500, tablets 260 to 330, laptops 200 to 250. Phone makers and spec sheets often call this DPI too.</div>
-          <div><b>Page at % of print size</b>How big a PDF page looks on that screen compared with the same page printed on paper. At 80%, 12 pt text looks like 9.6 pt text.</div>
+          <div><b>Size vs. printed page</b>How big a PDF page looks on that screen compared with the same page printed on paper. At 80%, 12 pt text looks like 9.6 pt text.</div>
           <div><b>Pixels per page inch</b>How many screen pixels each inch of the page gets. It's the effective resolution of the page on that screen, like a scanner's DPI. Around 150 or more looks crisp.</div>
           <div><b>Sizes are screen only</b>Rectangles show the visible display area from the diagonal and pixel count, not bezels or the case. Diagonals are the maker's figures, which round a little and ignore rounded corners.</div>
         </div>
@@ -361,8 +362,10 @@ const paperDims = () => {
   return { w: land ? p[3] : p[2], h: land ? p[2] : p[3], name: p[1].split(" (")[0] };
 };
 const spreadOf = (sel, paper) => paper && sel && sel.spread ? { ...paper, w: paper.w * 2, single: paper.w } : paper;
-function pageFit(g, paper) {
-  let k = S.fit === "page" ? Math.min(g.w / paper.w, g.h / paper.h) : S.fit === "width" ? g.w / paper.w : 1;
+const fitOf = sel => (sel && sel.fit) || S.fit;
+const isPortrait = sel => (S.orient === "portrait") !== !!sel.flip;
+function pageFit(g, paper, fit = S.fit) {
+  let k = fit === "page" ? Math.min(g.w / paper.w, g.h / paper.h) : fit === "width" ? g.w / paper.w : 1;
   const visW = Math.min(paper.w * k, g.w), visH = Math.min(paper.h * k, g.h);
   const shown = (visW * visH) / (paper.w * paper.h * k * k);
   return { k, shown };
@@ -551,10 +554,11 @@ $("#zoom").addEventListener("input", e => {
 function drawPage(x, r, s, paper0, i, col) {
   const spread = !!x.s.spread;
   const paper = spreadOf(x.s, paper0);
-  const { k } = pageFit(x.g, paper);
+  const fit = fitOf(x.s);
+  const { k } = pageFit(x.g, paper, fit);
   const pw = paper.w * k * s, ph = paper.h * k * s;
   const px = r.x + (pw < r.w ? (r.w - pw) / 2 : 0);
-  const py = r.y + (S.fit === "page" ? (r.h - ph) / 2 : 0);
+  const py = r.y + (fit === "page" ? (r.h - ph) / 2 : 0);
   const one = spread ? pw / 2 : pw;
   let g = `<g clip-path="url(#clip${i})">`;
   for (let n = 0; n < (spread ? 2 : 1); n++) {
@@ -609,12 +613,16 @@ function renderCards() {
     const ppi = g.ppi;
     let pdfHtml = "";
     if (paper) {
-      const f = pageFit(g, spreadOf(x.s, paper));
+      const fit = fitOf(x.s);
+      const f = pageFit(g, spreadOf(x.s, paper), fit);
       const pct = f.k * 100;
       const eff = ppi ? ppi * f.k : null;
       pdfHtml = `<div class="pdfbox">
-        <div class="pdf-head"><span><strong>${esc(paper.name)}</strong> ${S.fit === "actual" ? "at 100%" : S.fit === "page" ? "fit to page" : "fit to width"}</span>
-          <span class="seg mini" role="group" aria-label="Pages shown"><button data-act="single" data-i="${x.i}" aria-pressed="${!x.s.spread}">1 page</button><button data-act="spread" data-i="${x.i}" aria-pressed="${!!x.s.spread}">2 pages</button></span></div>
+        <div><strong>${esc(paper.name)}</strong></div>
+        <div class="pdf-head">
+          <span class="seg mini" role="group" aria-label="Pages shown"><button data-act="single" data-i="${x.i}" aria-pressed="${!x.s.spread}">1 page</button><button data-act="spread" data-i="${x.i}" aria-pressed="${!!x.s.spread}">2 pages</button></span>
+          <span class="seg mini" role="group" aria-label="Page fit">${[["page", "Fit page"], ["width", "Fit width"], ["actual", "100%"]].map(([v, t]) => `<button data-act="fit" data-v="${v}" data-i="${x.i}" aria-pressed="${fit === v}">${t}</button>`).join("")}</span>
+        </div>
         <dl>
           <dt>Size vs. printed page</dt><dd>${pct.toFixed(0)}%</dd>
           <dt>12 pt text looks like</dt><dd>${(12 * f.k).toFixed(1)} pt</dd>
@@ -629,11 +637,11 @@ function renderCards() {
     return `<article class="card" data-i="${x.i}" style="color:var(${x.color})">
       <div class="card-head">
         <span class="swatch" aria-hidden="true"></span>
-        <h3 style="color:var(--fg)">${esc(x.dev.n)}<span class="cat">${CATS[x.dev.c]} · ${g.h >= g.w ? "Portrait" : "Landscape"}</span></h3>
-        <button class="icon-btn" data-act="flip" data-i="${x.i}" title="Rotate this screen" aria-label="Rotate ${esc(x.dev.n)}">⟳</button>
+        <h3 style="color:var(--fg)">${esc(x.dev.n)}<span class="cat">${CATS[x.dev.c]}</span></h3>
         <button class="icon-btn" data-act="dup" data-i="${x.i}" title="Duplicate in the other orientation" aria-label="Duplicate ${esc(x.dev.n)}">⧉</button>
         <button class="icon-btn" data-act="remove" data-i="${x.i}" title="Remove" aria-label="Remove ${esc(x.dev.n)}">✕</button>
       </div>
+      <div class="card-ctrl"><span class="seg mini" role="group" aria-label="Orientation"><button data-act="orient" data-v="portrait" data-i="${x.i}" aria-pressed="${isPortrait(x.s)}">Portrait</button><button data-act="orient" data-v="landscape" data-i="${x.i}" aria-pressed="${!isPortrait(x.s)}">Landscape</button></span></div>
       <div class="ppi-big" style="color:var(--fg)">${ppi ? `<b>${Math.round(ppi)}</b><span>pixels per inch (PPI)</span>` : `<b>–</b><span>PPI unknown, add the pixel count</span>`}</div>
       <dl style="color:var(--fg)">
         <dt>Diagonal</dt><dd>${S.units === "cm" ? (x.dev.d * 2.54).toFixed(1) + " cm" : x.dev.d + "″"}</dd>
@@ -668,12 +676,21 @@ function syncSpreadAll() {
   document.querySelectorAll("#spreadAll button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === "spread" ? !!all2 : all1)));
 }
 $("#spreadAll").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S.sel.forEach(x => x.spread = b.dataset.v === "spread"); save(); renderAll(); });
-function renderAll() { syncSpreadAll(); syncVisibility(); renderCats(); renderResults(); renderStage(); renderCards(); }
+function syncMixed() {
+  const same = (vals, v) => vals.length > 0 && vals.every(x => x === v);
+  const o = S.sel.map(x => isPortrait(x) ? "portrait" : "landscape"), f = S.sel.map(fitOf);
+  document.querySelectorAll("#orient button").forEach(b => b.setAttribute("aria-pressed", String(same(o, b.dataset.v))));
+  document.querySelectorAll("#fit button").forEach(b => b.setAttribute("aria-pressed", String(same(f, b.dataset.v))));
+}
+function renderAll() { syncSpreadAll(); syncMixed(); syncVisibility(); renderCats(); renderResults(); renderStage(); renderCards(); }
 
 $("#paper").innerHTML = PAPERS.map(p => `<option value="${p[0]}">${p[1]}</option>`).join("");
 $("#paper").value = S.paper;
 $("#paper").addEventListener("change", e => { S.paper = e.target.value; save(); renderAll(); if (S.paper === "upload" && !pdf.img) $("#pdf-file").click(); });
-["mode", "orient", "anchor", "units", "scaleMode", "paperOrient", "fit"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
+["mode", "anchor", "units", "scaleMode", "paperOrient"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
+// these two set every screen at once; each card can then change its own
+bindSeg("orient", "orient", () => { S.sel.forEach(x => x.flip = false); save(); renderAll(); });
+bindSeg("fit", "fit", () => { S.sel.forEach(x => delete x.fit); save(); renderAll(); });
 $("#q").addEventListener("input", renderResults);
 $("#q").addEventListener("keydown", e => { if (e.key === "Enter") { const b = $("#results .res[aria-disabled='false']"); if (b) addDevice(b.dataset.id); } });
 $("#cats").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; S.cat = b.dataset.k; save(); renderCats(); renderResults(); });
@@ -684,6 +701,8 @@ $("#cards").addEventListener("click", e => {
   const act = b.dataset.act;
   if (act === "remove") S.sel.splice(i, 1);
   else if (act === "single" || act === "spread") S.sel[i].spread = act === "spread";
+  else if (act === "fit") S.sel[i].fit = b.dataset.v;
+  else if (act === "orient") { if (isPortrait(S.sel[i]) !== (b.dataset.v === "portrait")) rotateItem(i); return; }
   else if (act === "dup") {
     if (S.sel.length >= MAX) { $("#scale-note").textContent = `You can compare up to ${MAX} screens. Remove one first.`; return; }
     S.sel.splice(i + 1, 0, { ...S.sel[i], uid: newUid(), flip: !S.sel[i].flip });

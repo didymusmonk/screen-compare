@@ -27,6 +27,7 @@
   --paper-edge: #8794a3;
   --c1: #1f5fd1; --c2: #d2462f; --c3: #138a5b; --c4: #b0671a;
   --c5: #7b45c7; --c6: #0c8ca3; --c7: #c23a86; --c8: #59651f;
+  --c9: #8c5a3c; --c10: #3b4cc0; --c11: #14917f; --c12: #b07d00;
   --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --font-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -38,6 +39,7 @@
   --paper: #eef1f4; --paper-text: #a3adb9; --paper-edge: #5d6b7b;
   --c1: #6b9cff; --c2: #ff7a62; --c3: #3fcf93; --c4: #f0a24c;
   --c5: #b48cff; --c6: #3cc8e0; --c7: #f074b8; --c8: #b6c45a;
+  --c9: #d39b76; --c10: #8f9bff; --c11: #4fd6c4; --c12: #ffc94d;
   color-scheme: dark;
 } }
 :root[data-theme="dark"] {
@@ -46,6 +48,7 @@
   --paper: #eef1f4; --paper-text: #a3adb9; --paper-edge: #5d6b7b;
   --c1: #6b9cff; --c2: #ff7a62; --c3: #3fcf93; --c4: #f0a24c;
   --c5: #b48cff; --c6: #3cc8e0; --c7: #f074b8; --c8: #b6c45a;
+  --c9: #d39b76; --c10: #8f9bff; --c11: #4fd6c4; --c12: #ffc94d;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -167,7 +170,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <input id="q" type="text" placeholder="Search, e.g. Surface Pro, iPad, Pixel" autocomplete="off" aria-label="Search devices">
         <div class="chips" id="cats" role="group" aria-label="Filter by type"></div>
         <div class="results" id="results" role="listbox" aria-label="Devices"></div>
-        <p class="hint">Click a device to add it. Up to 8 at once.</p>
+        <p class="hint">Click a device to add it. Up to 12 at once.</p>
       </section>
 
       <section class="panel">
@@ -321,8 +324,8 @@ const S = Object.assign({
 let custom = store.get("custom", []);
 let ppiCal = store.get("ppiCal", 96);
 let pdf = { doc: null, page: 1, pages: 0, img: null, img2: null, w: 0, h: 0, name: "" };
-const COLORS = ["--c1", "--c2", "--c3", "--c4", "--c5", "--c6", "--c7", "--c8"];
-const MAX = 8;
+const COLORS = ["--c1", "--c2", "--c3", "--c4", "--c5", "--c6", "--c7", "--c8", "--c9", "--c10", "--c11", "--c12"];
+const MAX = 12;
 const save = () => store.set("state", { ...S });
 const newUid = () => "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
@@ -449,7 +452,8 @@ function renderStage() {
     if (paper) out += drawPage(x, r, s, paper, i, col);
     if (side) {
       out += `<text x="${r.x + r.w / 2}" y="${r.y + r.h + 18}" text-anchor="middle" font-size="12" fill="${col}" font-weight="500">${esc(trunc(x.dev.n, Math.max(8, Math.floor(r.w / 7.2))))}</text>`;
-      out += `<text x="${r.x + r.w / 2}" y="${r.y + r.h + 33}" text-anchor="middle" font-size="11" fill="var(--muted)">${x.dev.d}″${x.g.ppi ? " · " + Math.round(x.g.ppi) + " ppi" : ""}</text>`;
+      const sub = r.w > 82 ? `${x.dev.d}″${x.g.ppi ? " · " + Math.round(x.g.ppi) + " ppi" : ""}` : `${x.dev.d}″`;
+      out += `<text x="${r.x + r.w / 2}" y="${r.y + r.h + 33}" text-anchor="middle" font-size="11" fill="var(--muted)">${sub}</text>`;
     } else {
       const label = arr ? `${x.dev.d}″ ${trunc(x.dev.n, Math.max(4, Math.floor((r.w - 40) / 7)))}` : `${x.dev.d}″`;
       out += `<text x="${r.x + 6}" y="${r.y + 15}" font-size="11.5" fill="${col}" font-weight="500" style="paint-order:stroke" stroke="var(--sunk)" stroke-width="3">${esc(label)}</text>`;
@@ -585,16 +589,15 @@ function ruler(x, y, totalIn, s) {
   const cm = S.units === "cm";
   const unit = cm ? 1 / 2.54 : 1;
   const total = totalIn / unit;
-  let step = 1;
-  if (unit * s < 14) step = cm ? 5 : 2;
-  if (unit * s < 6) step = 10;
+  // pick a label spacing that leaves at least 30px between numbers
+  const step = [1, 2, 5, 10, 20, 50].find(st => unit * s * st >= 30) || 100;
   let g = `<g><line x1="${x}" y1="${y}" x2="${x + totalIn * s}" y2="${y}" stroke="var(--muted)" stroke-width="1"/>`;
   const halfOk = unit * s * step > 24;
   for (let v = 0; v <= total + 1e-6; v += step / (halfOk ? 2 : 1)) {
     const major = Math.abs(v / step - Math.round(v / step)) < 1e-6;
     const px = x + v * unit * s;
     g += `<line x1="${px.toFixed(1)}" y1="${y}" x2="${px.toFixed(1)}" y2="${y + (major ? 8 : 4)}" stroke="var(--muted)" stroke-width="1"/>`;
-    if (major && (unit * s * step > 18 || v === 0)) g += `<text x="${px.toFixed(1)}" y="${y + 20}" text-anchor="middle" font-size="10" fill="var(--muted)">${Math.round(v)}${v === 0 ? (cm ? " cm" : " in") : ""}</text>`;
+    if (major) g += `<text x="${px.toFixed(1)}" y="${y + 20}" text-anchor="middle" font-size="10" fill="var(--muted)">${Math.round(v)}${v === 0 ? (cm ? " cm" : " in") : ""}</text>`;
   }
   return g + `</g>`;
 }

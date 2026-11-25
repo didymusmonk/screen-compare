@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important} body{margin:0} img{max-width:100%}</style>
+<title>True Size Screens</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Compare phone, tablet, laptop and tablet PC screens at true relative scale, with PPI and PDF page previews.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a drafting table. Controls on a left rail, the measured stage (grid paper + ruler) on the right, spec cards below. */
+:root {
+  --bg: #f3f5f7;
+  --surface: #ffffff;
+  --sunk: #e8ecf0;
+  --grid: #d9e0e7;
+  --grid-strong: #c3ccd6;
+  --fg: #17202b;
+  --muted: #5b6878;
+  --line: #cfd6de;
+  --accent: #1f5fd1;
+  --accent-ink: #ffffff;
+  --paper: #ffffff;
+  --paper-text: #9aa6b4;
+  --paper-edge: #8794a3;
+  --c1: #1f5fd1; --c2: #d2462f; --c3: #138a5b; --c4: #b0671a;
+  --c5: #7b45c7; --c6: #0c8ca3; --c7: #c23a86; --c8: #59651f;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f141a; --surface: #161d25; --sunk: #1c252f; --grid: #1f2a35; --grid-strong: #2b3846;
+  --fg: #e6ebf1; --muted: #93a1b2; --line: #2c3845; --accent: #6b9cff; --accent-ink: #0b1220;
+  --paper: #eef1f4; --paper-text: #a3adb9; --paper-edge: #5d6b7b;
+  --c1: #6b9cff; --c2: #ff7a62; --c3: #3fcf93; --c4: #f0a24c;
+  --c5: #b48cff; --c6: #3cc8e0; --c7: #f074b8; --c8: #b6c45a;
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0f141a; --surface: #161d25; --sunk: #1c252f; --grid: #1f2a35; --grid-strong: #2b3846;
+  --fg: #e6ebf1; --muted: #93a1b2; --line: #2c3845; --accent: #6b9cff; --accent-ink: #0b1220;
+  --paper: #eef1f4; --paper-text: #a3adb9; --paper-edge: #5d6b7b;
+  --c1: #6b9cff; --c2: #ff7a62; --c3: #3fcf93; --c4: #f0a24c;
+  --c5: #b48cff; --c6: #3cc8e0; --c7: #f074b8; --c8: #b6c45a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+.wrap { max-width: 1320px; margin: 0 auto; display: grid; gap: 20px; }
+header.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(26px, 3.4vw, 36px); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+h1 span { color: var(--accent); }
+.lede { color: var(--muted); margin: 4px 0 0; max-width: 62ch; }
+h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+.eyebrow { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.layout { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } .layout > main { order: -1; } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: grid; gap: 14px; min-width: 0; }
+.rail { display: grid; gap: 16px; min-width: 0; }
+label { font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+input[type="text"], input[type="number"], select {
+  font: inherit; font-size: 14px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; width: 100%; min-width: 0;
+}
+input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+button { font: inherit; cursor: pointer; }
+.btn { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 7px; padding: 8px 14px; font-weight: 600; font-size: 14px; }
+.btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); font-weight: 500; }
+.btn.ghost:hover { border-color: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: transparent; color: var(--fg); border-radius: 999px; padding: 4px 10px; font-size: 12.5px; }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: transparent; color: var(--fg); padding: 6px 10px; font-size: 13px; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.row > .lbl { font-size: 13px; color: var(--muted); min-width: 84px; }
+.results { max-height: 300px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.results h3 { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0; padding: 8px 10px 4px; position: sticky; top: 0; background: var(--bg); }
+.res { display: flex; justify-content: space-between; gap: 8px; width: 100%; border: 0; background: transparent; color: var(--fg); text-align: left; padding: 6px 10px; font-size: 13.5px; }
+.res:hover, .res:focus-visible { background: var(--sunk); }
+.res small { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.res[aria-disabled="true"] { opacity: 0.45; cursor: default; }
+.empty { padding: 12px; color: var(--muted); font-size: 13px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hint { font-size: 12.5px; color: var(--muted); margin: 0; }
+.err { font-size: 12.5px; color: var(--c2); margin: 0; }
+details > summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: 15px; }
+details[open] > summary { margin-bottom: 12px; }
+
+.stage-panel { padding: 0; overflow: hidden; gap: 0; }
+.stage-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.stage {
+  position: relative; overflow-x: auto; min-height: 360px;
+  background-color: var(--sunk);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.stage svg { display: block; margin: 0 auto; }
+.stage-foot { padding: 10px 16px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; font-size: 12.5px; color: var(--muted); }
+.stage-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); padding: 24px; text-align: center; }
+svg text { font-family: var(--font-mono); }
+.zoom { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.zoom input { width: 140px; }
+.arr-help { margin: 0; padding: 8px 16px; font-size: 12.5px; color: var(--muted); border-bottom: 1px solid var(--line); }
+.linkish { border: 0; background: none; color: var(--accent); padding: 0; font-size: inherit; text-decoration: underline; }
+.stage.arranging svg { touch-action: none; user-select: none; }
+.stage.arranging .scr { cursor: grab; }
+.stage.arranging .scr.dragging { cursor: grabbing; }
+.rot { cursor: pointer; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.card-head { display: flex; gap: 10px; align-items: flex-start; }
+.swatch { width: 14px; height: 14px; border-radius: 4px; flex: none; margin-top: 3px; border: 2px solid currentColor; background: color-mix(in srgb, currentColor 22%, transparent); }
+.card-head h3 { font-size: 15px; font-weight: 600; margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.card-head .cat { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
+.icon-btn { border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 6px; width: 28px; height: 28px; display: grid; place-items: center; flex: none; font-size: 14px; line-height: 1; }
+.icon-btn:hover { color: var(--fg); border-color: var(--fg); }
+dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; font-size: 13.5px; }
+dt { color: var(--muted); }
+dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; }
+.ppi-big { display: flex; align-items: baseline; gap: 6px; }
+.ppi-big b { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.ppi-big span { color: var(--muted); font-size: 13px; }
+.pill { display: inline-block; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--sunk); color: var(--muted); font-family: var(--font-mono); }
+.pdfbox { border-top: 1px dashed var(--line); padding-top: 10px; display: grid; gap: 4px; font-size: 13px; }
+.pdfbox strong { font-weight: 600; }
+.pct { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.bar { height: 6px; border-radius: 3px; background: var(--sunk); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: currentColor; }
+
+.glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; font-size: 13.5px; color: var(--muted); }
+.glossary b { color: var(--fg); display: block; font-weight: 600; margin-bottom: 2px; }
+.cal-card { margin: 8px 0; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 35%, var(--surface)), var(--surface)); border: 1px solid var(--accent); border-radius: 10px; display: grid; place-items: center; color: var(--muted); font-size: 12px; max-width: 100%; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.file-drop { border: 1.5px dashed var(--line); border-radius: 8px; padding: 12px; text-align: center; font-size: 13px; color: var(--muted); }
+.file-drop.over { border-color: var(--accent); color: var(--fg); }
+@media (prefers-reduced-motion: no-preference) { .scr { transition: opacity .15s; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>True Size <span>Screens</span></h1>
+      <p class="lede">Put phones, tablets, laptops and tablet PCs side by side at real relative size. See each screen's pixel density and how a printed page would fit on it.</p>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="rail">
+      <section class="panel" aria-labelledby="h-add">
+        <h2 id="h-add">Add a device</h2>
+        <input id="q" type="text" placeholder="Search, e.g. Surface Pro, iPad, Pixel" autocomplete="off" aria-label="Search devices">
+        <div class="chips" id="cats" role="group" aria-label="Filter by type"></div>
+        <div class="results" id="results" role="listbox" aria-label="Devices"></div>
+        <p class="hint">Click a device to add it. Up to 8 at once.</p>
+      </section>
+
+      <section class="panel">
+        <details id="custom-details">
+          <summary>Enter your own screen</summary>
+          <form id="custom" class="grid2" novalidate>
+            <label style="grid-column: 1 / -1">Name<input id="c-name" type="text" placeholder="My laptop" maxlength="60"></label>
+            <label>Diagonal<input id="c-diag" type="number" step="0.01" min="1" max="120" placeholder="13.3"></label>
+            <label>Unit<select id="c-unit"><option value="in">inches</option><option value="cm">cm</option></select></label>
+            <label>Width (px)<input id="c-w" type="number" step="1" min="1" placeholder="2560"></label>
+            <label>Height (px)<input id="c-h" type="number" step="1" min="1" placeholder="1600"></label>
+            <p class="hint" style="grid-column: 1 / -1">Don't know the pixels? Leave them empty and give an aspect ratio. PPI needs the pixel count.</p>
+            <label>Aspect W<input id="c-aw" type="number" step="0.01" min="0.1" placeholder="16"></label>
+            <label>Aspect H<input id="c-ah" type="number" step="0.01" min="0.1" placeholder="10"></label>
+            <p class="err" id="c-err" style="grid-column: 1 / -1" hidden></p>
+            <div style="grid-column: 1 / -1" class="row"><button class="btn" type="submit">Add screen</button></div>
+          </form>
+        </details>
+      </section>
+
+      <section class="panel" aria-labelledby="h-pdf">
+        <h2 id="h-pdf">Page preview</h2>
+        <label>Page size
+          <select id="paper"></select>
+        </label>
+        <div class="row"><span class="lbl">Page</span>
+          <div class="seg" id="paperOrient"><button data-v="portrait">Portrait</button><button data-v="landscape">Landscape</button></div>
+        </div>
+        <div class="row"><span class="lbl">Page fit</span>
+          <div class="seg" id="fit"><button data-v="page">Fit page</button><button data-v="width">Fit width</button><button data-v="actual">100%</button></div>
+        </div>
+        <div class="file-drop" id="drop">
+          <div>Preview your own PDF</div>
+          <div class="row" style="justify-content:center; margin-top:8px">
+            <label class="btn ghost" style="display:inline-block; cursor:pointer">Choose PDF<input id="pdf-file" type="file" accept="application/pdf,.pdf" hidden></label>
+          </div>
+          <p class="hint" id="pdf-status" style="margin-top:8px">Or drop a file here. It stays on your computer.</p>
+          <div class="row" id="pdf-pager" style="justify-content:center; margin-top:6px" hidden>
+            <button class="btn ghost" id="pg-prev" type="button" aria-label="Previous page">‹</button>
+            <span id="pg-label" class="pct"></span>
+            <button class="btn ghost" id="pg-next" type="button" aria-label="Next page">›</button>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <main style="display:grid; gap:16px; min-width:0">
+      <section class="panel stage-panel" aria-label="Comparison">
+        <div class="stage-bar">
+          <div class="row">
+            <div class="seg" id="mode" aria-label="Layout"><button data-v="overlay">Overlay</button><button data-v="side">Side by side</button><button data-v="arrange">Free arrange</button></div>
+            <div class="seg" id="orient" aria-label="Orientation"><button data-v="portrait">Portrait</button><button data-v="landscape">Landscape</button></div>
+            <div class="seg" id="anchor" aria-label="Overlay alignment"><button data-v="center">Centered</button><button data-v="corner">Corner</button></div>
+          </div>
+          <div class="row">
+            <div class="seg" id="units" aria-label="Units"><button data-v="in">in</button><button data-v="cm">cm</button></div>
+            <div class="seg" id="scaleMode" aria-label="Scale"><button data-v="fit">Fit</button><button data-v="actual">Actual size</button></div>
+            <label class="zoom">Zoom<input id="zoom" type="range" min="6" max="240" step="1"></label>
+          </div>
+        </div>
+        <p class="arr-help" id="arr-help" hidden>Drag screens to move them. Edges and centers snap to each other (hold Alt or Option to stop snapping). Double-click a screen or use its ⟳ button to rotate it. <button class="linkish" id="arr-reset" type="button">Reset layout</button></p>
+        <div class="stage" id="stage"></div>
+        <div class="stage-foot">
+          <span id="scale-note"></span>
+          <button class="btn ghost" id="cal-btn" type="button" style="padding:4px 10px; font-size:12.5px">Calibrate actual size</button>
+        </div>
+        <div id="cal" class="panel" style="border:0; border-top:1px solid var(--line); border-radius:0" hidden>
+          <h2>Calibrate to your monitor</h2>
+          <p class="hint">Hold a bank card (or any ID-1 card) against the screen and drag the slider until the blue card matches it exactly. After that, "Actual size" draws screens at their real physical size on this monitor.</p>
+          <div style="overflow-x:auto"><div class="cal-card" id="cal-card">85.6 × 54 mm card</div></div>
+          <input id="cal-range" type="range" min="50" max="260" step="0.5" aria-label="Pixels per inch on this monitor">
+          <div class="row"><span class="hint" id="cal-val"></span><button class="btn ghost" id="cal-done" type="button">Done</button></div>
+        </div>
+      </section>
+
+      <section class="cards" id="cards" aria-label="Screen details"></section>
+
+      <section class="panel">
+        <h2>What the numbers mean</h2>
+        <div class="glossary">
+          <div><b>PPI (pixels per inch)</b>How many screen pixels fit in one inch. Higher means sharper text. Phones are usually 400 to 500, tablets 260 to 330, laptops 200 to 250. Phone makers and spec sheets often call this DPI too.</div>
+          <div><b>Page at % of print size</b>How big a PDF page looks on that screen compared with the same page printed on paper. At 80%, 12 pt text looks like 9.6 pt text.</div>
+          <div><b>Pixels per page inch</b>How many screen pixels each inch of the page gets. It's the effective resolution of the page on that screen, like a scanner's DPI. Around 150 or more looks crisp.</div>
+          <div><b>Sizes are screen only</b>Rectangles show the visible display area from the diagonal and pixel count, not bezels or the case. Diagonals are the maker's figures, which round a little and ignore rounded corners.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+(() => {
+"use strict";
+// ---------- Device data: [name, category, diagonal inches, width px, height px] ----------
+const CATS = { phone: "Phones", tablet: "Tablets", ereader: "E-readers", tabletpc: "Tablet PCs & 2-in-1s", laptop: "Laptops", monitor: "Monitors", custom: "Your screens" };
+const RAW = [
+  ["iPhone 17 Pro Max", "phone", 6.9, 2868, 1320], ["iPhone 17 Pro", "phone", 6.3, 2622, 1206], ["iPhone 17", "phone", 6.3, 2622, 1206], ["iPhone Air", "phone", 6.5, 2736, 1260],
+  ["iPhone 16 Pro Max", "phone", 6.9, 2868, 1320], ["iPhone 16 Pro", "phone", 6.3, 2622, 1206], ["iPhone 16 Plus", "phone", 6.7, 2796, 1290], ["iPhone 16", "phone", 6.1, 2556, 1179],
+  ["iPhone 16e", "phone", 6.1, 2532, 1170], ["iPhone 15 Pro Max", "phone", 6.7, 2796, 1290], ["iPhone 15", "phone", 6.1, 2556, 1179], ["iPhone 13 mini", "phone", 5.4, 2340, 1080], ["iPhone SE (2nd/3rd gen)", "phone", 4.7, 1334, 750],
+  ["Galaxy S25 Ultra", "phone", 6.9, 3120, 1440], ["Galaxy S25+", "phone", 6.7, 3120, 1440], ["Galaxy S25", "phone", 6.2, 2340, 1080], ["Galaxy S24 Ultra", "phone", 6.8, 3120, 1440], ["Galaxy A55", "phone", 6.6, 2340, 1080],
+  ["Galaxy Z Fold6 (inner)", "phone", 7.6, 2160, 1856], ["Galaxy Z Fold6 (cover)", "phone", 6.3, 2376, 968], ["Galaxy Z Flip6", "phone", 6.7, 2640, 1080],
+  ["Pixel 10 Pro XL", "phone", 6.8, 2992, 1344], ["Pixel 9 Pro XL", "phone", 6.8, 2992, 1344], ["Pixel 9 Pro", "phone", 6.3, 2856, 1280], ["Pixel 9", "phone", 6.3, 2424, 1080], ["Pixel 9a", "phone", 6.3, 2424, 1080], ["Pixel 9 Pro Fold (inner)", "phone", 8.0, 2152, 2076],
+  ["OnePlus 13", "phone", 6.82, 3168, 1440],
+  ["iPad Pro 13-inch (M4/M5)", "tablet", 13.0, 2752, 2064], ["iPad Pro 11-inch (M4/M5)", "tablet", 11.1, 2420, 1668], ["iPad Pro 12.9-inch (3rd to 6th gen)", "tablet", 12.9, 2732, 2048], ["iPad Pro 11-inch (1st to 4th gen)", "tablet", 11.0, 2388, 1668],
+  ["iPad Air 13-inch (M2/M3)", "tablet", 13.0, 2732, 2048], ["iPad Air 11-inch (M2/M3)", "tablet", 10.86, 2360, 1640], ["iPad (A16) / iPad 10th gen", "tablet", 10.86, 2360, 1640], ["iPad 9th gen", "tablet", 10.2, 2160, 1620],
+  ["iPad mini (A20 Pro, 2026)", "tablet", 8.5, 2316, 1512], ["iPad mini (A17 Pro) / 6th gen", "tablet", 8.3, 2266, 1488],
+  ["Galaxy Tab S10 Ultra", "tablet", 14.6, 2960, 1848], ["Galaxy Tab S10+", "tablet", 12.4, 2800, 1752], ["Galaxy Tab S9", "tablet", 11.0, 2560, 1600], ["Galaxy Tab S9 FE", "tablet", 10.9, 2304, 1440], ["Galaxy Tab A9+", "tablet", 11.0, 1920, 1200],
+  ["Pixel Tablet", "tablet", 10.95, 2560, 1600], ["OnePlus Pad 2", "tablet", 12.1, 3000, 2120], ["Lenovo Tab P12", "tablet", 12.7, 2944, 1840], ["Amazon Fire HD 10", "tablet", 10.1, 1920, 1200], ["Amazon Fire Max 11", "tablet", 11.0, 2000, 1200],
+  ["Kindle Scribe", "ereader", 10.2, 2480, 1860], ["Kindle Paperwhite (2024)", "ereader", 7.0, 1680, 1264], ["Kindle (2024)", "ereader", 6.0, 1448, 1072], ["Kobo Elipsa 2E", "ereader", 10.3, 1872, 1404], ["Kobo Libra Colour", "ereader", 7.0, 1680, 1264],
+  ["reMarkable 2", "ereader", 10.3, 1872, 1404], ["reMarkable Paper Pro", "ereader", 11.8, 2160, 1620], ["Boox Note Air4 C", "ereader", 10.3, 2480, 1860], ["Boox Tab Ultra C Pro", "ereader", 10.3, 2480, 1860],
+  ["Surface Pro 11th Edition (13\")", "tablet pc", 13.0, 2880, 1920], ["Surface Pro 12-inch (2025)", "tablet pc", 12.0, 2196, 1464], ["Surface Pro 10 for Business", "tablet pc", 13.0, 2880, 1920],
+  ["Surface Pro 9", "tablet pc", 13.0, 2880, 1920], ["Surface Pro 8", "tablet pc", 13.0, 2880, 1920], ["Surface Pro X", "tablet pc", 13.0, 2880, 1920], ["Surface Pro 7 / 7+", "tablet pc", 12.3, 2736, 1824],
+  ["Surface Pro 6", "tablet pc", 12.3, 2736, 1824], ["Surface Pro (2017) / Pro 5", "tablet pc", 12.3, 2736, 1824], ["Surface Pro 4", "tablet pc", 12.3, 2736, 1824], ["Surface Pro 3", "tablet pc", 12.0, 2160, 1440],
+  ["Surface Go 4 / Go 3 / Go 2", "tablet pc", 10.5, 1920, 1280], ["Surface Go (1st gen)", "tablet pc", 10.0, 1800, 1200], ["Surface Laptop Studio 2", "tablet pc", 14.4, 2400, 1600],
+  ["Surface Book 3 (13.5\")", "tablet pc", 13.5, 3000, 2000], ["Surface Book 3 (15\")", "tablet pc", 15.0, 3240, 2160],
+  ["Lenovo ThinkPad X1 Fold 16", "tablet pc", 16.3, 2560, 2024], ["Lenovo Yoga 7i 14 (2-in-1)", "tablet pc", 14.0, 1920, 1200], ["HP Spectre x360 14", "tablet pc", 14.0, 2880, 1800], ["HP Spectre x360 16", "tablet pc", 16.0, 2880, 1800],
+  ["Galaxy Book4 Pro 360", "tablet pc", 16.0, 2880, 1800], ["Dell XPS 13 2-in-1 (9315)", "tablet pc", 13.0, 2880, 1920], ["ASUS ROG Flow Z13", "tablet pc", 13.4, 2560, 1600],
+  ["MacBook Air 13\" (M2/M3/M4)", "laptop", 13.6, 2560, 1664], ["MacBook Air 15\" (M2/M3/M4)", "laptop", 15.3, 2880, 1864], ["MacBook Air 13\" (M1)", "laptop", 13.3, 2560, 1600],
+  ["MacBook Pro 14\" (M1 to M5)", "laptop", 14.2, 3024, 1964], ["MacBook Pro 16\" (M1 to M4)", "laptop", 16.2, 3456, 2234], ["MacBook Pro 13\" (M2)", "laptop", 13.3, 2560, 1600],
+  ["Surface Laptop 7th Edition 13.8\"", "laptop", 13.8, 2304, 1536], ["Surface Laptop 7th Edition 15\"", "laptop", 15.0, 2496, 1664], ["Surface Laptop 13-inch (2025)", "laptop", 13.0, 1920, 1280], ["Surface Laptop Go 3", "laptop", 12.4, 1536, 1024],
+  ["Dell XPS 13 (9350)", "laptop", 13.4, 2560, 1600], ["Dell XPS 14 (9440)", "laptop", 14.5, 3200, 2000], ["Dell XPS 16 (9640)", "laptop", 16.3, 3840, 2400],
+  ["Lenovo ThinkPad X1 Carbon Gen 12", "laptop", 14.0, 2880, 1800], ["Framework Laptop 13 (2.8K)", "laptop", 13.5, 2880, 1920], ["Framework Laptop 13 (2.2K)", "laptop", 13.5, 2256, 1504], ["Framework Laptop 16", "laptop", 16.0, 2560, 1600],
+  ["ASUS Zenbook 14 OLED", "laptop", 14.0, 2880, 1800], ["Typical 15.6\" Full HD laptop", "laptop", 15.6, 1920, 1080], ["Typical 14\" Full HD laptop", "laptop", 14.0, 1920, 1080], ["Typical 11.6\" Chromebook", "laptop", 11.6, 1366, 768],
+  ["21.5\" Full HD monitor", "monitor", 21.5, 1920, 1080], ["24\" Full HD monitor", "monitor", 23.8, 1920, 1080], ["24\" QHD 1440p monitor", "monitor", 23.8, 2560, 1440], ["24\" 4K monitor", "monitor", 23.8, 3840, 2160], ["27\" Full HD monitor", "monitor", 27, 1920, 1080], ["27\" QHD 1440p monitor", "monitor", 27, 2560, 1440], ["27\" 4K monitor", "monitor", 27, 3840, 2160], ["27\" 5K (Apple Studio Display) monitor", "monitor", 27, 5120, 2880], ["32\" QHD 1440p monitor", "monitor", 31.5, 2560, 1440], ["32\" 4K monitor", "monitor", 31.5, 3840, 2160], ["32\" 6K (Pro Display XDR) monitor", "monitor", 32, 6016, 3384], ["29\" ultrawide 1080p monitor", "monitor", 29, 2560, 1080], ["34\" ultrawide 1080p monitor", "monitor", 34, 2560, 1080], ["34\" ultrawide 1440p monitor", "monitor", 34, 3440, 1440], ["38\" ultrawide monitor", "monitor", 37.5, 3840, 1600], ["40\" ultrawide 5K2K monitor", "monitor", 39.7, 5120, 2160], ["45\" ultrawide 1440p monitor", "monitor", 44.5, 3440, 1440], ["49\" super ultrawide monitor", "monitor", 49, 5120, 1440], ["42\" 4K OLED monitor", "monitor", 41.5, 3840, 2160], ["15.6\" portable monitor monitor", "monitor", 15.6, 1920, 1080],
+];
+const catKey = c => c === "tablet pc" ? "tabletpc" : c;
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const BUILTIN = RAW.map(([n, c, d, w, h]) => ({ id: slug(n), n, c: catKey(c), d, w: Math.max(w, h), h: Math.min(w, h) }));
+
+// ---------- Paper sizes (inches, portrait) ----------
+const MM = 1 / 25.4;
+const PAPERS = [
+  ["none", "None", 0, 0], ["letter", "US Letter (8.5 × 11 in)", 8.5, 11], ["legal", "US Legal (8.5 × 14 in)", 8.5, 14], ["tabloid", "Tabloid (11 × 17 in)", 11, 17],
+  ["half", "Half Letter / Statement (5.5 × 8.5 in)", 5.5, 8.5], ["exec", "Executive (7.25 × 10.5 in)", 7.25, 10.5],
+  ["a3", "A3 (297 × 420 mm)", 297 * MM, 420 * MM], ["a4", "A4 (210 × 297 mm)", 210 * MM, 297 * MM], ["a5", "A5 (148 × 210 mm)", 148 * MM, 210 * MM], ["a6", "A6 (105 × 148 mm)", 105 * MM, 148 * MM],
+  ["b5", "B5 (176 × 250 mm)", 176 * MM, 250 * MM], ["comic", "US comic book (6.625 × 10.25 in)", 6.625, 10.25], ["trade", "Paperback 6 × 9 in", 6, 9],
+  ["upload", "Your PDF (upload below)", 0, 0],
+];
+
+// ---------- State ----------
+const store = {
+  get(k, f) { try { const v = localStorage.getItem("tss:" + k); return v == null ? f : JSON.parse(v); } catch { return f; } },
+  set(k, v) { try { localStorage.setItem("tss:" + k, JSON.stringify(v)); } catch {} },
+};
+const S = Object.assign({
+  sel: [{ id: "surface-pro-11th-edition-13" }, { id: "ipad-pro-11-inch-m4-m5" }, { id: "kindle-scribe" }, { id: "iphone-17-pro" }],
+  mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
+  paper: "letter", paperOrient: "portrait", fit: "page", cat: "all", zoom: 50, pos: {}, zo: [],
+}, store.get("state", {}));
+let custom = store.get("custom", []);
+let ppiCal = store.get("ppiCal", 96);
+let pdf = { doc: null, page: 1, pages: 0, img: null, w: 0, h: 0, name: "" };
+const COLORS = ["--c1", "--c2", "--c3", "--c4", "--c5", "--c6", "--c7", "--c8"];
+const MAX = 8;
+const save = () => store.set("state", { ...S });
+
+const all = () => BUILTIN.concat(custom);
+const byId = id => all().find(d => d.id === id);
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// ---------- Geometry ----------
+function geom(dev, flip) {
+  const hyp = Math.hypot(dev.w, dev.h);
+  const W = dev.d * dev.w / hyp, H = dev.d * dev.h / hyp; // landscape inches
+  let portrait = S.orient === "portrait";
+  if (flip) portrait = !portrait;
+  const w = portrait ? H : W, h = portrait ? W : H;
+  const ppi = dev.aspectOnly ? null : hyp / dev.d;
+  const pxW = portrait ? dev.h : dev.w, pxH = portrait ? dev.w : dev.h;
+  return { w, h, ppi, pxW, pxH, area: W * H };
+}
+function aspectLabel(a, b) {
+  const r = Math.max(a, b) / Math.min(a, b);
+  if (r > 2.3 && r < 2.42) return "21:9 (ultrawide)";
+  const known = [[16, 9], [16, 10], [3, 2], [4, 3], [5, 4], [32, 9], [19.5, 9], [20, 9], [19, 9], [18, 9], [2, 1], [5, 3]];
+  for (const [x, y] of known) if (Math.abs(r - x / y) < 0.006) return `${x}:${y}`;
+  if (Math.abs(r - Math.SQRT2) < 0.006) return "√2 (like A4)";
+  return `${r.toFixed(2)}:1`;
+}
+const fmtLen = (inch, dp = 2) => S.units === "cm" ? `${(inch * 2.54).toFixed(dp === 2 ? 1 : dp)} cm` : `${inch.toFixed(dp)}″`;
+const paperDims = () => {
+  if (S.paper === "none") return null;
+  if (S.paper === "upload") return pdf.img ? { w: pdf.w, h: pdf.h, name: pdf.name || "Your PDF" } : null;
+  const p = PAPERS.find(p => p[0] === S.paper); if (!p) return null;
+  const land = S.paperOrient === "landscape";
+  return { w: land ? p[3] : p[2], h: land ? p[2] : p[3], name: p[1].split(" (")[0] };
+};
+function pageFit(g, paper) {
+  let k = S.fit === "page" ? Math.min(g.w / paper.w, g.h / paper.h) : S.fit === "width" ? g.w / paper.w : 1;
+  const visW = Math.min(paper.w * k, g.w), visH = Math.min(paper.h * k, g.h);
+  const shown = (visW * visH) / (paper.w * paper.h * k * k);
+  return { k, shown };
+}
+
+// ---------- Search & categories ----------
+function renderCats() {
+  const keys = ["all", "phone", "tablet", "tabletpc", "laptop", "ereader", "monitor"].concat(custom.length ? ["custom"] : []);
+  $("#cats").innerHTML = keys.map(k => `<button class="chip" data-k="${k}" aria-pressed="${S.cat === k}">${k === "all" ? "All" : CATS[k]}</button>`).join("");
+}
+function renderResults() {
+  const q = $("#q").value.trim().toLowerCase();
+  const terms = q.split(/\s+/).filter(Boolean);
+  let list = all().filter(d => (S.cat === "all" || d.c === S.cat) && terms.every(t => (d.n + " " + CATS[d.c]).toLowerCase().includes(t.replace(/["″]/g, ""))));
+  const order = ["custom", "tabletpc", "tablet", "phone", "laptop", "ereader", "monitor"];
+  let html = "";
+  for (const c of order) {
+    const items = list.filter(d => d.c === c);
+    if (!items.length) continue;
+    html += `<h3>${CATS[c]}</h3>`;
+    html += items.map(d => {
+      const on = S.sel.some(s => s.id === d.id);
+      const spec = d.aspectOnly ? `${d.d}″ · ${aspectLabel(d.w, d.h)}` : `${d.d}″ · ${Math.round(Math.hypot(d.w, d.h) / d.d)} ppi`;
+      return `<button class="res" role="option" data-id="${esc(d.id)}" aria-disabled="${on}" aria-selected="${on}"><span>${on ? "✓ " : ""}${esc(d.n)}</span><small>${spec}</small></button>`;
+    }).join("");
+  }
+  $("#results").innerHTML = html || `<div class="empty">No match. Try fewer words, or enter the screen yourself below.</div>`;
+}
+function addDevice(id) {
+  if (S.sel.some(s => s.id === id)) return;
+  if (S.sel.length >= MAX) { $("#scale-note").textContent = `You can compare up to ${MAX} screens. Remove one first.`; return; }
+  S.sel.push({ id }); save(); renderAll();
+}
+
+// ---------- Stage ----------
+let view = null; // last drawn layout, used by dragging
+const GAP = 0.6; // inches between screens side by side
+function ensurePos(items, maxH) {
+  let x0 = 0;
+  const missing = items.some(x => !S.pos[x.s.id]);
+  // new screens go to the right of everything already placed
+  if (missing) x0 = Math.max(0, ...items.filter(x => S.pos[x.s.id]).map(x => S.pos[x.s.id].x + x.g.w + GAP));
+  for (const x of items) {
+    if (!S.pos[x.s.id]) { S.pos[x.s.id] = { x: x0, y: Math.max(0, maxH - x.g.h) }; x0 += x.g.w + GAP; }
+  }
+  for (const id of Object.keys(S.pos)) if (!items.some(x => x.s.id === id)) delete S.pos[id];
+  S.zo = S.zo.filter(id => items.some(x => x.s.id === id));
+  for (const x of items) if (!S.zo.includes(x.s.id)) S.zo.push(x.s.id);
+}
+function renderStage() {
+  const stage = $("#stage");
+  const items = S.sel.map((s, i) => ({ s, dev: byId(s.id), color: COLORS[i % COLORS.length] })).filter(x => x.dev);
+  if (!items.length) { stage.innerHTML = `<div class="stage-empty">Add a device from the list to start comparing.</div>`; $("#scale-note").textContent = ""; view = null; return; }
+  items.forEach(x => x.g = geom(x.dev, x.s.flip));
+  const paper = paperDims();
+  const side = S.mode === "side", arr = S.mode === "arrange";
+  const maxW = Math.max(...items.map(x => x.g.w)), maxH = Math.max(...items.map(x => x.g.h));
+  const sideW = items.reduce((a, x) => a + x.g.w, 0) + GAP * (items.length - 1);
+  // where each screen sits, in inches from the top-left of the drawing
+  if (side) { let x0 = 0; items.forEach(x => { x.ix = x0; x.iy = maxH - x.g.h; x0 += x.g.w + GAP; }); }
+  else if (arr) { ensurePos(items, maxH); items.forEach(x => { x.ix = S.pos[x.s.id].x; x.iy = S.pos[x.s.id].y; }); }
+  else items.forEach(x => { x.ix = S.anchor === "center" ? (maxW - x.g.w) / 2 : 0; x.iy = S.anchor === "center" ? (maxH - x.g.h) / 2 : maxH - x.g.h; });
+  const worldW = arr ? Math.max(sideW, ...items.map(x => x.ix + x.g.w)) + 0.4 : side ? sideW : maxW;
+  const worldH = arr ? Math.max(maxH * 1.1, ...items.map(x => x.iy + x.g.h)) + 0.2 : maxH;
+  const padX = 24, padTop = 20, labelH = side ? 40 : 0, rulerH = 34;
+  const availW = Math.max(260, stage.clientWidth - padX * 2);
+  const availH = Math.max(280, Math.min(window.innerHeight * 0.62, 620)) - padTop - labelH - rulerH;
+  const fitS = Math.min(availW / worldW, availH / worldH);
+  const s = S.scale === "actual" ? ppiCal : S.scale === "manual" ? S.zoom : fitS;
+  $("#zoom").value = Math.round(s);
+  const W = Math.max(worldW * s + padX * 2, arr ? stage.clientWidth : 0), H = worldH * s + padTop + labelH + rulerH;
+  const rad = Math.min(6, s * 0.08);
+  items.forEach(x => x.r = { x: +(padX + x.ix * s).toFixed(2), y: +(padTop + x.iy * s).toFixed(2), w: +(x.g.w * s).toFixed(2), h: +(x.g.h * s).toFixed(2) });
+  const drawOrder = side ? items : arr ? [...items].sort((a, b) => S.zo.indexOf(a.s.id) - S.zo.indexOf(b.s.id)) : [...items].sort((a, b) => b.g.area - a.g.area);
+  let out = `<svg width="${W.toFixed(0)}" height="${H.toFixed(0)}" viewBox="0 0 ${W.toFixed(1)} ${H.toFixed(1)}" role="img" aria-label="Screens drawn to scale"><defs>`;
+  items.forEach((x, i) => { const r = x.r; out += `<clipPath id="clip${i}"><rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="${rad}"/></clipPath>`; });
+  out += `</defs>`;
+  out += ruler(padX, H - rulerH + 6, (W - padX * 2) / s, s);
+  out += `<g id="screens">`;
+  for (const x of drawOrder) {
+    const i = items.indexOf(x), r = x.r, col = `var(${x.color})`;
+    out += `<g class="scr" data-i="${i}">`;
+    out += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="${rad}" fill="${col}" fill-opacity="${paper ? 0.08 : 0.12}" stroke="${col}" stroke-width="2"/>`;
+    if (paper) out += drawPage(x, r, s, paper, i, col);
+    if (side) {
+      out += `<text x="${r.x + r.w / 2}" y="${r.y + r.h + 18}" text-anchor="middle" font-size="12" fill="${col}" font-weight="500">${esc(trunc(x.dev.n, Math.max(8, Math.floor(r.w / 7.2))))}</text>`;
+      out += `<text x="${r.x + r.w / 2}" y="${r.y + r.h + 33}" text-anchor="middle" font-size="11" fill="var(--muted)">${x.dev.d}″${x.g.ppi ? " · " + Math.round(x.g.ppi) + " ppi" : ""}</text>`;
+    } else {
+      const label = arr ? `${x.dev.d}″ ${trunc(x.dev.n, Math.max(4, Math.floor((r.w - 40) / 7)))}` : `${x.dev.d}″`;
+      out += `<text x="${r.x + 6}" y="${r.y + 15}" font-size="11.5" fill="${col}" font-weight="500" style="paint-order:stroke" stroke="var(--sunk)" stroke-width="3">${esc(label)}</text>`;
+    }
+    if (arr && r.w > 40 && r.h > 40) {
+      out += `<g class="rot" data-i="${i}" role="button" aria-label="Rotate ${esc(x.dev.n)}"><title>Rotate</title><circle cx="${r.x + r.w - 14}" cy="${r.y + 14}" r="10" fill="var(--surface)" stroke="${col}" stroke-width="1.5"/><text x="${r.x + r.w - 14}" y="${r.y + 18.5}" text-anchor="middle" font-size="13" fill="${col}">⟳</text></g>`;
+    }
+    out += `</g>`;
+  }
+  out += `</g><g id="guides" pointer-events="none"></g></svg>`;
+  stage.innerHTML = out;
+  view = { items, s, padX, padTop, W, H };
+  const how = S.scale === "actual"
+    ? `Drawn at actual size using ${ppiCal} screen pixels per inch${ppiCal === 96 ? " (default, calibrate for accuracy)" : " (calibrated)"}.`
+    : `Drawn to scale: 1 inch = ${s.toFixed(0)} px on your screen.`;
+  $("#scale-note").textContent = how + " Outlines are the lit screen area only, not the bezel or case.";
+}
+
+// ---------- Free arrange: drag, snap, rotate ----------
+function rotateItem(i) {
+  const sel = S.sel[i]; if (!sel) return;
+  const dev = byId(sel.id), before = geom(dev, sel.flip);
+  sel.flip = !sel.flip;
+  const p = S.pos[sel.id];
+  if (p) { // keep the screen's center where it was
+    p.x = Math.max(0, p.x + (before.w - before.h) / 2);
+    p.y = Math.max(0, p.y + (before.h - before.w) / 2);
+  }
+  save(); renderAll();
+}
+let drag = null, lastTap = {};
+function snapAxis(a, size, others, tol) {
+  const mine = [a, a + size / 2, a + size];
+  let best = null;
+  for (const o of others) for (const m of mine) {
+    const d = o - m;
+    if (Math.abs(d) <= tol && (best === null || Math.abs(d) < Math.abs(best))) best = d;
+  }
+  const v = best === null ? a : a + best;
+  const after = [v, v + size / 2, v + size];
+  const lines = best === null ? [] : others.filter(o => after.some(m => Math.abs(o - m) < 1e-6));
+  return { v, lines };
+}
+function drawGuides(gx, gy) {
+  const { s, padX, padTop, W, H } = view;
+  const g = document.getElementById("guides"); if (!g) return;
+  g.innerHTML = [...new Set(gx)].map(x => `<line x1="${padX + x * s}" y1="0" x2="${padX + x * s}" y2="${H}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="5 4"/>`).join("")
+    + [...new Set(gy)].map(y => `<line x1="0" y1="${padTop + y * s}" x2="${W}" y2="${padTop + y * s}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="5 4"/>`).join("");
+}
+const stageEl = $("#stage");
+stageEl.addEventListener("pointerdown", e => {
+  if (S.mode !== "arrange" || !view || e.button > 0) return;
+  const g = e.target.closest(".scr"); if (!g) return;
+  const i = +g.dataset.i, item = view.items[i];
+  if (e.target.closest(".rot")) { e.preventDefault(); rotateItem(S.sel.indexOf(item.s)); return; }
+  e.preventDefault();
+  const now = Date.now();
+  if (lastTap.id === item.s.id && now - lastTap.t < 350) { lastTap = {}; rotateItem(S.sel.indexOf(item.s)); return; } // double-click or double-tap
+  lastTap = { id: item.s.id, t: now };
+  if (g.nextSibling) g.parentNode.appendChild(g); // bring to front
+  S.zo = S.zo.filter(id => id !== item.s.id).concat(item.s.id);
+  g.classList.add("dragging");
+  stageEl.querySelector("svg").setPointerCapture(e.pointerId);
+  const others = view.items.filter(o => o !== item);
+  drag = { g, item, sx: e.clientX, sy: e.clientY, ox: item.ix, oy: item.iy, nx: item.ix, ny: item.iy,
+    xs: [0, ...others.flatMap(o => [o.ix, o.ix + o.g.w / 2, o.ix + o.g.w])],
+    ys: [0, ...others.flatMap(o => [o.iy, o.iy + o.g.h / 2, o.iy + o.g.h])] };
+});
+stageEl.addEventListener("pointermove", e => {
+  if (!drag) return;
+  const { s } = view, it = drag.item;
+  let nx = Math.max(0, drag.ox + (e.clientX - drag.sx) / s), ny = Math.max(0, drag.oy + (e.clientY - drag.sy) / s);
+  let gx = [], gy = [];
+  if (!e.altKey) {
+    const tol = 8 / s;
+    const X = snapAxis(nx, it.g.w, drag.xs, tol), Y = snapAxis(ny, it.g.h, drag.ys, tol);
+    nx = Math.max(0, X.v); ny = Math.max(0, Y.v); gx = X.lines; gy = Y.lines;
+  }
+  drag.nx = nx; drag.ny = ny;
+  drag.g.setAttribute("transform", `translate(${((nx - drag.ox) * s).toFixed(2)} ${((ny - drag.oy) * s).toFixed(2)})`);
+  drawGuides(gx, gy);
+});
+const endDrag = () => {
+  if (!drag) return;
+  const moved = drag.nx !== drag.ox || drag.ny !== drag.oy;
+  drag.g.classList.remove("dragging");
+  if (moved) S.pos[drag.item.s.id] = { x: drag.nx, y: drag.ny };
+  drag = null; save();
+  if (moved) renderStage(); else drawGuides([], []);
+};
+stageEl.addEventListener("pointerup", endDrag);
+stageEl.addEventListener("pointercancel", endDrag);
+$("#arr-reset").addEventListener("click", () => { S.pos = {}; save(); renderStage(); });
+$("#zoom").addEventListener("input", e => {
+  S.scale = "manual"; S.zoom = +e.target.value; save();
+  document.querySelectorAll("#scaleMode button").forEach(b => b.setAttribute("aria-pressed", "false"));
+  renderStage();
+});
+function drawPage(x, r, s, paper, i, col) {
+  const { k } = pageFit(x.g, paper);
+  const pw = paper.w * k * s, ph = paper.h * k * s;
+  const px = r.x + (pw < r.w ? (r.w - pw) / 2 : 0);
+  const py = r.y + (S.fit === "page" ? (r.h - ph) / 2 : 0);
+  let g = `<g clip-path="url(#clip${i})">`;
+  g += `<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="var(--paper)" stroke="var(--paper-edge)" stroke-width="0.75"/>`;
+  if (S.paper === "upload" && pdf.img) {
+    g += `<image href="${pdf.img}" x="${px}" y="${py}" width="${pw}" height="${ph}" preserveAspectRatio="none"/>`;
+  } else {
+    // 12 pt body text with 1 inch margins, drawn to scale (line pitch 14.4 pt)
+    const m = Math.min(1, paper.w * 0.12) * k * s, lh = (14.4 / 72) * k * s, th = (7 / 72) * k * s;
+    const lines = Math.floor((ph - 2 * m) / lh);
+    if (lh > 1.2) {
+      g += `<rect x="${px + m}" y="${py + m}" width="${(pw - 2 * m) * 0.55}" height="${th * 2}" fill="var(--paper-edge)" opacity="0.7"/>`;
+      for (let l = 2; l < lines; l++) {
+        if (l % 9 === 1) continue; // paragraph break
+        const wf = l % 9 === 0 ? 0.62 : 1 - ((l * 37) % 11) / 90;
+        g += `<rect x="${(px + m).toFixed(1)}" y="${(py + m + l * lh).toFixed(1)}" width="${((pw - 2 * m) * wf).toFixed(1)}" height="${th.toFixed(2)}" fill="var(--paper-text)"/>`;
+      }
+    }
+  }
+  g += `</g>`;
+  return g;
+}
+function ruler(x, y, totalIn, s) {
+  const cm = S.units === "cm";
+  const unit = cm ? 1 / 2.54 : 1;
+  const total = totalIn / unit;
+  let step = 1;
+  if (unit * s < 14) step = cm ? 5 : 2;
+  if (unit * s < 6) step = 10;
+  let g = `<g><line x1="${x}" y1="${y}" x2="${x + totalIn * s}" y2="${y}" stroke="var(--muted)" stroke-width="1"/>`;
+  const halfOk = unit * s * step > 24;
+  for (let v = 0; v <= total + 1e-6; v += step / (halfOk ? 2 : 1)) {
+    const major = Math.abs(v / step - Math.round(v / step)) < 1e-6;
+    const px = x + v * unit * s;
+    g += `<line x1="${px.toFixed(1)}" y1="${y}" x2="${px.toFixed(1)}" y2="${y + (major ? 8 : 4)}" stroke="var(--muted)" stroke-width="1"/>`;
+    if (major && (unit * s * step > 18 || v === 0)) g += `<text x="${px.toFixed(1)}" y="${y + 20}" text-anchor="middle" font-size="10" fill="var(--muted)">${Math.round(v)}${v === 0 ? (cm ? " cm" : " in") : ""}</text>`;
+  }
+  return g + `</g>`;
+}
+const trunc = (t, n) => t.length > n ? t.slice(0, n - 1) + "…" : t;
+
+// ---------- Cards ----------
+function renderCards() {
+  const items = S.sel.map((s, i) => ({ s, dev: byId(s.id), color: COLORS[i % COLORS.length], i })).filter(x => x.dev);
+  const paper = paperDims();
+  const maxArea = Math.max(...items.map(x => geom(x.dev, false).area), 0);
+  $("#cards").innerHTML = items.map(x => {
+    const g = geom(x.dev, x.s.flip);
+    const ppi = g.ppi;
+    let pdfHtml = "";
+    if (paper) {
+      const f = pageFit(g, paper);
+      const pct = f.k * 100;
+      const eff = ppi ? ppi * f.k : null;
+      pdfHtml = `<div class="pdfbox">
+        <div><strong>${esc(paper.name)}</strong> ${S.fit === "actual" ? "at 100%" : S.fit === "page" ? "fit to page" : "fit to width"}</div>
+        <dl>
+          <dt>Shown at</dt><dd>${pct.toFixed(0)}% of print size</dd>
+          <dt>12 pt text looks like</dt><dd>${(12 * f.k).toFixed(1)} pt</dd>
+          ${eff ? `<dt>Pixels per page inch</dt><dd>${Math.round(eff)}</dd>` : ""}
+          <dt>Page visible at once</dt><dd>${Math.round(f.shown * 100)}%</dd>
+        </dl>
+      </div>`;
+    }
+    const dims = `${fmtLen(g.w)} × ${fmtLen(g.h)}`;
+    const areaIn = geom(x.dev, false).area;
+    const areaTxt = S.units === "cm" ? `${(areaIn * 6.4516).toFixed(0)} cm²` : `${areaIn.toFixed(1)} sq in`;
+    return `<article class="card" data-i="${x.i}" style="color:var(${x.color})">
+      <div class="card-head">
+        <span class="swatch" aria-hidden="true"></span>
+        <h3 style="color:var(--fg)">${esc(x.dev.n)}<span class="cat">${CATS[x.dev.c]}</span></h3>
+        <button class="icon-btn" data-act="flip" data-i="${x.i}" title="Rotate this screen" aria-label="Rotate ${esc(x.dev.n)}">⟳</button>
+        <button class="icon-btn" data-act="remove" data-i="${x.i}" title="Remove" aria-label="Remove ${esc(x.dev.n)}">✕</button>
+      </div>
+      <div class="ppi-big" style="color:var(--fg)">${ppi ? `<b>${Math.round(ppi)}</b><span>pixels per inch (PPI)</span>` : `<b>–</b><span>PPI unknown, add the pixel count</span>`}</div>
+      <dl style="color:var(--fg)">
+        <dt>Diagonal</dt><dd>${S.units === "cm" ? (x.dev.d * 2.54).toFixed(1) + " cm" : x.dev.d + "″"}</dd>
+        ${x.dev.aspectOnly ? "" : `<dt>Resolution</dt><dd>${g.pxW} × ${g.pxH}</dd>`}
+        <dt>Aspect ratio</dt><dd>${aspectLabel(x.dev.w, x.dev.h)}</dd>
+        <dt>Screen size</dt><dd>${dims}</dd>
+        <dt>Area</dt><dd>${areaTxt}</dd>
+      </dl>
+      <div class="bar" title="Area compared with the largest screen here"><i style="width:${(areaIn / maxArea * 100).toFixed(1)}%"></i></div>
+      ${pdfHtml ? `<div style="color:var(--fg)">${pdfHtml}</div>` : ""}
+    </article>`;
+  }).join("");
+}
+
+// ---------- Controls ----------
+function bindSeg(id, key, after) {
+  const el = $("#" + id);
+  const sync = () => el.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(S[key] === b.dataset.v)));
+  el.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; S[key] = b.dataset.v; sync(); save(); after ? after() : renderAll(); });
+  sync();
+}
+function syncVisibility() {
+  $("#anchor").hidden = S.mode !== "overlay";
+  $("#arr-help").hidden = S.mode !== "arrange";
+  $("#stage").classList.toggle("arranging", S.mode === "arrange");
+  $("#paperOrient").parentElement.hidden = S.paper === "upload" || S.paper === "none";
+  $("#fit").parentElement.hidden = S.paper === "none";
+}
+function renderAll() { syncVisibility(); renderCats(); renderResults(); renderStage(); renderCards(); }
+
+$("#paper").innerHTML = PAPERS.map(p => `<option value="${p[0]}">${p[1]}</option>`).join("");
+$("#paper").value = S.paper;
+$("#paper").addEventListener("change", e => { S.paper = e.target.value; save(); renderAll(); if (S.paper === "upload" && !pdf.img) $("#pdf-file").click(); });
+["mode", "orient", "anchor", "units", "scaleMode", "paperOrient", "fit"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
+$("#q").addEventListener("input", renderResults);
+$("#q").addEventListener("keydown", e => { if (e.key === "Enter") { const b = $("#results .res[aria-disabled='false']"); if (b) addDevice(b.dataset.id); } });
+$("#cats").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; S.cat = b.dataset.k; save(); renderCats(); renderResults(); });
+$("#results").addEventListener("click", e => { const b = e.target.closest(".res"); if (b && b.getAttribute("aria-disabled") !== "true") addDevice(b.dataset.id); });
+$("#cards").addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const i = +b.dataset.i;
+  if (b.dataset.act === "remove") S.sel.splice(i, 1);
+  else { rotateItem(i); return; }
+  save(); renderAll();
+});
+const hl = i => document.querySelectorAll("#stage .scr").forEach(g => g.style.opacity = i == null || g.dataset.i === String(i) ? "1" : "0.2");
+$("#cards").addEventListener("mouseover", e => { const c = e.target.closest(".card"); hl(c ? c.dataset.i : null); });
+$("#cards").addEventListener("mouseleave", () => hl(null));
+
+// custom screen
+$("#custom").addEventListener("submit", e => {
+  e.preventDefault();
+  const err = $("#c-err");
+  const name = $("#c-name").value.trim() || "My screen";
+  let d = parseFloat($("#c-diag").value);
+  if ($("#c-unit").value === "cm") d = d / 2.54;
+  const w = parseFloat($("#c-w").value), h = parseFloat($("#c-h").value);
+  const aw = parseFloat($("#c-aw").value), ah = parseFloat($("#c-ah").value);
+  const fail = m => { err.textContent = m; err.hidden = false; };
+  if (!(d > 0.5 && d < 200)) return fail("Enter the diagonal screen size, for example 13.3.");
+  let dev;
+  if (w > 0 && h > 0) dev = { w: Math.max(w, h), h: Math.min(w, h) };
+  else if (aw > 0 && ah > 0) dev = { w: Math.max(aw, ah), h: Math.min(aw, ah), aspectOnly: true };
+  else return fail("Enter the pixel width and height, or an aspect ratio such as 3 and 2.");
+  err.hidden = true;
+  Object.assign(dev, { id: "c-" + Date.now().toString(36), n: name, c: "custom", d: +d.toFixed(2) });
+  custom.push(dev); store.set("custom", custom);
+  e.target.reset();
+  addDevice(dev.id);
+});
+
+// calibration
+const calCard = $("#cal-card"), calRange = $("#cal-range");
+const drawCal = () => { calCard.style.width = (3.370 * ppiCal) + "px"; calCard.style.height = (2.125 * ppiCal) + "px"; $("#cal-val").textContent = `${ppiCal} px per inch`; };
+calRange.value = ppiCal;
+calRange.addEventListener("input", () => { ppiCal = +calRange.value; store.set("ppiCal", ppiCal); drawCal(); if (S.scale === "actual") renderStage(); });
+$("#cal-btn").addEventListener("click", () => { $("#cal").hidden = !$("#cal").hidden; drawCal(); });
+$("#cal-done").addEventListener("click", () => { $("#cal").hidden = true; S.scale = "actual"; save(); document.querySelectorAll("#scaleMode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === "actual"))); renderStage(); });
+
+// PDF upload (pdf.js runs in the page; nothing is uploaded anywhere)
+let workerLoaded = null;
+function loadWorker() {
+  if (workerLoaded) return workerLoaded;
+  workerLoaded = new Promise((res, rej) => {
+    const sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    sc.onload = res; sc.onerror = () => { workerLoaded = null; rej(new Error("worker")); };
+    document.head.appendChild(sc);
+  });
+  return workerLoaded;
+}
+async function openPdf(file) {
+  const status = $("#pdf-status");
+  if (!window.pdfjsLib) { status.textContent = "The PDF reader didn't load. Check your connection and reload the page."; return; }
+  status.textContent = "Reading " + file.name + "…";
+  try {
+    await loadWorker();
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    const data = new Uint8Array(await file.arrayBuffer());
+    pdf.doc = await pdfjsLib.getDocument({ data, isEvalSupported: false }).promise;
+    pdf.pages = pdf.doc.numPages; pdf.page = 1; pdf.name = file.name.replace(/\.pdf$/i, "");
+    await renderPdfPage();
+    S.paper = "upload"; $("#paper").value = "upload"; save();
+    renderAll();
+  } catch (err) {
+    console.error(err);
+    status.textContent = "Couldn't open that file. Make sure it's a PDF that isn't password protected.";
+  }
+}
+async function renderPdfPage() {
+  const page = await pdf.doc.getPage(pdf.page);
+  const vp1 = page.getViewport({ scale: 1 });
+  pdf.w = vp1.width / 72; pdf.h = vp1.height / 72;
+  const scale = Math.min(3, 1600 / Math.max(vp1.width, vp1.height));
+  const vp = page.getViewport({ scale });
+  const c = document.createElement("canvas");
+  c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+  const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+  await page.render({ canvasContext: ctx, viewport: vp }).promise;
+  pdf.img = c.toDataURL("image/jpeg", 0.85);
+  $("#pdf-status").textContent = `${pdf.name}: page ${pdf.page} is ${pdf.w.toFixed(2)} × ${pdf.h.toFixed(2)} in (${(pdf.w * 25.4).toFixed(0)} × ${(pdf.h * 25.4).toFixed(0)} mm)`;
+  $("#pdf-pager").hidden = pdf.pages < 2;
+  $("#pg-label").textContent = `${pdf.page} / ${pdf.pages}`;
+}
+$("#pdf-file").addEventListener("change", e => { const f = e.target.files[0]; if (f) openPdf(f); e.target.value = ""; });
+const drop = $("#drop");
+["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (f) openPdf(f); });
+const turn = async d => { if (!pdf.doc) return; const n = pdf.page + d; if (n < 1 || n > pdf.pages) return; pdf.page = n; await renderPdfPage(); renderAll(); };
+$("#pg-prev").addEventListener("click", () => turn(-1));
+$("#pg-next").addEventListener("click", () => turn(1));
+
+// the uploaded PDF isn't kept between visits, so fall back to Letter
+if (S.paper === "upload") S.paper = "letter", $("#paper").value = "letter";
+S.sel = S.sel.filter(s => byId(s.id));
+let rz; new ResizeObserver(() => { cancelAnimationFrame(rz); rz = requestAnimationFrame(renderStage); }).observe($("#stage"));
+renderAll();
+})();
+</script>
+</body>
+</html>

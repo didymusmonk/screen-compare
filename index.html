@@ -226,6 +226,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
           <div class="row">
             <div class="seg" id="mode" aria-label="Layout"><button data-v="overlay">Overlay</button><button data-v="side">Side by side</button><button data-v="arrange">Free arrange</button></div>
             <div class="seg" id="orient" aria-label="Orientation"><button data-v="portrait">Portrait</button><button data-v="landscape">Landscape</button></div>
+            <div class="seg" id="order" aria-label="Order"><button data-v="added">As added</button><button data-v="height">Shortest first</button></div>
             <div class="seg" id="anchor" aria-label="Overlay alignment"><button data-v="center">Centered</button><button data-v="corner">Corner</button></div>
           </div>
           <div class="row">
@@ -319,7 +320,7 @@ const store = {
 const S = Object.assign({
   sel: [{ id: "surface-pro-11th-edition-13" }, { id: "ipad-pro-11-inch-m4-m5" }, { id: "kindle-scribe-1st-2nd-gen" }, { id: "iphone-17-pro" }],
   mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
-  paper: "letter", paperOrient: "portrait", fit: "page", cat: "all", zoom: 50, pos: {}, zo: [],
+  paper: "letter", paperOrient: "portrait", fit: "page", cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
 }, store.get("state", {}));
 let custom = store.get("custom", []);
 let ppiCal = store.get("ppiCal", 96);
@@ -425,7 +426,7 @@ function renderStage() {
   const maxW = Math.max(...items.map(x => x.g.w)), maxH = Math.max(...items.map(x => x.g.h));
   const sideW = items.reduce((a, x) => a + x.g.w, 0) + GAP * (items.length - 1);
   // where each screen sits, in inches from the top-left of the drawing
-  if (side) { let x0 = 0; items.forEach(x => { x.ix = x0; x.iy = maxH - x.g.h; x0 += x.g.w + GAP; }); }
+  if (side) { let x0 = 0; (S.order === "height" ? [...items].sort((a, b) => a.g.h - b.g.h) : items).forEach(x => { x.ix = x0; x.iy = maxH - x.g.h; x0 += x.g.w + GAP; }); }
   else if (arr) { ensurePos(items, maxH); items.forEach(x => { x.ix = S.pos[x.s.uid].x; x.iy = S.pos[x.s.uid].y; }); }
   else items.forEach(x => { x.ix = S.anchor === "center" ? (maxW - x.g.w) / 2 : 0; x.iy = S.anchor === "center" ? (maxH - x.g.h) / 2 : maxH - x.g.h; });
   const worldW = arr ? Math.max(sideW, ...items.map(x => x.ix + x.g.w)) + 0.4 : side ? sideW : maxW;
@@ -665,6 +666,7 @@ function bindSeg(id, key, after) {
 }
 function syncVisibility() {
   $("#anchor").hidden = S.mode !== "overlay";
+  $("#order").hidden = S.mode !== "side";
   $("#arr-help").hidden = S.mode !== "arrange";
   $("#stage").classList.toggle("arranging", S.mode === "arrange");
   $("#paperOrient").parentElement.hidden = S.paper === "upload" || S.paper === "none";
@@ -687,7 +689,7 @@ function renderAll() { syncSpreadAll(); syncMixed(); syncVisibility(); renderCat
 $("#paper").innerHTML = PAPERS.map(p => `<option value="${p[0]}">${p[1]}</option>`).join("");
 $("#paper").value = S.paper;
 $("#paper").addEventListener("change", e => { S.paper = e.target.value; save(); renderAll(); if (S.paper === "upload" && !pdf.img) $("#pdf-file").click(); });
-["mode", "anchor", "units", "scaleMode", "paperOrient"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
+["mode", "order", "anchor", "units", "scaleMode", "paperOrient"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
 // these two set every screen at once; each card can then change its own
 bindSeg("orient", "orient", () => { S.sel.forEach(x => x.flip = false); save(); renderAll(); });
 bindSeg("fit", "fit", () => { S.sel.forEach(x => delete x.fit); save(); renderAll(); });

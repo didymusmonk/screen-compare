@@ -1,6 +1,11 @@
 # True Size Screens device list. One screen per line. Diagonal is in inches; width and height are the screen's pixel count.
 # type is one of: phone, tablet, ereader, tablet pc, laptop, monitor
 name,type,diagonal,width,height
+iPhone Duo (inner),phone,7.6,2670,1878
+iPhone Duo (front),phone,5.4,2034,1398
+iPhone 18 Pro Max,phone,6.9,2868,1320
+iPhone 18 Pro,phone,6.3,2622,1206
+iPhone 17e,phone,6.1,2532,1170
 iPhone 17 Pro Max,phone,6.9,2868,1320
 iPhone 17 Pro,phone,6.3,2622,1206
 iPhone Air,phone,6.5,2736,1260

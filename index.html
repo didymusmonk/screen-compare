@@ -267,39 +267,36 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 "use strict";
 // ---------- Device data: [name, category, diagonal inches, width px, height px] ----------
 const CATS = { phone: "Phones", tablet: "Tablets", ereader: "E-readers", tabletpc: "Tablet PCs & 2-in-1s", laptop: "Laptops", monitor: "Monitors", custom: "Your screens" };
-const RAW = [
-  ["iPhone 17 Pro Max", "phone", 6.9, 2868, 1320], ["iPhone 17 Pro", "phone", 6.3, 2622, 1206], ["iPhone 17", "phone", 6.3, 2622, 1206], ["iPhone Air", "phone", 6.5, 2736, 1260],
-  ["iPhone 16 Pro Max", "phone", 6.9, 2868, 1320], ["iPhone 16 Pro", "phone", 6.3, 2622, 1206], ["iPhone 16 Plus", "phone", 6.7, 2796, 1290], ["iPhone 16", "phone", 6.1, 2556, 1179],
-  ["iPhone 16e", "phone", 6.1, 2532, 1170], ["iPhone 15 Pro Max", "phone", 6.7, 2796, 1290], ["iPhone 15", "phone", 6.1, 2556, 1179], ["iPhone 13 mini", "phone", 5.4, 2340, 1080], ["iPhone SE (2nd/3rd gen)", "phone", 4.7, 1334, 750],
-  ["Galaxy S25 Ultra", "phone", 6.9, 3120, 1440], ["Galaxy S25+", "phone", 6.7, 3120, 1440], ["Galaxy S25", "phone", 6.2, 2340, 1080], ["Galaxy S24 Ultra", "phone", 6.8, 3120, 1440], ["Galaxy A55", "phone", 6.6, 2340, 1080],
-  ["Galaxy Z Fold6 (inner)", "phone", 7.6, 2160, 1856], ["Galaxy Z Fold6 (cover)", "phone", 6.3, 2376, 968], ["Galaxy Z Flip6", "phone", 6.7, 2640, 1080],
-  ["Pixel 10 Pro XL", "phone", 6.8, 2992, 1344], ["Pixel 9 Pro XL", "phone", 6.8, 2992, 1344], ["Pixel 9 Pro", "phone", 6.3, 2856, 1280], ["Pixel 9", "phone", 6.3, 2424, 1080], ["Pixel 9a", "phone", 6.3, 2424, 1080], ["Pixel 9 Pro Fold (inner)", "phone", 8.0, 2152, 2076],
-  ["OnePlus 13", "phone", 6.82, 3168, 1440],
-  ["iPad Pro 13-inch (M4/M5)", "tablet", 13.0, 2752, 2064], ["iPad Pro 11-inch (M4/M5)", "tablet", 11.1, 2420, 1668], ["iPad Pro 12.9-inch (3rd to 6th gen)", "tablet", 12.9, 2732, 2048], ["iPad Pro 11-inch (1st to 4th gen)", "tablet", 11.0, 2388, 1668],
-  ["iPad Air 13-inch (M2/M3)", "tablet", 13.0, 2732, 2048], ["iPad Air 11-inch (M2/M3)", "tablet", 10.86, 2360, 1640], ["iPad (A16) / iPad 10th gen", "tablet", 10.86, 2360, 1640], ["iPad 9th gen", "tablet", 10.2, 2160, 1620],
-  ["iPad mini (A20 Pro, 2026)", "tablet", 8.5, 2316, 1512], ["iPad mini (A17 Pro) / 6th gen", "tablet", 8.3, 2266, 1488],
-  ["Galaxy Tab S10 Ultra", "tablet", 14.6, 2960, 1848], ["Galaxy Tab S10+", "tablet", 12.4, 2800, 1752], ["Galaxy Tab S9", "tablet", 11.0, 2560, 1600], ["Galaxy Tab S9 FE", "tablet", 10.9, 2304, 1440], ["Galaxy Tab A9+", "tablet", 11.0, 1920, 1200],
-  ["Pixel Tablet", "tablet", 10.95, 2560, 1600], ["OnePlus Pad 2", "tablet", 12.1, 3000, 2120], ["Lenovo Tab P12", "tablet", 12.7, 2944, 1840], ["Amazon Fire HD 10", "tablet", 10.1, 1920, 1200], ["Amazon Fire Max 11", "tablet", 11.0, 2000, 1200],
-  ["Kindle Scribe", "ereader", 10.2, 2480, 1860], ["Kindle Paperwhite (2024)", "ereader", 7.0, 1680, 1264], ["Kindle (2024)", "ereader", 6.0, 1448, 1072], ["Kobo Elipsa 2E", "ereader", 10.3, 1872, 1404], ["Kobo Libra Colour", "ereader", 7.0, 1680, 1264],
-  ["reMarkable 2", "ereader", 10.3, 1872, 1404], ["reMarkable Paper Pro", "ereader", 11.8, 2160, 1620], ["Boox Note Air4 C", "ereader", 10.3, 2480, 1860], ["Boox Tab Ultra C Pro", "ereader", 10.3, 2480, 1860],
-  ["Surface Pro 11th Edition (13\")", "tablet pc", 13.0, 2880, 1920], ["Surface Pro 12-inch (2025)", "tablet pc", 12.0, 2196, 1464], ["Surface Pro 10 for Business", "tablet pc", 13.0, 2880, 1920],
-  ["Surface Pro 9", "tablet pc", 13.0, 2880, 1920], ["Surface Pro 8", "tablet pc", 13.0, 2880, 1920], ["Surface Pro X", "tablet pc", 13.0, 2880, 1920], ["Surface Pro 7 / 7+", "tablet pc", 12.3, 2736, 1824],
-  ["Surface Pro 6", "tablet pc", 12.3, 2736, 1824], ["Surface Pro (2017) / Pro 5", "tablet pc", 12.3, 2736, 1824], ["Surface Pro 4", "tablet pc", 12.3, 2736, 1824], ["Surface Pro 3", "tablet pc", 12.0, 2160, 1440],
-  ["Surface Go 4 / Go 3 / Go 2", "tablet pc", 10.5, 1920, 1280], ["Surface Go (1st gen)", "tablet pc", 10.0, 1800, 1200], ["Surface Laptop Studio 2", "tablet pc", 14.4, 2400, 1600],
-  ["Surface Book 3 (13.5\")", "tablet pc", 13.5, 3000, 2000], ["Surface Book 3 (15\")", "tablet pc", 15.0, 3240, 2160],
-  ["Lenovo ThinkPad X1 Fold 16", "tablet pc", 16.3, 2560, 2024], ["Lenovo Yoga 7i 14 (2-in-1)", "tablet pc", 14.0, 1920, 1200], ["HP Spectre x360 14", "tablet pc", 14.0, 2880, 1800], ["HP Spectre x360 16", "tablet pc", 16.0, 2880, 1800],
-  ["Galaxy Book4 Pro 360", "tablet pc", 16.0, 2880, 1800], ["Dell XPS 13 2-in-1 (9315)", "tablet pc", 13.0, 2880, 1920], ["ASUS ROG Flow Z13", "tablet pc", 13.4, 2560, 1600],
-  ["MacBook Air 13\" (M2/M3/M4)", "laptop", 13.6, 2560, 1664], ["MacBook Air 15\" (M2/M3/M4)", "laptop", 15.3, 2880, 1864], ["MacBook Air 13\" (M1)", "laptop", 13.3, 2560, 1600],
-  ["MacBook Pro 14\" (M1 to M5)", "laptop", 14.2, 3024, 1964], ["MacBook Pro 16\" (M1 to M4)", "laptop", 16.2, 3456, 2234], ["MacBook Pro 13\" (M2)", "laptop", 13.3, 2560, 1600],
-  ["Surface Laptop 7th Edition 13.8\"", "laptop", 13.8, 2304, 1536], ["Surface Laptop 7th Edition 15\"", "laptop", 15.0, 2496, 1664], ["Surface Laptop 13-inch (2025)", "laptop", 13.0, 1920, 1280], ["Surface Laptop Go 3", "laptop", 12.4, 1536, 1024],
-  ["Dell XPS 13 (9350)", "laptop", 13.4, 2560, 1600], ["Dell XPS 14 (9440)", "laptop", 14.5, 3200, 2000], ["Dell XPS 16 (9640)", "laptop", 16.3, 3840, 2400],
-  ["Lenovo ThinkPad X1 Carbon Gen 12", "laptop", 14.0, 2880, 1800], ["Framework Laptop 13 (2.8K)", "laptop", 13.5, 2880, 1920], ["Framework Laptop 13 (2.2K)", "laptop", 13.5, 2256, 1504], ["Framework Laptop 16", "laptop", 16.0, 2560, 1600],
-  ["ASUS Zenbook 14 OLED", "laptop", 14.0, 2880, 1800], ["Typical 15.6\" Full HD laptop", "laptop", 15.6, 1920, 1080], ["Typical 14\" Full HD laptop", "laptop", 14.0, 1920, 1080], ["Typical 11.6\" Chromebook", "laptop", 11.6, 1366, 768],
-  ["21.5\" Full HD monitor", "monitor", 21.5, 1920, 1080], ["24\" Full HD monitor", "monitor", 23.8, 1920, 1080], ["24\" QHD 1440p monitor", "monitor", 23.8, 2560, 1440], ["24\" 4K monitor", "monitor", 23.8, 3840, 2160], ["27\" Full HD monitor", "monitor", 27, 1920, 1080], ["27\" QHD 1440p monitor", "monitor", 27, 2560, 1440], ["27\" 4K monitor", "monitor", 27, 3840, 2160], ["27\" 5K (Apple Studio Display) monitor", "monitor", 27, 5120, 2880], ["32\" QHD 1440p monitor", "monitor", 31.5, 2560, 1440], ["32\" 4K monitor", "monitor", 31.5, 3840, 2160], ["32\" 6K (Pro Display XDR) monitor", "monitor", 32, 6016, 3384], ["29\" ultrawide 1080p monitor", "monitor", 29, 2560, 1080], ["34\" ultrawide 1080p monitor", "monitor", 34, 2560, 1080], ["34\" ultrawide 1440p monitor", "monitor", 34, 3440, 1440], ["38\" ultrawide monitor", "monitor", 37.5, 3840, 1600], ["40\" ultrawide 5K2K monitor", "monitor", 39.7, 5120, 2160], ["45\" ultrawide 1440p monitor", "monitor", 44.5, 3440, 1440], ["49\" super ultrawide monitor", "monitor", 49, 5120, 1440], ["42\" 4K OLED monitor", "monitor", 41.5, 3840, 2160], ["15.6\" portable monitor monitor", "monitor", 15.6, 1920, 1080],
-];
+// The built-in device list lives in devices.csv next to this page.
 const catKey = c => c === "tablet pc" ? "tabletpc" : c;
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-const BUILTIN = RAW.map(([n, c, d, w, h]) => ({ id: slug(n), n, c: catKey(c), d, w: Math.max(w, h), h: Math.min(w, h) }));
+let BUILTIN = [];
+function parseCsv(text) {
+  const rows = [];
+  for (const line of text.split(/\r?\n/)) {
+    if (!line.trim() || line.startsWith("#")) continue;
+    const cells = []; let cur = "", q = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (q) { if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; } else if (ch === '"') q = false; else cur += ch; }
+      else if (ch === '"') q = true; else if (ch === ",") { cells.push(cur); cur = ""; } else cur += ch;
+    }
+    cells.push(cur); rows.push(cells.map(c => c.trim()));
+  }
+  return rows;
+}
+async function loadDevices() {
+  const res = await fetch("devices.csv", { cache: "no-cache" });
+  if (!res.ok) throw new Error("devices.csv " + res.status);
+  const rows = parseCsv(await res.text());
+  const head = rows.shift().map(h => h.toLowerCase());
+  const col = k => head.indexOf(k);
+  BUILTIN = rows.map(r => {
+    const n = r[col("name")], d = +r[col("diagonal")], w = +r[col("width")], h = +r[col("height")];
+    if (!n || !(d > 0) || !(w > 0) || !(h > 0)) return null; // skip broken lines instead of failing
+    return { id: slug(n), n, c: catKey((r[col("type")] || "").toLowerCase()), d, w: Math.max(w, h), h: Math.min(w, h) };
+  }).filter(d => d && CATS[d.c]);
+}
 
 // ---------- Paper sizes (inches, portrait) ----------
 const MM = 1 / 25.4;
@@ -317,7 +314,7 @@ const store = {
   set(k, v) { try { localStorage.setItem("tss:" + k, JSON.stringify(v)); } catch {} },
 };
 const S = Object.assign({
-  sel: [{ id: "surface-pro-11th-edition-13" }, { id: "ipad-pro-11-inch-m4-m5" }, { id: "kindle-scribe" }, { id: "iphone-17-pro" }],
+  sel: [{ id: "surface-pro-11th-edition-13" }, { id: "ipad-pro-11-inch-m4-m5" }, { id: "kindle-scribe-1st-2nd-gen" }, { id: "iphone-17-pro" }],
   mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
   paper: "letter", paperOrient: "portrait", fit: "page", cat: "all", zoom: 50, pos: {}, zo: [],
 }, store.get("state", {}));
@@ -805,10 +802,16 @@ $("#pg-next").addEventListener("click", () => turn(1));
 
 // the uploaded PDF isn't kept between visits, so fall back to Letter
 if (S.paper === "upload") S.paper = "letter", $("#paper").value = "letter";
-S.sel = S.sel.filter(s => byId(s.id));
-S.sel.forEach(s => { if (!s.uid) s.uid = newUid(); });
 let rz; new ResizeObserver(() => { cancelAnimationFrame(rz); rz = requestAnimationFrame(renderStage); }).observe($("#stage"));
-renderAll();
+$("#results").innerHTML = `<div class="empty">Loading devices…</div>`;
+loadDevices().catch(err => {
+  console.error(err);
+  $("#scale-note").textContent = "The built-in device list didn't load. Reload the page, or enter a screen yourself.";
+}).finally(() => {
+  S.sel = S.sel.filter(s => byId(s.id));
+  S.sel.forEach(s => { if (!s.uid) s.uid = newUid(); });
+  renderAll();
+});
 })();
 </script>
 </body>

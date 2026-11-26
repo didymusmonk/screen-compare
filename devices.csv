@@ -115,6 +115,14 @@ Galaxy S21,phone,6.2,2400,1080
 Galaxy S21 FE,phone,6.4,2340,1080
 Galaxy Note20 Ultra,phone,6.9,3088,1440
 Galaxy Note20,phone,6.7,2400,1080
+Galaxy Z TriFold (inner),phone,10.0,2160,1584
+Galaxy Z TriFold (cover),phone,6.5,2520,1080
+Galaxy Z Fold8 Ultra (inner),phone,8.0,2504,2256
+Galaxy Z Fold8 Ultra (cover),phone,6.5,2520,1080
+Galaxy Z Fold8 (inner),phone,7.6,2448,1828
+Galaxy Z Fold8 (cover),phone,5.5,1972,1248
+Galaxy Z Flip8,phone,6.9,2520,1080
+Galaxy Z Flip8 (cover),phone,4.1,1048,948
 Galaxy Z Fold7 (inner),phone,8.0,2184,1968
 Galaxy Z Fold7 (cover),phone,6.5,2520,1080
 Galaxy Z Fold6 (inner),phone,7.6,2160,1856
@@ -122,8 +130,20 @@ Galaxy Z Fold6 (cover),phone,6.3,2376,968
 Galaxy Z Fold5 / Fold4 (inner),phone,7.6,2176,1812
 Galaxy Z Fold5 / Fold4 (cover),phone,6.2,2316,904
 Galaxy Z Fold3 (inner),phone,7.6,2208,1768
+Galaxy Z Fold3 (cover),phone,6.2,2268,832
 Galaxy Z Flip7,phone,6.9,2520,1080
-Galaxy Z Flip6 / Flip5 / Flip4,phone,6.7,2640,1080
+Galaxy Z Flip7 (cover),phone,4.1,1048,948
+Galaxy Z Flip7 FE / Flip6 / Flip5 / Flip4,phone,6.7,2640,1080
+Galaxy Z Flip7 FE / Flip6 / Flip5 (cover),phone,3.4,748,720
+Galaxy Z Flip4 (cover),phone,1.9,512,260
+Pixel 11 Pro Fold (inner),phone,8.0,2152,2076
+Pixel 11 Pro Fold (cover),phone,6.5,2342,1080
+Pixel 10 Pro Fold (inner),phone,8.0,2152,2076
+Pixel 10 Pro Fold (cover),phone,6.4,2364,1080
+Pixel 9 Pro Fold (inner),phone,8.0,2152,2076
+Pixel 9 Pro Fold (cover),phone,6.3,2424,1080
+Pixel Fold (inner),phone,7.6,2208,1840
+Pixel Fold (cover),phone,5.8,2092,1080
 Galaxy A56,phone,6.7,2340,1080
 Galaxy A55 / A35,phone,6.6,2340,1080
 Galaxy A54,phone,6.4,2340,1080
@@ -236,7 +256,6 @@ Pixel 9 Pro XL,phone,6.8,2992,1344
 Pixel 9 Pro,phone,6.3,2856,1280
 Pixel 9,phone,6.3,2424,1080
 Pixel 9a,phone,6.3,2424,1080
-Pixel 9 Pro Fold (inner),phone,8,2152,2076
 OnePlus 13,phone,6.82,3168,1440
 Pixel Tablet,tablet,10.95,2560,1600
 OnePlus Pad 2,tablet,12.1,3000,2120

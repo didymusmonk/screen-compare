@@ -122,6 +122,12 @@ svg text { font-family: var(--font-mono); }
 
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.cards-bar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin-bottom: -4px; }
+.cards-bar .hint { margin: 0; }
+.row-mini { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+.grip { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; font-size: 16px; }
+.card.dragging { position: relative; z-index: 5; box-shadow: 0 10px 28px rgba(0,0,0,.18); cursor: grabbing; opacity: .96; }
+.card.dragging .grip { cursor: grabbing; }
 .card-head { display: flex; gap: 10px; align-items: flex-start; }
 .swatch { width: 14px; height: 14px; border-radius: 4px; flex: none; margin-top: 3px; border: 2px solid currentColor; background: color-mix(in srgb, currentColor 22%, transparent); }
 .card-head h3 { font-size: 15px; font-weight: 600; margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
@@ -244,7 +250,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
           <div class="row">
             <div class="seg" id="mode" aria-label="Layout"><button data-v="overlay">Overlay</button><button data-v="side">Side by side</button><button data-v="arrange">Free arrange</button></div>
             <div class="seg" id="orient" aria-label="Orientation"><button data-v="portrait">Portrait</button><button data-v="landscape">Landscape</button></div>
-            <div class="seg" id="order" aria-label="Order"><button data-v="added">As added</button><button data-v="height">Shortest first</button></div>
+            <div class="seg" id="order" aria-label="Order"><button data-v="added">Card order</button><button data-v="height">Shortest first</button></div>
             <div class="seg" id="anchor" aria-label="Overlay alignment"><button data-v="center">Centered</button><button data-v="corner">Corner</button></div>
           </div>
           <div class="row">
@@ -268,6 +274,10 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         </div>
       </section>
 
+      <div class="cards-bar" id="cards-bar">
+        <span class="hint">Drag a card by its <b aria-hidden="true">⠿</b> handle to reorder. Side by side follows this order.</span>
+        <span class="row-mini">Sort by screen height <span class="seg mini" role="group" aria-label="Sort cards"><button type="button" data-sort="asc">Shortest first</button><button type="button" data-sort="desc">Tallest first</button></span></span>
+      </div>
       <section class="cards" id="cards" aria-label="Screen details"></section>
 
       <section class="panel">
@@ -463,6 +473,14 @@ function renderResults() {
   }
   $("#results").innerHTML = html || `<div class="empty">No match. Try fewer words, or enter the screen yourself below.</div>`;
 }
+// each screen keeps its color when cards are reordered
+function colIdx(sel) {
+  if (sel.col == null || S.sel.some(o => o !== sel && o.col === sel.col)) {
+    const used = new Set(S.sel.filter(o => o !== sel && o.col != null).map(o => o.col));
+    let c = 0; while (used.has(c)) c++; sel.col = c;
+  }
+  return sel.col % COLORS.length;
+}
 function addDevice(id) {
   if (S.sel.some(s => s.id === id)) return;
   if (S.sel.length >= MAX) { $("#scale-note").textContent = `You can compare up to ${MAX} screens. Remove one first.`; return; }
@@ -486,7 +504,7 @@ function ensurePos(items, maxH) {
 }
 function renderStage() {
   const stage = $("#stage");
-  const items = S.sel.map((s, i) => ({ s, dev: byId(s.id), color: COLORS[i % COLORS.length] })).filter(x => x.dev);
+  const items = S.sel.map((s, i) => ({ s, dev: byId(s.id), color: COLORS[colIdx(s)] })).filter(x => x.dev);
   if (!items.length) { stage.innerHTML = `<div class="stage-empty">Add a device from the list to start comparing.</div>`; $("#scale-note").textContent = ""; view = null; return; }
   items.forEach(x => x.g = geom(x.dev, x.s.flip));
   const paper = paperDims();
@@ -880,9 +898,10 @@ const trunc = (t, n) => t.length > n ? t.slice(0, n - 1) + "…" : t;
 
 // ---------- Cards ----------
 function renderCards() {
-  const items = S.sel.map((s, i) => ({ s, dev: byId(s.id), color: COLORS[i % COLORS.length], i })).filter(x => x.dev);
+  const items = S.sel.map((s, i) => ({ s, dev: byId(s.id), color: COLORS[colIdx(s)], i })).filter(x => x.dev);
   const paper = paperDims();
   const maxArea = Math.max(...items.map(x => geom(x.dev, false).area), 0);
+  $("#cards-bar").hidden = items.length < 2;
   $("#cards").innerHTML = items.map(x => {
     const g = geom(x.dev, x.s.flip);
     const ppi = g.ppi;
@@ -941,6 +960,7 @@ function renderCards() {
     const areaTxt = S.units === "cm" ? `${(areaIn * 6.4516).toFixed(0)} cm²` : `${areaIn.toFixed(1)} sq in`;
     return `<article class="card" data-i="${x.i}" style="color:var(${x.color})">
       <div class="card-head">
+        <button class="icon-btn grip" data-grip="${x.i}" title="Drag to reorder (or use the arrow keys)" aria-label="Move ${esc(x.dev.n)}. Drag, or press the left and right arrow keys">⠿</button>
         <span class="swatch" aria-hidden="true"></span>
         <h3 style="color:var(--fg)">${esc(x.dev.n)}<span class="cat">${CATS[x.dev.c]}</span></h3>
         <button class="icon-btn" data-act="dup" data-i="${x.i}" title="Duplicate in the other orientation" aria-label="Duplicate ${esc(x.dev.n)}">⧉</button>
@@ -1026,9 +1046,60 @@ $("#cards").addEventListener("click", e => {
   else if (act === "orient") { if (isPortrait(S.sel[i]) !== (b.dataset.v === "portrait")) rotateItem(i); return; }
   else if (act === "dup") {
     if (S.sel.length >= MAX) { $("#scale-note").textContent = `You can compare up to ${MAX} screens. Remove one first.`; return; }
-    S.sel.splice(i + 1, 0, { ...S.sel[i], uid: newUid(), flip: !S.sel[i].flip });
+    S.sel.splice(i + 1, 0, { ...S.sel[i], uid: newUid(), flip: !S.sel[i].flip, col: undefined });
   }
   else { rotateItem(i); return; }
+  save(); renderAll();
+});
+// ---------- Reorder cards ----------
+function moveSel(from, to) {
+  if (to < 0 || to >= S.sel.length || from === to) return;
+  const [m] = S.sel.splice(from, 1); S.sel.splice(to, 0, m); save(); renderAll();
+}
+let cdrag = null;
+$("#cards").addEventListener("pointerdown", e => {
+  const h = e.target.closest("[data-grip]"); if (!h || e.button > 0) return;
+  e.preventDefault();
+  const card = h.closest(".card"); const r = card.getBoundingClientRect();
+  h.setPointerCapture(e.pointerId);
+  card.classList.add("dragging");
+  cdrag = { card, from: +card.dataset.i, sx: e.clientX, sy: e.clientY, ox: r.left, oy: r.top };
+});
+$("#cards").addEventListener("pointermove", e => {
+  if (!cdrag) return;
+  const { card } = cdrag;
+  // move the card's slot in the grid when the pointer is over another card
+  card.style.transform = "";
+  const others = [...$("#cards").children].filter(c => c !== card);
+  const hit = others.find(c => { const r = c.getBoundingClientRect(); return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom; });
+  if (hit) {
+    const list = [...$("#cards").children], a = list.indexOf(card), b = list.indexOf(hit);
+    hit.parentNode.insertBefore(card, a < b ? hit.nextSibling : hit);
+  }
+  const r = card.getBoundingClientRect();
+  card.style.transform = `translate(${e.clientX - cdrag.sx - (r.left - cdrag.ox)}px, ${e.clientY - cdrag.sy - (r.top - cdrag.oy)}px)`;
+});
+const endCardDrag = () => {
+  if (!cdrag) return;
+  const order = [...$("#cards").children].map(c => +c.dataset.i);
+  cdrag.card.style.transform = ""; cdrag.card.classList.remove("dragging");
+  cdrag = null;
+  if (order.some((v, k) => v !== k)) { S.sel = order.map(k => S.sel[k]).concat(S.sel.filter((_, k) => !order.includes(k))); save(); renderAll(); }
+};
+$("#cards").addEventListener("pointerup", endCardDrag);
+$("#cards").addEventListener("pointercancel", endCardDrag);
+$("#cards").addEventListener("keydown", e => {
+  const h = e.target.closest("[data-grip]"); if (!h) return;
+  const i = +h.dataset.grip, d = e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : 0;
+  if (!d) return;
+  e.preventDefault(); moveSel(i, i + d);
+  const g = document.querySelector(`[data-grip="${i + d}"]`); if (g) g.focus();
+});
+$("#cards-bar").addEventListener("click", e => {
+  const b = e.target.closest("[data-sort]"); if (!b) return;
+  const h = sel => { const d = byId(sel.id); return d ? geom(d, sel.flip).h : 0; };
+  const dir = b.dataset.sort === "asc" ? 1 : -1;
+  S.sel = S.sel.map((x, k) => [x, k]).sort((a, c) => (h(a[0]) - h(c[0])) * dir || a[1] - c[1]).map(a => a[0]);
   save(); renderAll();
 });
 const hl = i => document.querySelectorAll("#stage .scr").forEach(g => g.style.opacity = i == null || g.dataset.i === String(i) ? "1" : "0.2");

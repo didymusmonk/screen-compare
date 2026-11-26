@@ -140,6 +140,7 @@ dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-num
 .pdf-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; justify-content: space-between; }
 .seg.mini button { padding: 3px 8px; font-size: 12px; }
 .card-ctrl { display: flex; flex-wrap: wrap; gap: 6px; }
+.grid-stack { display: grid; gap: 14px; }
 .pct { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .bar { height: 6px; border-radius: 3px; background: var(--sunk); overflow: hidden; }
 .bar > i { display: block; height: 100%; background: currentColor; }
@@ -192,7 +193,17 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
       </section>
 
       <section class="panel" aria-labelledby="h-pdf">
-        <h2 id="h-pdf">Page preview</h2>
+        <h2 id="h-pdf">Show on each screen</h2>
+        <div class="seg" id="content" aria-label="Content"><button data-v="page">Pages</button><button data-v="video">Video</button><button data-v="ebook">E-book</button><button data-v="none">Nothing</button></div>
+        <div id="video-ctrls" class="grid-stack" hidden>
+          <label>Video shape<select id="video"></select></label>
+          <p class="hint">Black areas are the bars you'd see when the video fills the screen without cropping.</p>
+        </div>
+        <div id="ebook-ctrls" class="grid-stack" hidden>
+          <label>Font size<select id="ebookPt"></select></label>
+          <p class="hint">Text flows across the whole screen with 0.3″ margins, the way an e-reader app lays out a book. Font sizes are true printed points.</p>
+        </div>
+        <div id="page-ctrls" class="grid-stack">
         <label>Page size
           <select id="paper"></select>
         </label>
@@ -216,6 +227,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
             <span id="pg-label" class="pct"></span>
             <button class="btn ghost" id="pg-next" type="button" aria-label="Next page">›</button>
           </div>
+        </div>
         </div>
       </section>
     </aside>
@@ -333,6 +345,26 @@ function buildPaperMenu() {
   $("#paper").value = S.paper;
 }
 
+// ---------- Video shapes and e-book font sizes ----------
+const VIDEOS = [
+  ["16:9", "16:9 (HD video, TV, YouTube)", 16 / 9], ["2.39:1", "2.39:1 (widescreen cinema)", 2.39], ["1.85:1", "1.85:1 (cinema)", 1.85],
+  ["21:9", "21:9 (ultrawide)", 64 / 27], ["4:3", "4:3 (classic TV)", 4 / 3], ["3:2", "3:2 (photos)", 1.5], ["1:1", "1:1 (square posts)", 1],
+  ["4:5", "4:5 (portrait posts)", 0.8], ["9:16", "9:16 (vertical: Shorts, TikTok, Reels)", 9 / 16],
+];
+const EBOOK_PTS = [[8, "8 pt (very small)"], [10, "10 pt (small, mass-market paperback)"], [12, "12 pt (medium, typical book)"], [14, "14 pt"], [16, "16 pt (large)"], [18, "18 pt"], [20, "20 pt (extra large)"], [24, "24 pt"], [28, "28 pt (largest)"]];
+const EBOOK_MARGIN = 0.3; // inches on every side
+function videoFit(g) {
+  const ar = (VIDEOS.find(v => v[0] === S.video) || VIDEOS[0])[2];
+  const vw = Math.min(g.w, g.h * ar), vh = vw / ar;
+  return { vw, vh, ar, used: (vw * vh) / (g.w * g.h), barsTB: (g.h - vh) / 2, barsLR: (g.w - vw) / 2 };
+}
+function ebookFit(g) {
+  const em = S.ebookPt / 72, lh = em * 1.5; // inches
+  const tw = Math.max(0, g.w - 2 * EBOOK_MARGIN), th = Math.max(0, g.h - 2 * EBOOK_MARGIN);
+  const cpl = Math.floor(tw / (em * 0.5)), lines = Math.floor(th / lh); // average character is about half an em wide
+  return { em, lh, tw, th, cpl, lines, words: Math.round(lines * cpl / 6) };
+}
+
 // ---------- State ----------
 const store = {
   get(k, f) { try { const v = localStorage.getItem("tss:" + k); return v == null ? f : JSON.parse(v); } catch { return f; } },
@@ -346,7 +378,7 @@ const defaults = () => ({
     { id: "ipad-pro-11-inch-m4-m5", uid: "d3" }, { id: "ipad-pro-11-inch-m4-m5", uid: "d4", flip: true, fit: "width" },
   ],
   mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
-  paper: "us-letter-paper", paperOrient: "portrait", fit: "page", cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
+  paper: "us-letter-paper", paperOrient: "portrait", fit: "page", content: "page", video: "16:9", ebookPt: 12, cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
 });
 const S = Object.assign(defaults(), store.get("state", {}));
 let custom = store.get("custom", []);
@@ -383,7 +415,7 @@ function aspectLabel(a, b) {
 }
 const fmtLen = (inch, dp = 2) => S.units === "cm" ? `${(inch * 2.54).toFixed(dp === 2 ? 1 : dp)} cm` : `${inch.toFixed(dp)}″`;
 const paperDims = () => {
-  if (S.paper === "none") return null;
+  if (S.content !== "page" || S.paper === "none") return null;
   if (S.paper === "upload") return pdf.img ? { w: pdf.w, h: pdf.h, name: pdf.name || "Your PDF" } : null;
   const p = byId(S.paper); if (!p || !p.sheet) return null;
   const land = S.paperOrient === "landscape";
@@ -470,7 +502,7 @@ function renderStage() {
   const drawOrder = side ? items : arr ? [...items].sort((a, b) => S.zo.indexOf(a.s.uid) - S.zo.indexOf(b.s.uid)) : [...items].sort((a, b) => b.g.area - a.g.area);
   let out = `<svg width="${W.toFixed(0)}" height="${H.toFixed(0)}" viewBox="0 0 ${W.toFixed(1)} ${H.toFixed(1)}" role="img" aria-label="Screens drawn to scale"><defs>`;
   items.forEach((x, i) => { const r = x.r; out += `<clipPath id="clip${i}"><rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="${rad}"/></clipPath>`; });
-  out += `</defs>`;
+  out += `<linearGradient id="vidsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b8fd6"/><stop offset="1" stop-color="#bcd6f2"/></linearGradient></defs>`;
   out += ruler(padX, H - rulerH + 6, (W - padX * 2) / s, s);
   out += `<g id="screens">`;
   for (const x of drawOrder) {
@@ -481,6 +513,8 @@ function renderStage() {
     } else {
       out += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="${rad}" fill="${col}" fill-opacity="${paper ? 0.08 : 0.12}" stroke="${col}" stroke-width="2"/>`;
       if (paper) out += drawPage(x, r, s, paper, i, col);
+      else if (S.content === "video") out += drawVideo(x, r, s, i);
+      else if (S.content === "ebook") out += drawEbook(x, r, s, i);
     }
     if (side) {
       out += `<text x="${r.x + r.w / 2}" y="${r.y + r.h + 18}" text-anchor="middle" font-size="12" fill="${col}" font-weight="500">${esc(trunc(x.dev.n, Math.max(8, Math.floor(r.w / 7.2))))}</text>`;
@@ -626,6 +660,30 @@ function drawPage(x, r, s, paper0, i, col) {
   g += `</g>`;
   return g;
 }
+function drawVideo(x, r, s, i) {
+  const v = videoFit(x.g), vw = v.vw * s, vh = v.vh * s;
+  const vx = r.x + (r.w - vw) / 2, vy = r.y + (r.h - vh) / 2;
+  let g = `<g clip-path="url(#clip${i})"><rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="#000"/>`;
+  g += `<rect x="${vx}" y="${vy}" width="${vw}" height="${vh}" fill="url(#vidsky)"/>`;
+  // a simple scene: ground line and sun, so the picture reads as video
+  g += `<rect x="${vx}" y="${vy + vh * 0.72}" width="${vw}" height="${vh * 0.28}" fill="#3d6b4a"/>`;
+  g += `<circle cx="${vx + vw * 0.75}" cy="${vy + vh * 0.32}" r="${Math.min(vw, vh) * 0.09}" fill="#ffd36b"/>`;
+  if (vh > 24) g += `<text x="${vx + vw / 2}" y="${vy + vh * 0.86 + 4}" text-anchor="middle" font-size="${Math.min(14, vh / 6)}" fill="#ffffff" opacity="0.9">${esc(S.video)}</text>`;
+  return g + `</g>`;
+}
+function drawEbook(x, r, s, i) {
+  const e = ebookFit(x.g), m = EBOOK_MARGIN * s, lh = e.lh * s, th = Math.max(0.6, e.em * 0.5 * s), tw = e.tw * s;
+  let g = `<g clip-path="url(#clip${i})"><rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="var(--paper)"/>`;
+  if (lh >= 1.5) {
+    for (let l = 0; l < e.lines; l++) {
+      const para = l % 8;
+      const indent = para === 0 ? e.em * 1.5 * s : 0;
+      const wf = para === 7 ? 0.45 : 1 - ((l * 29) % 13) / 110;
+      g += `<rect x="${(r.x + m + indent).toFixed(1)}" y="${(r.y + m + l * lh + (lh - th) / 2).toFixed(1)}" width="${((tw - indent) * wf).toFixed(1)}" height="${th.toFixed(2)}" fill="var(--paper-text)"/>`;
+    }
+  }
+  return g + `</g>`;
+}
 function ruler(x, y, totalIn, s) {
   const cm = S.units === "cm";
   const unit = cm ? 1 / 2.54 : 1;
@@ -672,6 +730,24 @@ function renderCards() {
         </dl>
       </div>`;
     }
+    if (!x.dev.sheet && S.content === "video") {
+      const v = videoFit(g);
+      const bars = v.barsTB > 0.005 ? `top and bottom, ${fmtLen(v.barsTB)} each` : v.barsLR > 0.005 ? `left and right, ${fmtLen(v.barsLR)} each` : "none";
+      pdfHtml = `<div class="pdfbox"><div><strong>${esc(S.video)} video</strong></div><dl>
+        <dt>Picture uses</dt><dd>${Math.round(v.used * 100)}% of screen</dd>
+        <dt>Black bars</dt><dd>${bars}</dd>
+        <dt>Picture size</dt><dd>${fmtLen(v.vw)} × ${fmtLen(v.vh)}</dd>
+        ${ppi ? `<dt>Picture pixels</dt><dd>${Math.round(v.vw * ppi)} × ${Math.round(v.vh * ppi)}</dd>` : ""}
+      </dl></div>`;
+    } else if (!x.dev.sheet && S.content === "ebook") {
+      const e = ebookFit(g);
+      pdfHtml = `<div class="pdfbox"><div><strong>E-book at ${S.ebookPt} pt</strong></div><dl>
+        <dt>Words per screen</dt><dd>about ${e.words.toLocaleString()}</dd>
+        <dt>Lines per screen</dt><dd>${e.lines}</dd>
+        <dt>Characters per line</dt><dd>about ${e.cpl}</dd>
+        ${ppi ? `<dt>Pixels per letter height</dt><dd>${Math.round(e.em * 0.7 * ppi)}</dd>` : ""}
+      </dl></div>`;
+    }
     const dims = `${fmtLen(g.w)} × ${fmtLen(g.h)}`;
     const areaIn = geom(x.dev, false).area;
     const areaTxt = S.units === "cm" ? `${(areaIn * 6.4516).toFixed(0)} cm²` : `${areaIn.toFixed(1)} sq in`;
@@ -712,6 +788,10 @@ function syncVisibility() {
   $("#paperOrient").parentElement.hidden = S.paper === "upload" || S.paper === "none";
   $("#fit").parentElement.hidden = S.paper === "none";
   $("#spreadAll").parentElement.hidden = S.paper === "none";
+  $("#page-ctrls").hidden = S.content !== "page";
+  $("#video").value = S.video; $("#ebookPt").value = String(S.ebookPt);
+  $("#video-ctrls").hidden = S.content !== "video";
+  $("#ebook-ctrls").hidden = S.content !== "ebook";
 }
 function syncSpreadAll() {
   const all2 = S.sel.length && S.sel.every(x => x.spread), all1 = S.sel.every(x => !x.spread);
@@ -726,8 +806,14 @@ function syncMixed() {
 }
 function renderAll() { syncSpreadAll(); syncMixed(); syncVisibility(); renderCats(); renderResults(); renderStage(); renderCards(); }
 
+$("#video").innerHTML = VIDEOS.map(v => `<option value="${v[0]}">${v[1]}</option>`).join("");
+$("#video").value = S.video;
+$("#video").addEventListener("change", e => { S.video = e.target.value; save(); renderStage(); renderCards(); });
+$("#ebookPt").innerHTML = EBOOK_PTS.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
+$("#ebookPt").value = String(S.ebookPt);
+$("#ebookPt").addEventListener("change", e => { S.ebookPt = +e.target.value; save(); renderStage(); renderCards(); });
 $("#paper").addEventListener("change", e => { S.paper = e.target.value; save(); renderAll(); if (S.paper === "upload" && !pdf.img) $("#pdf-file").click(); });
-["mode", "order", "anchor", "units", "scaleMode", "paperOrient"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
+["mode", "content", "order", "anchor", "units", "scaleMode", "paperOrient"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
 // these two set every screen at once; each card can then change its own
 bindSeg("orient", "orient", () => { S.sel.forEach(x => x.flip = false); save(); renderAll(); });
 bindSeg("fit", "fit", () => { S.sel.forEach(x => delete x.fit); save(); renderAll(); });

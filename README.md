@@ -25,3 +25,7 @@ Surface Pro 9,tablet pc,13.0,2880,1920
 - Wrap a name in double quotes if it contains a comma, and write a `"` inside a quoted name as `""`
 
 To edit it on GitHub, open `devices.csv`, click the pencil icon, make your change and click **Commit changes**. The live site updates in a minute or two.
+
+## License
+
+MIT License, © 2026 DidymusMonk. See [LICENSE](LICENSE). Product names are trademarks of their owners.

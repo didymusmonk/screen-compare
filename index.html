@@ -36,9 +36,9 @@
   --paper: #ffffff;
   --paper-text: #9aa6b4;
   --paper-edge: #8794a3;
-  --c1: #1f5fd1; --c2: #d2462f; --c3: #138a5b; --c4: #b0671a;
-  --c5: #7b45c7; --c6: #0c8ca3; --c7: #c23a86; --c8: #59651f;
-  --c9: #8c5a3c; --c10: #3b4cc0; --c11: #14917f; --c12: #b07d00;
+  --c1: #1f5fd1; --c2: #ba3d28; --c3: #11784f; --c4: #985916;
+  --c5: #7b45c7; --c6: #0a7184; --c7: #b6367e; --c8: #59651f;
+  --c9: #8c5a3c; --c10: #3b4cc0; --c11: #107667; --c12: #8a6200; /* all at least 4.5:1 against the drawing background */
   --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --font-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -96,7 +96,7 @@ label { font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
 input[type="text"], input[type="number"], select {
   font: inherit; font-size: 14px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; width: 100%; min-width: 0;
 }
-input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible, .grip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 button { font: inherit; cursor: pointer; }
 .btn { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 7px; padding: 8px 14px; font-weight: 600; font-size: 14px; }
 .btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); font-weight: 500; }
@@ -213,7 +213,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <h2 id="h-add">Add a device</h2>
         <input id="q" type="text" placeholder="Search, e.g. Surface Pro, iPad, Pixel" autocomplete="off" aria-label="Search devices">
         <div class="chips" id="cats" role="group" aria-label="Filter by type"></div>
-        <div class="results" id="results" role="listbox" aria-label="Devices"></div>
+        <div class="results" id="results" role="group" aria-label="Devices"></div>
         <p class="hint">Click a device to add it. Up to 12 at once.</p>
       </section>
 
@@ -299,7 +299,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <p class="arr-help" id="arr-help" hidden>Drag screens to move them. Edges and centers snap to each other (hold Alt or Option to stop snapping). Double-click a screen or use its ⟳ button to rotate it. <button class="linkish" id="arr-reset" type="button">Reset layout</button></p>
         <div class="stage" id="stage"></div>
         <div class="stage-foot">
-          <span id="scale-note"></span>
+          <span id="scale-note" aria-live="polite"></span>
           <span class="row"><button class="btn ghost" id="reset-btn" type="button" style="padding:4px 10px; font-size:12.5px">Reset to start</button><button class="btn ghost" id="cal-btn" type="button" style="padding:4px 10px; font-size:12.5px">Calibrate actual size</button></span>
         </div>
         <div id="cal" class="panel" style="border:0; border-top:1px solid var(--line); border-radius:0" hidden>
@@ -485,6 +485,7 @@ const paperDims = () => {
 };
 const spreadOf = (sel, paper) => paper && sel && sel.spread ? { ...paper, w: paper.w * 2, single: paper.w } : paper;
 const fitOf = sel => (sel && sel.fit) || S.fit;
+const spokenLen = inch => S.units === "cm" ? `${(inch * 2.54).toFixed(1)} centimeters` : `${inch.toFixed(1)} inches`;
 const isPortrait = sel => (S.orient === "portrait") !== !!sel.flip;
 function pageFit(g, paper, fit = S.fit) {
   let k = fit === "page" ? Math.min(g.w / paper.w, g.h / paper.h) : fit === "width" ? g.w / paper.w : 1;
@@ -511,7 +512,7 @@ function renderResults() {
     html += items.map(d => {
       const on = S.sel.some(s => s.id === d.id);
       const spec = d.sheet ? `${sizeTag(d)}` : d.aspectOnly ? `${d.d}″ · ${aspectLabel(d.w, d.h)}` : `${d.d}″ · ${Math.round(Math.hypot(d.w, d.h) / d.d)} ppi`;
-      return `<button class="res" role="option" data-id="${esc(d.id)}" aria-disabled="${on}" aria-selected="${on}"><span>${on ? "✓ " : ""}${esc(d.n)}</span><small>${spec}</small></button>`;
+      return `<button class="res" data-id="${esc(d.id)}" aria-disabled="${on}"${on ? ` title="Already added"` : ""}><span>${on ? `<span aria-label="Added:">✓ </span>` : ""}${esc(d.n)}</span><small>${spec}</small></button>`;
     }).join("");
   }
   $("#results").innerHTML = html || `<div class="empty">No match. Try fewer words, or enter the screen yourself below.</div>`;
@@ -570,7 +571,7 @@ function renderStage() {
   const rad = Math.min(6, s * 0.08);
   items.forEach(x => x.r = { x: +(padX + x.ix * s).toFixed(2), y: +(padTop + x.iy * s).toFixed(2), w: +(x.g.w * s).toFixed(2), h: +(x.g.h * s).toFixed(2) });
   const drawOrder = side ? items : arr ? [...items].sort((a, b) => S.zo.indexOf(a.s.uid) - S.zo.indexOf(b.s.uid)) : [...items].sort((a, b) => b.g.area - a.g.area);
-  let out = `<svg width="${W.toFixed(0)}" height="${H.toFixed(0)}" viewBox="0 0 ${W.toFixed(1)} ${H.toFixed(1)}" role="img" aria-label="Screens drawn to scale"><defs>`;
+  let out = `<svg width="${W.toFixed(0)}" height="${H.toFixed(0)}" viewBox="0 0 ${W.toFixed(1)} ${H.toFixed(1)}" role="img" aria-label="${esc(`Scale drawing of ${items.length} screen${items.length > 1 ? "s" : ""}: ` + items.map(x => `${x.dev.n}, ${isPortrait(x.s) ? "portrait" : "landscape"}, ${spokenLen(x.g.w)} wide by ${spokenLen(x.g.h)} tall`).join("; "))}"><defs>`;
   items.forEach((x, i) => { const r = x.r; out += `<clipPath id="clip${i}"><rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" rx="${rad}"/></clipPath>`; });
   out += `<linearGradient id="vidsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b8fd6"/><stop offset="1" stop-color="#bcd6f2"/></linearGradient></defs>`;
   out += ruler(padX, H - rulerH + 6, (W - padX * 2) / s, s);
@@ -1086,13 +1087,21 @@ $("#cards").addEventListener("click", e => {
   else if (act === "single" || act === "spread") S.sel[i].spread = act === "spread";
   else if (act === "fit") S.sel[i].fit = b.dataset.v;
   else if (act === "cols") S.sel[i].cols = b.dataset.v;
-  else if (act === "orient") { if (isPortrait(S.sel[i]) !== (b.dataset.v === "portrait")) rotateItem(i); return; }
+  else if (act === "orient") {
+    if (isPortrait(S.sel[i]) !== (b.dataset.v === "portrait")) rotateItem(i);
+    const o = document.querySelector(`#cards [data-act="orient"][data-i="${i}"][data-v="${b.dataset.v}"]`); if (o) o.focus({ preventScroll: true });
+    return;
+  }
   else if (act === "dup") {
     if (S.sel.length >= MAX) { $("#scale-note").textContent = `You can compare up to ${MAX} screens. Remove one first.`; return; }
     S.sel.splice(i + 1, 0, { ...S.sel[i], uid: newUid(), flip: !S.sel[i].flip, col: undefined });
   }
   else { rotateItem(i); return; }
   save(); renderAll();
+  // keep keyboard focus on the same control after the cards are redrawn
+  const ni = act === "remove" ? Math.min(i, S.sel.length - 1) : act === "dup" ? i + 1 : i;
+  const sel = act === "remove" || act === "dup" ? `[data-act="${act}"][data-i="${ni}"]` : `[data-act="${act}"][data-i="${i}"]${b.dataset.v ? `[data-v="${b.dataset.v}"]` : ""}`;
+  (document.querySelector("#cards " + sel) || $("#q")).focus({ preventScroll: true });
 });
 // ---------- Reorder cards ----------
 function moveSel(from, to) {
@@ -1148,6 +1157,8 @@ $("#cards-bar").addEventListener("click", e => {
 const hl = i => document.querySelectorAll("#stage .scr").forEach(g => g.style.opacity = i == null || g.dataset.i === String(i) ? "1" : "0.2");
 $("#cards").addEventListener("mouseover", e => { const c = e.target.closest(".card"); hl(c ? c.dataset.i : null); });
 $("#cards").addEventListener("mouseleave", () => hl(null));
+$("#cards").addEventListener("focusin", e => { const c = e.target.closest(".card"); hl(c ? c.dataset.i : null); });
+$("#cards").addEventListener("focusout", e => { if (!$("#cards").contains(e.relatedTarget)) hl(null); });
 
 // custom screen
 $("#custom").addEventListener("submit", e => {

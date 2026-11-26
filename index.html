@@ -76,7 +76,20 @@ h1 span { color: var(--accent); }
 h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
 .eyebrow { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
-@media (max-width: 700px) { .layout > main { order: -1; } }
+/* Phones: one column in the order you use it: pick devices, pick content, see the drawing, then details */
+@media (max-width: 700px) {
+  .layout > .rail, .layout > main { display: contents !important; }
+  .rail > section:nth-child(1) { order: 1; }
+  .rail > section:nth-child(3) { order: 2; }
+  .stage-panel { order: 3; }
+  #cards-bar { order: 4; }
+  #cards { order: 5; }
+  .rail > section:nth-child(2) { order: 6; }
+  main > section.panel:not(.stage-panel) { order: 7; }
+  .site-foot { order: 8; }
+  .layout .stage { min-height: 200px; }
+  .layout .stage-bar { padding: 10px 12px; gap: 8px 10px; }
+}
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: grid; gap: 14px; min-width: 0; }
 .rail { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; min-width: 0; align-items: start; }
 label { font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
@@ -91,9 +104,9 @@ button { font: inherit; cursor: pointer; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { border: 1px solid var(--line); background: transparent; color: var(--fg); border-radius: 999px; padding: 4px 10px; font-size: 12.5px; }
 .chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-.seg button { border: 0; background: transparent; color: var(--fg); padding: 6px 10px; font-size: 13px; }
-.seg button + button { border-left: 1px solid var(--line); }
+.seg { display: inline-flex; flex-wrap: wrap; max-width: 100%; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { white-space: nowrap; flex: 1 0 auto; border: 0; background: transparent; color: var(--fg); padding: 6px 10px; font-size: 13px; }
+.seg button { border-left: 1px solid var(--line); border-top: 1px solid var(--line); margin: -1px 0 0 -1px; } /* lines between buttons, also when a row wraps */
 .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 .row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
 .row > .lbl { font-size: 13px; color: var(--muted); min-width: 84px; }
@@ -172,6 +185,15 @@ dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-num
 input[type="range"] { width: 100%; accent-color: var(--accent); }
 .file-drop { border: 1.5px dashed var(--line); border-radius: 8px; padding: 12px; text-align: center; font-size: 13px; color: var(--muted); }
 .file-drop.over { border-color: var(--accent); color: var(--fg); }
+/* Bigger tap targets on touch screens */
+@media (pointer: coarse) {
+  .seg button { min-height: 38px; }
+  .seg.mini button { min-height: 34px; padding: 6px 10px; }
+  .chip { min-height: 36px; padding: 6px 12px; }
+  .icon-btn { width: 38px; height: 38px; }
+  .btn { min-height: 40px; }
+  .res { min-height: 40px; }
+}
 @media (prefers-reduced-motion: no-preference) { .scr { transition: opacity .15s; } }
 </style>
 
@@ -316,6 +338,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 (() => {
+if (window.matchMedia && matchMedia("(max-width: 700px)").matches) document.getElementById("custom-details").open = false;
 "use strict";
 // ---------- Device data: [name, category, diagonal inches, width px, height px] ----------
 const CATS = { phone: "Phones", tablet: "Tablets", ereader: "E-readers", tabletpc: "Tablet PCs & 2-in-1s", laptop: "Laptops", monitor: "Monitors", paper: "Paper & books", custom: "Your screens" };
@@ -538,7 +561,7 @@ function renderStage() {
   const worldW = arr ? Math.max(sideW, ...items.map(x => x.ix + x.g.w)) + 0.4 : side ? sideW : maxW;
   const worldH = arr ? Math.max(maxH * 1.1, ...items.map(x => x.iy + x.g.h)) + 0.2 : maxH;
   const padX = 24, padTop = 20, labelH = side ? 40 : 0, rulerH = 34;
-  const availW = Math.max(260, stage.clientWidth - padX * 2);
+  const availW = Math.max(200, stage.clientWidth - padX * 2);
   const availH = Math.max(280, Math.min(window.innerHeight * 0.62, 620)) - padTop - labelH - rulerH;
   const fitS = Math.min(availW / worldW, availH / worldH);
   const s = S.scale === "actual" ? ppiCal : S.scale === "manual" ? S.zoom : fitS;
@@ -565,7 +588,7 @@ function renderStage() {
       else if (S.content === "site") out += drawSite(x, r, s, i);
     }
     if (side) {
-      out += `<text x="${r.x + r.w / 2}" y="${r.y + r.h + 18}" text-anchor="middle" font-size="12" fill="${col}" font-weight="500">${esc(trunc(x.dev.n, Math.max(8, Math.floor(r.w / 7.2))))}</text>`;
+      out += `<text x="${r.x + r.w / 2}" y="${r.y + r.h + 18}" text-anchor="middle" font-size="12" fill="${col}" font-weight="500">${esc(trunc(x.dev.n, Math.max(3, Math.floor(r.w / 7.2))))}</text>`;
       const sub = r.w > 82 ? `${sizeTag(x.dev)}${x.g.ppi ? " · " + Math.round(x.g.ppi) + " ppi" : ""}` : sizeTag(x.dev);
       out += `<text x="${r.x + r.w / 2}" y="${r.y + r.h + 33}" text-anchor="middle" font-size="11" fill="var(--muted)">${sub}</text>`;
     } else {

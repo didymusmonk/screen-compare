@@ -14,6 +14,14 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="canonical" href="https://didymusmonk.github.io/screen-compare/">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="True Size">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f141a" media="(prefers-color-scheme: dark)">
 <style>[hidden]{display:none!important} body{margin:0} img{max-width:100%}</style>
 <title>True Size Screens</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -66,8 +74,10 @@
 body {
   background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.45;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 20px 40px;
+  padding-top: max(20px, env(safe-area-inset-top, 0px)); padding-bottom: max(40px, calc(env(safe-area-inset-bottom, 0px) + 24px));
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
 }
+button, .chip, .res { touch-action: manipulation; } /* no double-tap zoom delay on phones */
 .wrap { max-width: 2400px; margin: 0 auto; display: grid; gap: 20px; }
 header.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
 h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(26px, 3.4vw, 36px); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
@@ -76,14 +86,29 @@ h1 span { color: var(--accent); }
 h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
 .eyebrow { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
-/* Phones: one column in the order you use it: pick devices, pick content, see the drawing, then details */
+.quickbar { display: none; }
+.myphone { display: grid; gap: 8px; justify-items: start; }
+.myphone-pick:empty { display: none; }
+.myphone-pick { display: grid; gap: 6px; }
+.more-btn { display: none; }
+.share-btn.ok { color: var(--accent); border-color: var(--accent); }
+/* Phones: the drawing and cards first, with the content switch pinned at the top */
 @media (max-width: 700px) {
   .layout > .rail, .layout > main { display: contents !important; }
-  .rail > section:nth-child(1) { order: 1; }
-  .rail > section:nth-child(3) { order: 2; }
-  .stage-panel { order: 3; }
-  #cards-bar { order: 4; }
-  #cards { order: 5; }
+  .quickbar { order: 0; display: flex; gap: 8px; align-items: center; position: sticky; top: 0; z-index: 20;
+    margin: 0 -16px; padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px; background: color-mix(in srgb, var(--bg) 92%, transparent);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .quickbar .seg { flex: 1; flex-wrap: nowrap; background: var(--surface); }
+  .quickbar .seg button { flex: 1 1 0; padding-inline: 4px; }
+  .quickbar .share-btn { flex: none; background: var(--surface); color: var(--fg); }
+  #content { display: none; }
+  .stage-panel { order: 1; }
+  #cards-bar { order: 2; }
+  #cards { order: 3; }
+  .rail > section:nth-child(1) { order: 4; }
+  .rail > section:nth-child(3) { order: 5; }
+  .more-btn { display: inline-block; padding: 6px 10px; font-size: 13px; }
+  .stage-bar:not(.open) #stage-more, .stage-bar:not(.open) #order, .stage-bar:not(.open) #anchor { display: none !important; }
   .rail > section:nth-child(2) { order: 6; }
   main > section.panel:not(.stage-panel) { order: 7; }
   .site-foot { order: 8; }
@@ -191,6 +216,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 .file-drop.over { border-color: var(--accent); color: var(--fg); }
 /* Bigger tap targets on touch screens */
 @media (pointer: coarse) {
+  input[type="text"], input[type="number"], select { font-size: 16px; } /* iPhone zooms the page into smaller text fields */
   .seg button { min-height: 38px; }
   .seg.mini button { min-height: 34px; padding: 6px 10px; }
   .chip { min-height: 36px; padding: 6px 12px; }
@@ -209,9 +235,14 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
       <h1>True Size <span>Screens</span></h1>
       <p class="lede">Put phones, tablets, laptops and tablet PCs side by side at real relative size. See each screen's pixel density and how a printed page would fit on it.</p>
     </div>
+    <div class="myphone" id="myphone" hidden></div>
   </header>
 
   <div class="layout">
+    <div class="quickbar" id="quickbar" role="region" aria-label="Quick controls">
+      <div class="seg" id="content2" aria-label="Show on each screen"><button data-v="page">Pages</button><button data-v="video">Video</button><button data-v="ebook">E-book</button><button data-v="site">Web</button><button data-v="none">None</button></div>
+      <button class="icon-btn share-btn" type="button" data-share aria-label="Share this comparison" title="Share this comparison"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
+    </div>
     <aside class="rail">
       <section class="panel" aria-labelledby="h-add">
         <h2 id="h-add">Add a device</h2>
@@ -287,14 +318,15 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 
     <main style="display:grid; gap:16px; min-width:0">
       <section class="panel stage-panel" aria-label="Comparison">
-        <div class="stage-bar">
+        <div class="stage-bar" id="stage-bar">
           <div class="row">
             <div class="seg" id="mode" aria-label="Layout"><button data-v="overlay">Overlay</button><button data-v="side">Side by side</button><button data-v="arrange">Free arrange</button></div>
             <div class="seg" id="orient" aria-label="Orientation"><button data-v="portrait">Portrait</button><button data-v="landscape">Landscape</button></div>
             <div class="seg" id="order" aria-label="Order"><button data-v="added">Card order</button><button data-v="height">Shortest first</button></div>
             <div class="seg" id="anchor" aria-label="Overlay alignment"><button data-v="center">Centered</button><button data-v="corner">Corner</button></div>
+            <button class="btn ghost more-btn" id="more-btn" type="button" aria-expanded="false" aria-controls="stage-more">More options</button>
           </div>
-          <div class="row">
+          <div class="row" id="stage-more">
             <div class="seg" id="units" aria-label="Units"><button data-v="in">in</button><button data-v="cm">cm</button></div>
             <div class="seg" id="scaleMode" aria-label="Scale"><button data-v="fit">Fit</button><button data-v="actual">Actual size</button></div>
             <label class="zoom">Zoom<input id="zoom" type="range" min="6" max="240" step="1"></label>
@@ -304,7 +336,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <div class="stage" id="stage"></div>
         <div class="stage-foot">
           <span id="scale-note" aria-live="polite"></span><span id="sr-live" class="sr-only" aria-live="polite"></span>
-          <span class="row"><button class="btn ghost" id="reset-btn" type="button" style="padding:4px 10px; font-size:12.5px">Reset to start</button><button class="btn ghost" id="cal-btn" type="button" style="padding:4px 10px; font-size:12.5px">Calibrate actual size</button></span>
+          <span class="row"><button class="btn ghost" type="button" data-share style="padding:4px 10px; font-size:12.5px">Share this comparison</button><button class="btn ghost" id="reset-btn" type="button" style="padding:4px 10px; font-size:12.5px">Reset to start</button><button class="btn ghost" id="cal-btn" type="button" style="padding:4px 10px; font-size:12.5px">Calibrate actual size</button></span>
         </div>
         <div id="cal" class="panel" style="border:0; border-top:1px solid var(--line); border-radius:0" hidden>
           <h2>Calibrate to your monitor</h2>
@@ -322,13 +354,15 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
       <section class="cards" id="cards" aria-label="Screen details"></section>
 
       <section class="panel">
-        <h2>What the numbers mean</h2>
+        <details id="gloss-details" open>
+        <summary><h2 style="display:inline; font-size:inherit">What the numbers mean</h2></summary>
         <div class="glossary">
           <div><b>PPI (pixels per inch)</b>How many screen pixels fit in one inch. Higher means sharper text. Phones are usually 400 to 500, tablets 260 to 330, laptops 200 to 250. Phone makers and spec sheets often call this DPI too.</div>
           <div><b>Size vs. printed page</b>How big a PDF page looks on that screen compared with the same page printed on paper. At 80%, 12 pt text looks like 9.6 pt text.</div>
           <div><b>Pixels per page inch</b>How many screen pixels each inch of the page gets. It's the effective resolution of the page on that screen, like a scanner's DPI. Around 150 or more looks crisp.</div>
           <div><b>Sizes are screen only</b>Rectangles show the visible display area from the diagonal and pixel count, not bezels or the case. Diagonals are the maker's figures, which round a little and ignore rounded corners.</div>
         </div>
+        </details>
       </section>
       <footer class="site-foot">
         <p>© 2026 DidymusMonk · <a href="https://github.com/didymusmonk/screen-compare/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a> · <a href="https://github.com/didymusmonk/screen-compare" target="_blank" rel="noopener">Source on GitHub</a> · <a href="https://github.com/didymusmonk/screen-compare/issues/new" target="_blank" rel="noopener">Spotted a wrong spec or missing device? Tell me</a></p>
@@ -446,8 +480,25 @@ const defaults = () => ({
   mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
   paper: "us-letter-paper", paperOrient: "portrait", fit: "page", content: "page", video: "16:9", ebookPt: 12, ebookCols: "1", site: "news", siteLayout: "auto", cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
 });
-const S = Object.assign(defaults(), store.get("state", {}));
 let custom = store.get("custom", []);
+// A shared link carries the comparison in the address after #s=. It replaces the saved layout once, then the address is cleaned up.
+const SHARE_KEYS = ["mode", "orient", "anchor", "units", "paper", "paperOrient", "fit", "content", "video", "ebookPt", "ebookCols", "site", "siteLayout", "order"];
+const fromShare = (() => {
+  try {
+    const m = location.hash.match(/^#s=([A-Za-z0-9_-]+)/); if (!m) return null;
+    const j = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/")))));
+    const st = {};
+    for (const k of SHARE_KEYS) if (j[k] != null) st[k] = j[k];
+    for (const c of j.cu || []) if (c && c.id && !custom.some(x => x.id === c.id)) custom.push({ ...c, c: "custom" });
+    store.set("custom", custom);
+    st.sel = (j.sel || []).slice(0, 12).map((x, k) => { const o = { id: String(x.i), uid: "s" + k }; if (x.f) o.flip = true; if (x.s) o.spread = true; if (x.t) o.fit = x.t; if (x.c) o.cols = x.c; return o; });
+    st.pos = {}; (j.pos || []).forEach((q, k) => { if (q && st.sel[k]) st.pos[st.sel[k].uid] = { x: q[0], y: q[1] }; });
+    st.zo = [];
+    history.replaceState(null, "", location.pathname + location.search);
+    return st;
+  } catch { return null; }
+})();
+const S = Object.assign(defaults(), fromShare || store.get("state", {}));
 let ppiCal = store.get("ppiCal", 96);
 let pdf = { doc: null, page: 1, pages: 0, img: null, img2: null, w: 0, h: 0, name: "" };
 const COLORS = ["--c1", "--c2", "--c3", "--c4", "--c5", "--c6", "--c7", "--c8", "--c9", "--c10", "--c11", "--c12"];
@@ -529,6 +580,64 @@ function colIdx(sel) {
   }
   return sel.col % COLORS.length;
 }
+function shareUrl() {
+  const o = {};
+  for (const k of SHARE_KEYS) o[k] = S[k];
+  if (o.paper === "upload") o.paper = "us-letter-paper"; // your own PDF stays on your device
+  o.sel = S.sel.map(x => { const e = { i: x.id }; if (x.flip) e.f = 1; if (x.spread) e.s = 1; if (x.fit) e.t = x.fit; if (x.cols) e.c = x.cols; return e; });
+  if (S.mode === "arrange") o.pos = S.sel.map(x => S.pos[x.uid] ? [+S.pos[x.uid].x.toFixed(2), +S.pos[x.uid].y.toFixed(2)] : null);
+  const cu = custom.filter(c => S.sel.some(x => x.id === c.id)).map(({ id, n, d, w, h, aspectOnly }) => ({ id, n, d, w, h, aspectOnly }));
+  if (cu.length) o.cu = cu;
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return location.origin + location.pathname + "#s=" + b64;
+}
+async function shareComparison(btn) {
+  const url = shareUrl(), names = S.sel.map(x => byId(x.id)).filter(Boolean).map(d => d.n);
+  const text = names.length ? `Comparing ${names.slice(0, 3).join(", ")}${names.length > 3 ? ` and ${names.length - 3} more` : ""} at true size` : "Compare screens at true size";
+  try {
+    if (navigator.share) { await navigator.share({ title: "True Size Screens", text, url }); return; }
+  } catch (e) { if (e && e.name === "AbortError") return; }
+  try { await navigator.clipboard.writeText(url); flash(btn, "Link copied"); }
+  catch { window.prompt("Copy this link:", url); }
+}
+function flash(btn, msg) {
+  $("#sr-live").textContent = msg;
+  if (btn.classList.contains("icon-btn")) { btn.title = msg; btn.classList.add("ok"); setTimeout(() => { btn.title = "Share this comparison"; btn.classList.remove("ok"); }, 1800); $("#scale-note").textContent = msg + ". Paste it anywhere to share this comparison."; return; }
+  const t = btn.dataset.label || btn.textContent; btn.dataset.label = t; btn.textContent = msg; setTimeout(() => { btn.textContent = t; }, 1800);
+}
+
+// ---------- Compare with my phone ----------
+// Browsers report the screen in CSS pixels; times the pixel ratio that gives the real pixel count, which picks out the model.
+function myScreenMatches() {
+  const dpr = window.devicePixelRatio || 1;
+  const a = Math.round(Math.max(screen.width, screen.height) * dpr), b = Math.round(Math.min(screen.width, screen.height) * dpr);
+  const pool = BUILTIN.filter(d => (d.c === "phone" || d.c === "tablet") && !d.aspectOnly);
+  let hits = pool.filter(d => Math.abs(d.w - a) <= 2 && Math.abs(d.h - b) <= 2);
+  if (!hits.length) hits = pool.filter(d => { const k = d.w / a; return k > 1 && k < 1.6 && Math.abs(d.h / b - k) < 0.006; }); // Android phones set to a lower resolution
+  return { a, b, hits: hits.slice(0, 8) };
+}
+function setupMyPhone() {
+  const box = $("#myphone"); if (!box) return;
+  const touch = window.matchMedia && matchMedia("(pointer: coarse)").matches;
+  if (!touch) { box.hidden = true; return; }
+  const small = Math.min(screen.width, screen.height) < 600;
+  box.hidden = false;
+  box.innerHTML = `<button class="btn" type="button" id="myphone-btn">${small ? "Compare with my phone" : "Compare with this device"}</button><div class="myphone-pick" id="myphone-pick"></div>`;
+  $("#myphone-btn").addEventListener("click", () => {
+    const { a, b, hits } = myScreenMatches(), pick = $("#myphone-pick");
+    const done = d => { addDevice(d.id); const st = $(".stage-panel"); if (st) st.scrollIntoView({ behavior: "smooth", block: "start" }); };
+    if (!hits.length) { pick.innerHTML = `<p class="hint">Couldn't tell which model this is (${a} × ${b} pixels). Search for it in "Add a device".</p>`; return; }
+    const same = hits.every(d => d.d === hits[0].d && d.w === hits[0].w && d.h === hits[0].h);
+    if (same) {
+      done(hits[0]);
+      pick.innerHTML = hits.length > 1 ? `<p class="hint">Added ${esc(hits[0].n)}. ${esc(hits.slice(1).map(d => d.n).join(", "))} ${hits.length > 2 ? "have" : "has"} the same screen.</p>` : "";
+      return;
+    }
+    pick.innerHTML = `<p class="hint">Your screen matches more than one model. Which is yours?</p><div class="chips">${hits.map(d => `<button class="chip" type="button" data-id="${esc(d.id)}">${esc(d.n)}</button>`).join("")}</div>`;
+    pick.onclick = e => { const c = e.target.closest("[data-id]"); if (c) { done(byId(c.dataset.id)); pick.innerHTML = ""; } };
+  });
+}
+
 function addDevice(id) {
   if (S.sel.some(s => s.id === id)) return;
   if (S.sel.length >= MAX) { $("#scale-note").textContent = `You can compare up to ${MAX} screens. Remove one first.`; return; }
@@ -568,7 +677,7 @@ function renderStage() {
   const worldH = arr ? Math.max(maxH * 1.1, ...items.map(x => x.iy + x.g.h)) + 0.2 : maxH;
   const padX = 24, padTop = 20, labelH = side ? 40 : 0, rulerH = 34;
   const availW = Math.max(200, stage.clientWidth - padX * 2);
-  const availH = Math.max(280, Math.min(window.innerHeight * 0.62, 620)) - padTop - labelH - rulerH;
+  const availH = Math.max(280, Math.min(document.documentElement.clientHeight * 0.62, 620)) - padTop - labelH - rulerH;
   const fitS = Math.min(availW / worldW, availH / worldH);
   const s = S.scale === "actual" ? ppiCal : S.scale === "manual" ? S.zoom : fitS;
   $("#zoom").value = Math.round(s);
@@ -1064,6 +1173,7 @@ function bindSeg(id, key, after) {
   sync();
 }
 function syncVisibility() {
+  for (const id of ["content", "content2"]) document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(S.content === b.dataset.v)));
   $("#anchor").hidden = S.mode !== "overlay";
   $("#order").hidden = S.mode !== "side";
   $("#arr-help").hidden = S.mode !== "arrange";
@@ -1102,6 +1212,10 @@ $("#paper").addEventListener("change", e => { S.paper = e.target.value; save(); 
 $("#site").innerHTML = SITES.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
 $("#site").addEventListener("change", e => { S.site = e.target.value; save(); renderStage(); renderCards(); });
 ["mode", "content", "order", "anchor", "units", "scaleMode", "paperOrient", "siteLayout"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
+bindSeg("content2", "content");
+document.querySelectorAll("[data-share]").forEach(b => b.addEventListener("click", () => shareComparison(b)));
+$("#more-btn").addEventListener("click", e => { const open = $("#stage-bar").classList.toggle("open"); e.currentTarget.setAttribute("aria-expanded", String(open)); e.currentTarget.textContent = open ? "Fewer options" : "More options"; });
+if (window.matchMedia && matchMedia("(max-width: 700px)").matches) $("#gloss-details").open = false;
 // these two set every screen at once; each card can then change its own
 bindSeg("orient", "orient", () => { S.sel.forEach(x => x.flip = false); save(); renderAll(); });
 bindSeg("ebookCols", "ebookCols", () => { S.sel.forEach(x => delete x.cols); save(); renderAll(); });
@@ -1305,8 +1419,10 @@ loadDevices().catch(err => {
   S.sel.forEach(s => { if (RENAMED[s.id]) s.id = RENAMED[s.id]; });
   S.sel = S.sel.filter(s => byId(s.id));
   S.sel.forEach(s => { if (!s.uid) s.uid = newUid(); });
+  if (fromShare) save();
   buildPaperMenu();
   renderAll();
+  setupMyPhone();
 });
 })();
 </script>

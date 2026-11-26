@@ -436,12 +436,12 @@ const store = {
   get(k, f) { try { const v = localStorage.getItem("tss:" + k); return v == null ? f : JSON.parse(v); } catch { return f; } },
   set(k, v) { try { localStorage.setItem("tss:" + k, JSON.stringify(v)); } catch {} },
 };
-// What a first-time visitor sees: iPad mini (A20 Pro) and iPad Pro 11 (M5), each upright and sideways,
-// showing a Letter page. Upright screens fit the page; sideways screens fit its width.
+// What a first-time visitor sees: iPad mini (A20 Pro) and iPad Pro 11 (M5), both upright, showing a Letter page
+// fitted to the screen. Two screens keep the drawing readable on a phone.
 const defaults = () => ({
   sel: [
-    { id: "ipad-mini-a20-pro-2026", uid: "d1" }, { id: "ipad-mini-a20-pro-2026", uid: "d2", flip: true, fit: "width" },
-    { id: "ipad-pro-11-inch-m4-m5", uid: "d3" }, { id: "ipad-pro-11-inch-m4-m5", uid: "d4", flip: true, fit: "width" },
+    { id: "ipad-mini-a20-pro-2026", uid: "d1" },
+    { id: "ipad-pro-11-inch-m4-m5", uid: "d3" },
   ],
   mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
   paper: "us-letter-paper", paperOrient: "portrait", fit: "page", content: "page", video: "16:9", ebookPt: 12, ebookCols: "1", site: "news", siteLayout: "auto", cat: "all", order: "added", zoom: 50, pos: {}, zo: [],

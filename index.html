@@ -201,7 +201,8 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         </div>
         <div id="ebook-ctrls" class="grid-stack" hidden>
           <label>Font size<select id="ebookPt"></select></label>
-          <p class="hint">Text flows across the whole screen with 0.3″ margins, the way an e-reader app lays out a book. Font sizes are true printed points.</p>
+          <div class="seg" id="ebookCols" aria-label="Columns"><button data-v="1">1 column</button><button data-v="2">2 columns</button><button data-v="auto">Auto</button></div>
+          <p class="hint">Text flows across the whole screen with 0.3″ margins, the way an e-reader app lays out a book. Font sizes are true printed points. Auto uses two columns on landscape screens at least 7″ wide, like e-reader apps do.</p>
         </div>
         <div id="site-ctrls" class="grid-stack" hidden>
           <label>Kind of site<select id="site"></select></label>
@@ -363,11 +364,13 @@ function videoFit(g) {
   const vw = Math.min(g.w, g.h * ar), vh = vw / ar;
   return { vw, vh, ar, used: (vw * vh) / (g.w * g.h), barsTB: (g.h - vh) / 2, barsLR: (g.w - vw) / 2 };
 }
+const EBOOK_GAP = 0.5; // inches between columns
 function ebookFit(g) {
   const em = S.ebookPt / 72, lh = em * 1.5; // inches
-  const tw = Math.max(0, g.w - 2 * EBOOK_MARGIN), th = Math.max(0, g.h - 2 * EBOOK_MARGIN);
-  const cpl = Math.floor(tw / (em * 0.5)), lines = Math.floor(th / lh); // average character is about half an em wide
-  return { em, lh, tw, th, cpl, lines, words: Math.round(lines * cpl / 6) };
+  const cols = S.ebookCols === "2" ? 2 : S.ebookCols === "auto" && g.w > g.h && g.w >= 7 ? 2 : 1;
+  const tw = Math.max(0, (g.w - 2 * EBOOK_MARGIN - (cols - 1) * EBOOK_GAP) / cols), th = Math.max(0, g.h - 2 * EBOOK_MARGIN);
+  const cpl = Math.floor(tw / (em * 0.5)), lines = Math.floor(th / lh); // per column; average character is about half an em wide
+  return { em, lh, tw, th, cols, cpl, lines, words: Math.round(cols * lines * cpl / 6) };
 }
 
 // ---------- State ----------
@@ -383,7 +386,7 @@ const defaults = () => ({
     { id: "ipad-pro-11-inch-m4-m5", uid: "d3" }, { id: "ipad-pro-11-inch-m4-m5", uid: "d4", flip: true, fit: "width" },
   ],
   mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
-  paper: "us-letter-paper", paperOrient: "portrait", fit: "page", content: "page", video: "16:9", ebookPt: 12, site: "news", siteLayout: "auto", cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
+  paper: "us-letter-paper", paperOrient: "portrait", fit: "page", content: "page", video: "16:9", ebookPt: 12, ebookCols: "1", site: "news", siteLayout: "auto", cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
 });
 const S = Object.assign(defaults(), store.get("state", {}));
 let custom = store.get("custom", []);
@@ -680,12 +683,14 @@ function drawVideo(x, r, s, i) {
 function drawEbook(x, r, s, i) {
   const e = ebookFit(x.g), m = EBOOK_MARGIN * s, lh = e.lh * s, th = Math.max(0.6, e.em * 0.5 * s), tw = e.tw * s;
   let g = `<g clip-path="url(#clip${i})"><rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="var(--paper)"/>`;
-  if (lh >= 1.5) {
+  if (lh >= 1.5) for (let c = 0; c < e.cols; c++) {
+    const cx = r.x + m + c * (tw + EBOOK_GAP * s);
     for (let l = 0; l < e.lines; l++) {
-      const para = l % 8;
+      const L = l + c * e.lines;
+      const para = L % 8;
       const indent = para === 0 ? e.em * 1.5 * s : 0;
-      const wf = para === 7 ? 0.45 : 1 - ((l * 29) % 13) / 110;
-      g += `<rect x="${(r.x + m + indent).toFixed(1)}" y="${(r.y + m + l * lh + (lh - th) / 2).toFixed(1)}" width="${((tw - indent) * wf).toFixed(1)}" height="${th.toFixed(2)}" fill="var(--paper-text)"/>`;
+      const wf = para === 7 ? 0.45 : 1 - ((L * 29) % 13) / 110;
+      g += `<rect x="${(cx + indent).toFixed(1)}" y="${(r.y + m + l * lh + (lh - th) / 2).toFixed(1)}" width="${((tw - indent) * wf).toFixed(1)}" height="${th.toFixed(2)}" fill="var(--paper-text)"/>`;
     }
   }
   return g + `</g>`;
@@ -913,7 +918,8 @@ function renderCards() {
       const e = ebookFit(g);
       pdfHtml = `<div class="pdfbox"><div><strong>E-book at ${S.ebookPt} pt</strong></div><dl>
         <dt>Words per screen</dt><dd>about ${e.words.toLocaleString()}</dd>
-        <dt>Lines per screen</dt><dd>${e.lines}</dd>
+        <dt>Columns</dt><dd>${e.cols}${S.ebookCols === "auto" ? " (auto)" : ""}</dd>
+        <dt>Lines per ${e.cols > 1 ? "column" : "screen"}</dt><dd>${e.lines}</dd>
         <dt>Characters per line</dt><dd>about ${e.cpl}</dd>
         ${ppi ? `<dt>Pixels per letter height</dt><dd>${Math.round(e.em * 0.7 * ppi)}</dd>` : ""}
       </dl></div>`;
@@ -996,7 +1002,7 @@ $("#ebookPt").addEventListener("change", e => { S.ebookPt = +e.target.value; sav
 $("#paper").addEventListener("change", e => { S.paper = e.target.value; save(); renderAll(); if (S.paper === "upload" && !pdf.img) $("#pdf-file").click(); });
 $("#site").innerHTML = SITES.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
 $("#site").addEventListener("change", e => { S.site = e.target.value; save(); renderStage(); renderCards(); });
-["mode", "content", "order", "anchor", "units", "scaleMode", "paperOrient", "siteLayout"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
+["mode", "content", "order", "anchor", "units", "scaleMode", "paperOrient", "siteLayout", "ebookCols"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
 // these two set every screen at once; each card can then change its own
 bindSeg("orient", "orient", () => { S.sel.forEach(x => x.flip = false); save(); renderAll(); });
 bindSeg("fit", "fit", () => { S.sel.forEach(x => delete x.fit); save(); renderAll(); });

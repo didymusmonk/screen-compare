@@ -194,7 +194,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 
       <section class="panel" aria-labelledby="h-pdf">
         <h2 id="h-pdf">Show on each screen</h2>
-        <div class="seg" id="content" aria-label="Content"><button data-v="page">Pages</button><button data-v="video">Video</button><button data-v="ebook">E-book</button><button data-v="none">Nothing</button></div>
+        <div class="seg" id="content" aria-label="Content"><button data-v="page">Pages</button><button data-v="video">Video</button><button data-v="ebook">E-book</button><button data-v="site">Website</button><button data-v="none">Nothing</button></div>
         <div id="video-ctrls" class="grid-stack" hidden>
           <label>Video shape<select id="video"></select></label>
           <p class="hint">Black areas are the bars you'd see when the video fills the screen without cropping.</p>
@@ -202,6 +202,11 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <div id="ebook-ctrls" class="grid-stack" hidden>
           <label>Font size<select id="ebookPt"></select></label>
           <p class="hint">Text flows across the whole screen with 0.3″ margins, the way an e-reader app lays out a book. Font sizes are true printed points.</p>
+        </div>
+        <div id="site-ctrls" class="grid-stack" hidden>
+          <label>Kind of site<select id="site"></select></label>
+          <div class="seg" id="siteLayout" aria-label="Site layout"><button data-v="auto">Auto</button><button data-v="mobile">Mobile</button><button data-v="desktop">Desktop</button></div>
+          <p class="hint">Generic mockups at 100% zoom. Auto picks the layout a site would choose from the screen's width in CSS pixels (resolution ÷ display scaling). Scaling is a typical default, so your device may differ a little.</p>
         </div>
         <div id="page-ctrls" class="grid-stack">
         <label>Page size
@@ -378,7 +383,7 @@ const defaults = () => ({
     { id: "ipad-pro-11-inch-m4-m5", uid: "d3" }, { id: "ipad-pro-11-inch-m4-m5", uid: "d4", flip: true, fit: "width" },
   ],
   mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
-  paper: "us-letter-paper", paperOrient: "portrait", fit: "page", content: "page", video: "16:9", ebookPt: 12, cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
+  paper: "us-letter-paper", paperOrient: "portrait", fit: "page", content: "page", video: "16:9", ebookPt: 12, site: "news", siteLayout: "auto", cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
 });
 const S = Object.assign(defaults(), store.get("state", {}));
 let custom = store.get("custom", []);
@@ -515,6 +520,7 @@ function renderStage() {
       if (paper) out += drawPage(x, r, s, paper, i, col);
       else if (S.content === "video") out += drawVideo(x, r, s, i);
       else if (S.content === "ebook") out += drawEbook(x, r, s, i);
+      else if (S.content === "site") out += drawSite(x, r, s, i);
     }
     if (side) {
       out += `<text x="${r.x + r.w / 2}" y="${r.y + r.h + 18}" text-anchor="middle" font-size="12" fill="${col}" font-weight="500">${esc(trunc(x.dev.n, Math.max(8, Math.floor(r.w / 7.2))))}</text>`;
@@ -684,6 +690,170 @@ function drawEbook(x, r, s, i) {
   }
   return g + `</g>`;
 }
+// ---------- Website previews ----------
+// At 100% zoom a web page is laid out in CSS pixels. Each CSS pixel covers "device pixel ratio" (DPR) screen pixels,
+// so the page's real size depends on the screen's PPI and the scale its system uses. These are typical defaults.
+const SITES = [["news", "News article"], ["search", "Search results"], ["social", "Social feed"], ["shop", "Shopping product page"], ["wiki", "Encyclopedia article"]];
+function dprOf(dev) {
+  const ppi = Math.hypot(dev.w, dev.h) / dev.d, q = (v, st = 4) => Math.max(1, Math.round(v * st) / st);
+  if (/^iPhone/.test(dev.n)) return /\b(SE|XR|11)$|\b(SE|XR)\b/.test(dev.n) ? 2 : 3;
+  if (/^iPad/.test(dev.n)) return 2;
+  if (/^MacBook/.test(dev.n)) return +(ppi / 127).toFixed(2); // macOS default "looks like" setting, about 127 points per inch
+  if (/^(Apple Studio|.*Pro Display XDR)/.test(dev.n)) return 2;
+  if (dev.c === "phone") return dev.w / dev.h > 1.6 ? q(dev.h / 412, 8) : q(ppi / 160, 8); // most phones are about 412 px wide; folded-open screens follow density
+  if (dev.c === "tablet" || dev.c === "ereader") return q(ppi / 160, 8);
+  if (dev.c === "monitor") return q(ppi / 110); // Windows' recommended scaling for desktop monitors
+  return q(ppi / 130); // laptops and tablet PCs, viewed closer
+}
+function siteView(dev, g) {
+  if (!g.ppi) return null;
+  const dpr = dprOf(dev), vw = Math.round(g.pxW / dpr), vh = Math.round(g.pxH / dpr);
+  const natural = vw < 600 ? "mobile" : vw < 1024 ? "tablet" : "desktop";
+  const mode = S.siteLayout === "auto" ? natural : S.siteLayout;
+  let lw = vw, zoom = 1;
+  if (mode === "desktop" && vw < 980) { lw = 980; zoom = vw / 980; } // "desktop site" on a small screen is zoomed out to fit
+  return { dpr, vw, vh, natural, mode, lw, zoom, bodyPt: 16 * zoom * dpr / g.ppi * 72 };
+}
+function buildSite(type, W, H, mode) {
+  const C = { bg: "#ffffff", bar: "#c3cad3", dark: "#4b5563", link: "#2f6fde", img: "#d6dee8", img2: "#bfcddc", line: "#e5e9ee", head: "#f3f5f8", accent: "#e4572e", star: "#f2b01e" };
+  const desk = mode === "desktop", tab = mode === "tablet";
+  const out = [];
+  const R = (x, y, w, h, fill, rx = 0, extra = "") => { if (y < H && w > 0 && h > 0) out.push(`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="${rx}" fill="${fill}" ${extra}/>`); };
+  const O = (cx, cy, r, fill) => { if (cy - r < H) out.push(`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r}" fill="${fill}"/>`); };
+  let seed = 1;
+  // a block of text drawn as bars: font size in CSS px, n lines, returns the y below it
+  const T = (x, y, w, font, n, color = C.bar, short = true) => {
+    const lh = font * 1.5;
+    for (let l = 0; l < n && y + l * lh < H; l++) {
+      seed = (seed * 37 + 11) % 97;
+      const wf = short && l === n - 1 ? 0.35 + (seed % 40) / 100 : 0.9 + (seed % 10) / 100;
+      R(x, y + l * lh + (lh - font * 0.6) / 2, w * Math.min(1, wf), font * 0.6, color, 1);
+    }
+    return y + n * lh;
+  };
+  const cx0 = desk ? Math.max(24, (W - 1200) / 2) : 0;
+  const header = (h, withNav = desk || tab) => {
+    R(0, 0, W, h, C.head); R(0, h - 1, W, 1, C.line);
+    const pad = desk ? cx0 : 16;
+    R(pad, h / 2 - 11, 96, 22, C.dark, 4);
+    if (withNav) for (let k = 0; k < 5; k++) R(W - pad - (5 - k) * 86, h / 2 - 5, 62, 10, C.bar, 2);
+    else for (let k = 0; k < 3; k++) R(W - pad - 22, h / 2 - 8 + k * 7, 22, 3, C.dark, 1);
+    return h;
+  };
+  R(0, 0, W, H, C.bg);
+  if (type === "news") {
+    let y = header(desk ? 64 : 56);
+    const colW = desk ? Math.min(680, W - 2 * cx0 - 340) : tab ? Math.min(W - 64, 680) : W - 32;
+    const x0 = desk ? cx0 : (W - colW) / 2;
+    y += 28; R(x0, y, 80, 10, C.accent, 2); y += 22;
+    const hf = desk ? 40 : tab ? 34 : 28;
+    y = T(x0, y, colW, hf, 3, C.dark) + 8;
+    y = T(x0, y, colW * 0.6, 13, 1) + 16;
+    R(x0, y, colW, colW * 0.56, C.img, 4); y += colW * 0.56 + 6;
+    y = T(x0, y, colW, 13, 1) + 18;
+    const bf = desk ? 18 : 17;
+    while (y < H) { y = T(x0, y, colW, bf, 4 + (seed % 3)) + bf; }
+    if (desk) {
+      const sx = x0 + colW + 40; let sy = 64 + 28;
+      R(sx, sy, 120, 14, C.dark, 2); sy += 34;
+      for (let k = 0; k < 5; k++) { R(sx, sy, 18, 18, C.accent, 2); sy = T(sx + 30, sy - 2, 270, 15, 2) + 18; }
+      R(sx, sy, 300, 250, C.img2, 4);
+    }
+  } else if (type === "search") {
+    let y = 0;
+    const x0 = desk ? Math.min(180, W * 0.12) : 16, colW = desk ? Math.min(652, W - x0 - 24) : W - 32;
+    if (desk) {
+      R(0, 0, W, 76, C.bg); R(0, 75, W, 1, C.line); R(24, 27, 96, 22, C.dark, 4);
+      R(x0, 16, colW, 44, C.bg, 22, `stroke="${C.line}" stroke-width="1.5"`); y = 76;
+    } else {
+      y = header(56, false); R(16, y + 12, W - 32, 44, C.bg, 22, `stroke="${C.line}" stroke-width="1.5"`); y += 68;
+    }
+    for (let k = 0; k < 5; k++) R(x0 + k * 72, y + 14, 48, 9, k ? C.bar : C.link, 2);
+    y += 44; R(0, y - 8, W, 1, C.line); y += 14;
+    const ky = y;
+    while (y < H) {
+      O(x0 + 9, y + 9, 9, C.img2); R(x0 + 26, y + 4, 140, 9, C.bar, 2); y += 26;
+      y = T(x0, y, colW * (desk ? 0.8 : 1), desk ? 20 : 18, desk ? 1 : 2, C.link, false) + 4;
+      y = T(x0, y, colW, 14, 2) + 26;
+    }
+    if (desk && W > x0 + colW + 56 + 360 + 24) {
+      const px = x0 + colW + 56; R(px, ky, 360, 520, C.bg, 8, `stroke="${C.line}" stroke-width="1"`);
+      R(px + 16, ky + 16, 328, 190, C.img, 6); let py = T(px + 16, ky + 222, 300, 22, 1, C.dark) + 6;
+      py = T(px + 16, py, 328, 14, 5) + 10;
+      for (let k = 0; k < 5; k++) py = T(px + 16, py, 328, 14, 1, k % 2 ? C.bar : C.dark) + 4;
+    }
+  } else if (type === "social") {
+    const y0 = header(desk ? 60 : 56, desk);
+    const feedW = desk ? Math.min(600, W - 2 * cx0 - 280 - (W > 1200 ? 340 : 0)) : tab ? Math.min(600, W - 64) : W;
+    const fx = desk ? cx0 + 280 : (W - feedW) / 2;
+    if (desk) {
+      let ly = y0 + 24;
+      for (let k = 0; k < 8; k++) { O(cx0 + 14, ly + 12, 12, k ? C.img2 : C.link); R(cx0 + 40, ly + 7, 110, 11, k ? C.bar : C.dark, 2); ly += 48; }
+      if (W > 1200) { const rx = fx + feedW + 40; R(rx, y0 + 24, 300, 420, C.head, 12); let ry = T(rx + 16, y0 + 40, 200, 18, 1, C.dark) + 10; for (let k = 0; k < 5; k++) { ry = T(rx + 16, ry, 260, 13, 1) + 2; ry = T(rx + 16, ry, 200, 15, 1, C.dark) + 14; } }
+    }
+    let y = y0 + (desk ? 24 : 0);
+    if (!desk) { for (let k = 0; k * 76 + 16 < W; k++) O(16 + 32 + k * 76, y + 48, 32, C.img2); y += 108; R(0, y - 1, W, 1, C.line); }
+    const pad = 16;
+    while (y < H) {
+      y += 14; O(fx + pad + 20, y + 20, 20, C.img2);
+      R(fx + pad + 52, y + 6, 120, 12, C.dark, 2); R(fx + pad + 52, y + 26, 80, 9, C.bar, 2); y += 52;
+      y = T(fx + pad, y, feedW - 2 * pad, 15, 2 + (seed % 2)) + 10;
+      const iw = desk || tab ? feedW - 2 * pad : feedW, ix = desk || tab ? fx + pad : fx;
+      R(ix, y, iw, iw * 0.75, C.img, desk || tab ? 12 : 0); y += iw * 0.75 + 12;
+      for (let k = 0; k < 4; k++) R(fx + pad + k * (feedW - 2 * pad) / 4, y, 40, 10, C.bar, 2);
+      y += 26; R(fx, y, feedW, 1, C.line);
+    }
+  } else if (type === "shop") {
+    let y = header(desk ? 64 : 56);
+    if (desk) {
+      const iw = Math.min(560, (W - 2 * cx0) * 0.55), ix = cx0; y += 32;
+      R(ix, y, iw, iw, C.img, 8);
+      for (let k = 0; k < 5; k++) R(ix + k * (iw + 12) / 5, y + iw + 12, (iw + 12) / 5 - 12, (iw + 12) / 5 - 12, C.img2, 6);
+      const rx = ix + iw + 48, rw = Math.min(480, W - rx - cx0); let ry = y;
+      ry = T(rx, ry, rw * 0.6, 13, 1) + 8; ry = T(rx, ry, rw, 28, 2, C.dark) + 10;
+      for (let k = 0; k < 5; k++) R(rx + k * 20, ry, 16, 16, C.star, 3); ry += 34;
+      R(rx, ry, 130, 26, C.dark, 3); ry += 50;
+      for (let k = 0; k < 4; k++) O(rx + 18 + k * 46, ry + 18, 18, [C.dark, C.img2, C.accent, C.link][k]); ry += 60;
+      R(rx, ry, rw, 52, C.accent, 8); ry += 64; R(rx, ry, rw, 52, C.bg, 8, `stroke="${C.dark}" stroke-width="1.5"`); ry += 76;
+      T(rx, ry, rw, 15, 8);
+    } else {
+      const iw = tab ? Math.min(W - 64, 560) : W, ix = (W - iw) / 2;
+      R(ix, y, iw, iw, C.img, tab ? 8 : 0); y += iw + 12;
+      for (let k = 0; k < 5; k++) O(W / 2 - 32 + k * 16, y, 4, k ? C.bar : C.dark); y += 20;
+      const x0 = tab ? ix : 16, w = tab ? iw : W - 32;
+      y = T(x0, y, w, 22, 2, C.dark) + 8;
+      for (let k = 0; k < 5; k++) R(x0 + k * 18, y, 14, 14, C.star, 3); y += 28;
+      R(x0, y, 110, 22, C.dark, 3); y += 40;
+      R(x0, y, w, 48, C.accent, 8); y += 64;
+      while (y < H) y = T(x0, y, w, 16, 5) + 16;
+    }
+  } else if (type === "wiki") {
+    if (desk) {
+      R(cx0 + 20, 20, 120, 120, C.img2, 60);
+      let ly = 170; for (let k = 0; k < 12; k++) { R(cx0 + 20, ly, 100 + (k * 13) % 40, 9, C.link, 2); ly += 24; }
+      const x0 = cx0 + 200, w = Math.min(960, W - x0 - 24); let y = 28;
+      R(x0, 0, W - x0, 1, C.line);
+      y = T(x0, y, w * 0.5, 28, 1, C.dark) + 4; R(x0, y, w, 1, C.line); y += 18;
+      const box = w > 700, tw = box ? w - 300 : w;
+      if (box) { const bx = x0 + w - 280; R(bx, y, 280, 470, C.head, 0, `stroke="${C.line}" stroke-width="1"`); R(bx + 10, y + 10, 260, 190, C.img, 0); let by = y + 214; for (let k = 0; k < 9; k++) { R(bx + 10, by + 3, 80, 8, C.dark, 1); R(bx + 100, by + 3, 160 - (k * 17) % 50, 8, C.bar, 1); by += 28; } }
+      let k = 0;
+      while (y < H) { y = T(x0, y, k < 3 ? tw : w, 14, 5 + (seed % 3)) + 14; if (++k % 2 === 0) { y += 8; y = T(x0, y, 220, 22, 1, C.dark, false); R(x0, y, w, 1, C.line); y += 14; } }
+    } else {
+      let y = header(56, tab); const x0 = tab ? 32 : 16, w = W - 2 * x0; y += 24;
+      y = T(x0, y, w * 0.6, 28, 1, C.dark) + 4; R(x0, y, w, 1, C.line); y += 16;
+      R(x0, y, w, w * 0.6, C.img, 0); y += w * 0.6 + 16;
+      y = T(x0, y, w, 16, 6) + 16;
+      for (let k = 0; k < 8 && y < H; k++) { R(x0, y + 14, 180, 14, C.dark, 2); R(x0 + w - 14, y + 16, 10, 10, C.bar, 2); y += 48; R(x0, y, w, 1, C.line); }
+    }
+  }
+  return out.join("");
+}
+function drawSite(x, r, s, i) {
+  const v = siteView(x.dev, x.g);
+  if (!v) return "";
+  const f = r.w / v.lw, H = r.h / f;
+  return `<g clip-path="url(#clip${i})"><g transform="translate(${r.x} ${r.y}) scale(${f.toFixed(5)})">${buildSite(S.site, v.lw, H, v.mode)}</g></g>`;
+}
 function ruler(x, y, totalIn, s) {
   const cm = S.units === "cm";
   const unit = cm ? 1 / 2.54 : 1;
@@ -748,6 +918,16 @@ function renderCards() {
         ${ppi ? `<dt>Pixels per letter height</dt><dd>${Math.round(e.em * 0.7 * ppi)}</dd>` : ""}
       </dl></div>`;
     }
+    else if (!x.dev.sheet && S.content === "site") {
+      const v = siteView(x.dev, g), NM = { mobile: "Mobile", tablet: "Tablet", desktop: "Desktop" };
+      pdfHtml = v ? `<div class="pdfbox"><div><strong>${esc(SITES.find(t => t[0] === S.site)[1])}</strong></div><dl>
+        <dt>Layout</dt><dd>${NM[v.mode]}${v.mode !== v.natural ? ` (forced, would be ${NM[v.natural].toLowerCase()})` : ""}</dd>
+        <dt>Browser width</dt><dd>${v.vw} × ${v.vh} CSS px</dd>
+        <dt>Display scaling</dt><dd>${v.dpr}× (${Math.round(v.dpr * 100)}%)</dd>
+        <dt>16 px body text</dt><dd>looks like ${v.bodyPt.toFixed(1)} pt print</dd>
+      </dl>${v.zoom < 1 ? `<p class="hint">The desktop page is 980 px wide, so the browser shrinks it to ${Math.round(v.zoom * 100)}% to fit.</p>` : ""}</div>`
+        : `<div class="pdfbox"><div><strong>Website</strong></div><p class="hint">Add the pixel count to preview websites.</p></div>`;
+    }
     const dims = `${fmtLen(g.w)} × ${fmtLen(g.h)}`;
     const areaIn = geom(x.dev, false).area;
     const areaTxt = S.units === "cm" ? `${(areaIn * 6.4516).toFixed(0)} cm²` : `${areaIn.toFixed(1)} sq in`;
@@ -792,6 +972,7 @@ function syncVisibility() {
   $("#video").value = S.video; $("#ebookPt").value = String(S.ebookPt);
   $("#video-ctrls").hidden = S.content !== "video";
   $("#ebook-ctrls").hidden = S.content !== "ebook";
+  $("#site-ctrls").hidden = S.content !== "site"; $("#site").value = S.site;
 }
 function syncSpreadAll() {
   const all2 = S.sel.length && S.sel.every(x => x.spread), all1 = S.sel.every(x => !x.spread);
@@ -813,7 +994,9 @@ $("#ebookPt").innerHTML = EBOOK_PTS.map(([v, t]) => `<option value="${v}">${t}</
 $("#ebookPt").value = String(S.ebookPt);
 $("#ebookPt").addEventListener("change", e => { S.ebookPt = +e.target.value; save(); renderStage(); renderCards(); });
 $("#paper").addEventListener("change", e => { S.paper = e.target.value; save(); renderAll(); if (S.paper === "upload" && !pdf.img) $("#pdf-file").click(); });
-["mode", "content", "order", "anchor", "units", "scaleMode", "paperOrient"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
+$("#site").innerHTML = SITES.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
+$("#site").addEventListener("change", e => { S.site = e.target.value; save(); renderStage(); renderCards(); });
+["mode", "content", "order", "anchor", "units", "scaleMode", "paperOrient", "siteLayout"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
 // these two set every screen at once; each card can then change its own
 bindSeg("orient", "orient", () => { S.sel.forEach(x => x.flip = false); save(); renderAll(); });
 bindSeg("fit", "fit", () => { S.sel.forEach(x => delete x.fit); save(); renderAll(); });

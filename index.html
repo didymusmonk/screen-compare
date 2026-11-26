@@ -202,7 +202,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <div id="ebook-ctrls" class="grid-stack" hidden>
           <label>Font size<select id="ebookPt"></select></label>
           <div class="seg" id="ebookCols" aria-label="Columns"><button data-v="1">1 column</button><button data-v="2">2 columns</button><button data-v="auto">Auto</button></div>
-          <p class="hint">Text flows across the whole screen with 0.3″ margins, the way an e-reader app lays out a book. Font sizes are true printed points. Auto uses two columns on landscape screens at least 7″ wide, like e-reader apps do.</p>
+          <p class="hint">Text flows across the whole screen with 0.3″ margins, the way an e-reader app lays out a book. Font sizes are true printed points. This sets every screen; each card can change its own. Auto uses two columns on landscape screens at least 7″ wide, like e-reader apps do.</p>
         </div>
         <div id="site-ctrls" class="grid-stack" hidden>
           <label>Kind of site<select id="site"></select></label>
@@ -365,9 +365,10 @@ function videoFit(g) {
   return { vw, vh, ar, used: (vw * vh) / (g.w * g.h), barsTB: (g.h - vh) / 2, barsLR: (g.w - vw) / 2 };
 }
 const EBOOK_GAP = 0.5; // inches between columns
-function ebookFit(g) {
+const colsOf = sel => sel.cols || S.ebookCols;
+function ebookFit(g, mode = S.ebookCols) {
   const em = S.ebookPt / 72, lh = em * 1.5; // inches
-  const cols = S.ebookCols === "2" ? 2 : S.ebookCols === "auto" && g.w > g.h && g.w >= 7 ? 2 : 1;
+  const cols = mode === "2" ? 2 : mode === "auto" && g.w > g.h && g.w >= 7 ? 2 : 1;
   const tw = Math.max(0, (g.w - 2 * EBOOK_MARGIN - (cols - 1) * EBOOK_GAP) / cols), th = Math.max(0, g.h - 2 * EBOOK_MARGIN);
   const cpl = Math.floor(tw / (em * 0.5)), lines = Math.floor(th / lh); // per column; average character is about half an em wide
   return { em, lh, tw, th, cols, cpl, lines, words: Math.round(cols * lines * cpl / 6) };
@@ -681,7 +682,7 @@ function drawVideo(x, r, s, i) {
   return g + `</g>`;
 }
 function drawEbook(x, r, s, i) {
-  const e = ebookFit(x.g), m = EBOOK_MARGIN * s, lh = e.lh * s, th = Math.max(0.6, e.em * 0.5 * s), tw = e.tw * s;
+  const e = ebookFit(x.g, colsOf(x.s)), m = EBOOK_MARGIN * s, lh = e.lh * s, th = Math.max(0.6, e.em * 0.5 * s), tw = e.tw * s;
   let g = `<g clip-path="url(#clip${i})"><rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="var(--paper)"/>`;
   if (lh >= 1.5) for (let c = 0; c < e.cols; c++) {
     const cx = r.x + m + c * (tw + EBOOK_GAP * s);
@@ -915,10 +916,11 @@ function renderCards() {
         ${ppi ? `<dt>Picture pixels</dt><dd>${Math.round(v.vw * ppi)} × ${Math.round(v.vh * ppi)}</dd>` : ""}
       </dl></div>`;
     } else if (!x.dev.sheet && S.content === "ebook") {
-      const e = ebookFit(g);
-      pdfHtml = `<div class="pdfbox"><div><strong>E-book at ${S.ebookPt} pt</strong></div><dl>
+      const cm = colsOf(x.s), e = ebookFit(g, cm);
+      pdfHtml = `<div class="pdfbox"><div><strong>E-book at ${S.ebookPt} pt</strong></div>
+        <div class="pdf-head"><span class="seg mini" role="group" aria-label="Columns">${[["1", "1 column"], ["2", "2 columns"], ["auto", "Auto"]].map(([v, t]) => `<button data-act="cols" data-v="${v}" data-i="${x.i}" aria-pressed="${cm === v}">${t}</button>`).join("")}</span></div><dl>
         <dt>Words per screen</dt><dd>about ${e.words.toLocaleString()}</dd>
-        <dt>Columns</dt><dd>${e.cols}${S.ebookCols === "auto" ? " (auto)" : ""}</dd>
+        <dt>Columns</dt><dd>${e.cols}${cm === "auto" ? " (auto)" : ""}</dd>
         <dt>Lines per ${e.cols > 1 ? "column" : "screen"}</dt><dd>${e.lines}</dd>
         <dt>Characters per line</dt><dd>about ${e.cpl}</dd>
         ${ppi ? `<dt>Pixels per letter height</dt><dd>${Math.round(e.em * 0.7 * ppi)}</dd>` : ""}
@@ -990,6 +992,8 @@ function syncMixed() {
   const o = S.sel.map(x => isPortrait(x) ? "portrait" : "landscape"), f = S.sel.map(fitOf);
   document.querySelectorAll("#orient button").forEach(b => b.setAttribute("aria-pressed", String(same(o, b.dataset.v))));
   document.querySelectorAll("#fit button").forEach(b => b.setAttribute("aria-pressed", String(same(f, b.dataset.v))));
+  const c = S.sel.map(colsOf);
+  document.querySelectorAll("#ebookCols button").forEach(b => b.setAttribute("aria-pressed", String(same(c, b.dataset.v))));
 }
 function renderAll() { syncSpreadAll(); syncMixed(); syncVisibility(); renderCats(); renderResults(); renderStage(); renderCards(); }
 
@@ -1002,9 +1006,10 @@ $("#ebookPt").addEventListener("change", e => { S.ebookPt = +e.target.value; sav
 $("#paper").addEventListener("change", e => { S.paper = e.target.value; save(); renderAll(); if (S.paper === "upload" && !pdf.img) $("#pdf-file").click(); });
 $("#site").innerHTML = SITES.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
 $("#site").addEventListener("change", e => { S.site = e.target.value; save(); renderStage(); renderCards(); });
-["mode", "content", "order", "anchor", "units", "scaleMode", "paperOrient", "siteLayout", "ebookCols"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
+["mode", "content", "order", "anchor", "units", "scaleMode", "paperOrient", "siteLayout"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
 // these two set every screen at once; each card can then change its own
 bindSeg("orient", "orient", () => { S.sel.forEach(x => x.flip = false); save(); renderAll(); });
+bindSeg("ebookCols", "ebookCols", () => { S.sel.forEach(x => delete x.cols); save(); renderAll(); });
 bindSeg("fit", "fit", () => { S.sel.forEach(x => delete x.fit); save(); renderAll(); });
 $("#q").addEventListener("input", renderResults);
 $("#q").addEventListener("keydown", e => { if (e.key === "Enter") { const b = $("#results .res[aria-disabled='false']"); if (b) addDevice(b.dataset.id); } });
@@ -1017,6 +1022,7 @@ $("#cards").addEventListener("click", e => {
   if (act === "remove") S.sel.splice(i, 1);
   else if (act === "single" || act === "spread") S.sel[i].spread = act === "spread";
   else if (act === "fit") S.sel[i].fit = b.dataset.v;
+  else if (act === "cols") S.sel[i].cols = b.dataset.v;
   else if (act === "orient") { if (isPortrait(S.sel[i]) !== (b.dataset.v === "portrait")) rotateItem(i); return; }
   else if (act === "dup") {
     if (S.sel.length >= MAX) { $("#scale-note").textContent = `You can compare up to ${MAX} screens. Remove one first.`; return; }

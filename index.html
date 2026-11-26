@@ -239,7 +239,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <div class="stage" id="stage"></div>
         <div class="stage-foot">
           <span id="scale-note"></span>
-          <button class="btn ghost" id="cal-btn" type="button" style="padding:4px 10px; font-size:12.5px">Calibrate actual size</button>
+          <span class="row"><button class="btn ghost" id="reset-btn" type="button" style="padding:4px 10px; font-size:12.5px">Reset to start</button><button class="btn ghost" id="cal-btn" type="button" style="padding:4px 10px; font-size:12.5px">Calibrate actual size</button></span>
         </div>
         <div id="cal" class="panel" style="border:0; border-top:1px solid var(--line); border-radius:0" hidden>
           <h2>Calibrate to your monitor</h2>
@@ -338,11 +338,17 @@ const store = {
   get(k, f) { try { const v = localStorage.getItem("tss:" + k); return v == null ? f : JSON.parse(v); } catch { return f; } },
   set(k, v) { try { localStorage.setItem("tss:" + k, JSON.stringify(v)); } catch {} },
 };
-const S = Object.assign({
-  sel: [{ id: "surface-pro-11th-edition-13" }, { id: "ipad-pro-11-inch-m4-m5" }, { id: "kindle-scribe-1st-2nd-gen" }, { id: "iphone-17-pro" }],
+// What a first-time visitor sees: iPad mini (A20 Pro) and iPad Pro 11 (M5), each upright and sideways,
+// showing a Letter page. Upright screens fit the page; sideways screens fit its width.
+const defaults = () => ({
+  sel: [
+    { id: "ipad-mini-a20-pro-2026", uid: "d1" }, { id: "ipad-mini-a20-pro-2026", uid: "d2", flip: true, fit: "width" },
+    { id: "ipad-pro-11-inch-m4-m5", uid: "d3" }, { id: "ipad-pro-11-inch-m4-m5", uid: "d4", flip: true, fit: "width" },
+  ],
   mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
   paper: "us-letter-paper", paperOrient: "portrait", fit: "page", cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
-}, store.get("state", {}));
+});
+const S = Object.assign(defaults(), store.get("state", {}));
 let custom = store.get("custom", []);
 let ppiCal = store.get("ppiCal", 96);
 let pdf = { doc: null, page: 1, pages: 0, img: null, img2: null, w: 0, h: 0, name: "" };
@@ -572,6 +578,13 @@ const endDrag = () => {
 };
 stageEl.addEventListener("pointerup", endDrag);
 stageEl.addEventListener("pointercancel", endDrag);
+$("#reset-btn").addEventListener("click", () => {
+  // back to the first-visit layout; your own screens and calibration are kept
+  for (const k of Object.keys(S)) delete S[k];
+  Object.assign(S, defaults()); save();
+  document.querySelectorAll(".seg[id]").forEach(el => el.querySelectorAll("button[data-v]").forEach(b => { const key = el.id === "scaleMode" ? "scale" : el.id; if (key in S) b.setAttribute("aria-pressed", String(S[key] === b.dataset.v)); }));
+  buildPaperMenu(); renderAll();
+});
 $("#arr-reset").addEventListener("click", () => { S.pos = {}; save(); renderStage(); });
 $("#zoom").addEventListener("input", e => {
   S.scale = "manual"; S.zoom = +e.target.value; save();

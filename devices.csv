@@ -93,6 +93,10 @@ Surface Studio 2+ / Studio 2,monitor,28.0,4500,3000
 Galaxy S26 Ultra,phone,6.9,3120,1440
 Galaxy S26+,phone,6.7,3120,1440
 Galaxy S26,phone,6.3,2340,1080
+Galaxy S26 FE,phone,6.7,2340,1080
+Xiaomi 17 Ultra,phone,6.9,2608,1200
+Redmi Note 15,phone,6.77,2392,1080
+POCO F9 Ultra,phone,6.9,2608,1200
 Galaxy S25 Ultra,phone,6.9,3120,1440
 Galaxy S25 Edge,phone,6.7,3120,1440
 Galaxy S25+,phone,6.7,3120,1440
@@ -119,7 +123,7 @@ Galaxy Z TriFold (inner),phone,10.0,2160,1584
 Galaxy Z TriFold (cover),phone,6.5,2520,1080
 Galaxy Z Fold8 Ultra (inner),phone,8.0,2504,2256
 Galaxy Z Fold8 Ultra (cover),phone,6.5,2520,1080
-Galaxy Z Fold8 (inner),phone,7.6,2448,1828
+Galaxy Z Fold8 (inner),phone,7.6,2448,1848
 Galaxy Z Fold8 (cover),phone,5.5,1972,1248
 Galaxy Z Flip8,phone,6.9,2520,1080
 Galaxy Z Flip8 (cover),phone,4.1,1048,948

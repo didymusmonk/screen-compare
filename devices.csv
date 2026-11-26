@@ -47,8 +47,8 @@ iPad Pro 12.9-inch (1st to 6th gen),tablet,12.9,2732,2048
 iPad Pro 11-inch (1st to 4th gen),tablet,11.0,2388,1668
 iPad Pro 10.5-inch,tablet,10.5,2224,1668
 iPad Pro 9.7-inch,tablet,9.7,2048,1536
-iPad Air 13-inch (M2/M3/M4),tablet,12.9,2732,2048
-iPad Air 11-inch (M2/M3/M4),tablet,10.86,2360,1640
+iPad Air 13-inch (M2 to M4),tablet,12.9,2732,2048
+iPad Air 11-inch (M2 to M4),tablet,10.86,2360,1640
 iPad Air (4th/5th gen),tablet,10.86,2360,1640
 iPad Air (3rd gen),tablet,10.5,2224,1668
 iPad Air 2 / iPad Air,tablet,9.7,2048,1536
@@ -271,11 +271,12 @@ HP Spectre x360 14,tablet pc,14,2880,1800
 HP Spectre x360 16,tablet pc,16,2880,1800
 Dell XPS 13 2-in-1 (9315),tablet pc,13,2880,1920
 ASUS ROG Flow Z13,tablet pc,13.4,2560,1600
-"MacBook Air 13"" (M2/M3/M4)",laptop,13.6,2560,1664
-"MacBook Air 15"" (M2/M3/M4)",laptop,15.3,2880,1864
+"MacBook Neo 13""",laptop,13.0,2408,1506
+"MacBook Air 13"" (M2 to M5)",laptop,13.6,2560,1664
+"MacBook Air 15"" (M2 to M5)",laptop,15.3,2880,1864
 "MacBook Air 13"" (M1)",laptop,13.3,2560,1600
 "MacBook Pro 14"" (M1 to M5)",laptop,14.2,3024,1964
-"MacBook Pro 16"" (M1 to M4)",laptop,16.2,3456,2234
+"MacBook Pro 16"" (M1 to M5)",laptop,16.2,3456,2234
 "MacBook Pro 13"" (M2)",laptop,13.3,2560,1600
 Dell XPS 13 (9350),laptop,13.4,2560,1600
 Dell XPS 14 (9440),laptop,14.5,3200,2000

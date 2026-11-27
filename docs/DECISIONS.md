@@ -156,7 +156,7 @@ To change a decision, describe the conflict to Thomas first (`AGENTS.md`, rule 1
 ## 9. Regression testing and deployment
 
 **Facts**
-- `node tests/run-all.js` runs `unit.js`, `smoke.js` and `browser.js` (425 checks after the 27 Nov Phase 2 change). GitHub Actions runs it on pushes to `main` and on pull requests.
+- `node tests/run-all.js` runs `unit.js`, `smoke.js` and `browser.js`. GitHub Actions runs it on pushes to `main` and on pull requests.
 - Automated browser tests use Chromium, including iPhone 13 emulation, which is not real Safari. `webkit.js` (WebKitGTK) and `browser-check.html` (on a real iPhone) cover the PDF path.
 
 **Decisions**
@@ -164,7 +164,7 @@ To change a decision, describe the conflict to Thomas first (`AGENTS.md`, rule 1
 - **Deployment = merge to `main`** (GitHub Pages, root folder). There is no staging site.
 - **The repo's `index.html` is the only source** (Thomas, 27 Nov, after Codex's review of the collaboration docs). Until then Claude edited a copy without the `<head>` in its project folder and rebuilt the repo copy with `wrap.sh`; an edit made only in the repo (by Codex, say) could have been overwritten by the next rebuild. Alternatives considered: moving `wrap.sh` into the repo (rejected: it keeps a second editable copy and adds a build step), or keeping the old workflow with a sync rule (rejected: easy to forget). Claude's Artifact preview is now generated from the repo file by a one-line command and never copied back. No build system, framework or dependency was added for it.
 - **Branch per task, pull request, Thomas approves every merge** (27 Nov). This replaces the earlier practice of committing straight to `main`. See `AGENTS.md`.
-- **Small batches of approved, verified device rows and copy-only edits** use targeted local checks, the full GitHub Actions suite, and Thomas’s approval before merge. See `AGENTS.md`.
+- **Small batches of approved, verified device rows and copy-only edits** use targeted local checks, the full GitHub Actions suite, and Thomas's approval before merge. See `AGENTS.md`.
 - Every bug fix gets a regression test; tests are never weakened.
 - Accessibility is required: 4.5:1 text contrast in both themes, full keyboard use, axe-core clean.
 - Phones first (about 79% of visitors on phones, 95% Safari): sticky quick bar, "More options" toggle, 44 px touch targets, 16 px inputs.

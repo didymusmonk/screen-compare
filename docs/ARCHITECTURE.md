@@ -188,9 +188,5 @@ All reads go through `store.get` with try/catch, and are validated before use.
 
 ## 10. Tests and deployment
 
-- `tests/unit.js` (Node only): maths and data against hand-worked values; `tests/lib/app.js` extracts named functions from `index.html` by text.
-- `tests/smoke.js` (Playwright): every feature works on desktop and iPhone 13 emulation, axe-core, offline.
-- `tests/browser.js` (Playwright): exact card numbers, drawing, calibration, forms, PDF fit, saving, share links (including a frozen old link), broken saved settings, missing device list, service worker update.
-- `tests/browser-check.html` + `tests/webkit.js`: in-page PDF check for real iPhones (via the live site) and WebKitGTK.
-- `.github/workflows/tests.yml`: runs `run-all.js` on pushes to `main` and on pull requests.
+- Tests: `tests/README.md` lists each test file, what it covers and which one to run for a change. `tests/lib/app.js` extracts named functions from `index.html` by text for `unit.js`; `.github/workflows/tests.yml` runs `run-all.js` on pushes to `main` and on pull requests.
 - **Deployment:** merging to `main` publishes the site through GitHub Pages ("pages build and deployment" action). There is no staging site. Claude can generate a temporary Artifact preview of a branch from `index.html` (no offline, no analytics).

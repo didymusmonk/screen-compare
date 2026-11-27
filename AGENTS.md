@@ -18,7 +18,29 @@ The **repository is the single source of truth.** Previous AI conversations, cha
 | `CHANGELOG.md` | Short history of significant changes |
 | `tests/README.md` | How the tests are organised and run |
 
-Read `AGENTS.md`, `docs/HANDOVER.md` and the relevant parts of `docs/DECISIONS.md` before starting any task.
+Before starting any task, read `AGENTS.md`, `docs/HANDOVER.md` and only the `docs/DECISIONS.md` sections the task touches:
+
+| Task touches | `DECISIONS.md` section | Also check |
+|---|---|---|
+| Sizes, PPI, megapixels | 1 | `methodology.html` |
+| `devices.csv` rows or names | 2 | name patterns in `dprOf()`, `RENAMED` |
+| Calibration, "Actual size", zoom | 3 | |
+| Website previews, display scaling, aspect ratios | 4 | |
+| PDFs, cropping, pdf.js | 5 | README pdf.js steps |
+| E-book counts | 6 | |
+| `sw.js`, offline, icons, manifest | 7 | bump `VERSION` |
+| Saved settings, custom screens, share links | 8 | `docs/ARCHITECTURE.md` section 9 |
+| Tests, deployment, workflow | 9 | `tests/README.md` |
+| Reference comparison | 10 | |
+| Privacy, licensing, originality | 11 | `methodology.html` |
+
+Read `README.md`, `docs/ARCHITECTURE.md` and `CHANGELOG.md` only when the task needs them.
+
+### Working efficiently
+
+- **Don't read all of `index.html`** (about 160 KB). List its sections with `grep -n '^// ----------' index.html`, find functions with `grep -n 'function name' index.html` (the table in `docs/ARCHITECTURE.md` section 3 says which functions live where), then read only those line ranges. The CSS is in the `<style>` block after `<title>`, and the page markup is between `<body>` and the main `<script>`.
+- **Run the narrowest test that covers the change while you work**, then the full suite once before opening the pull request. The table in `tests/README.md` lists which test covers what. Test output shows only failures and one total per file.
+- **Don't re-read a file you just edited**, and don't re-run tests when nothing has changed since they passed.
 
 ## 2. Development protocol (applies to all agents)
 
@@ -94,7 +116,7 @@ Details and reasons are in `docs/DECISIONS.md`. In short:
 - `tests/unit.js` copies functions out of `index.html` by text: **top-level declarations in the main script start at column 0, and multi-line ones end with a line starting with `}` or `]`.** Keep that formatting.
 - Every user-facing string is plain English in sentence case. Avoid jargon, or explain it in the glossary.
 - Commit messages: a short, plain-English summary line, then details if needed.
-- Device rows: `name,type,diagonal,width,height`. Paper rows leave `diagonal` empty and give inches. Sorting: see `docs/DECISIONS.md`.
+- Device rows: paper rows leave `diagonal` empty and give inches. Sorting rules are in `docs/DECISIONS.md` section 2.
 
 ## 6. `index.html` is the only source
 
@@ -106,5 +128,5 @@ The repository's `index.html` is the **only** authoritative, editable copy of th
 
 ## 7. Agent-specific files
 
-- `CLAUDE.md`: Claude-specific notes (the temporary Artifact preview, running tests in Claude's cloud sandbox, project memory). It defers to this file.
+- `CLAUDE.md`: Claude-specific notes (the temporary Artifact preview, running tests in Claude's cloud sandbox). It defers to this file.
 - Codex reads this file (`AGENTS.md`) directly. Put any future Codex-only notes in a clearly marked section at the end of this file rather than in a separate file, unless Thomas decides otherwise.

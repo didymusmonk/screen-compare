@@ -1,14 +1,14 @@
 # Handover
 
-A snapshot for a new developer or AI agent (written 27 Nov 2026, when Codex joined as a second developer and reviewer). Update it when the status changes. Rules are in [`../AGENTS.md`](../AGENTS.md); reasons in [`DECISIONS.md`](DECISIONS.md).
+What a new developer or AI agent needs to know about the current state. Update it when a bug, limitation or fragile area changes; leave counts and recent history to `README.md`, `CHANGELOG.md` and git. Rules are in [`../AGENTS.md`](../AGENTS.md); reasons in [`DECISIONS.md`](DECISIONS.md).
 
 ## Current status
 
-- The site is live at https://didymusmonk.github.io/screen-compare/ and feature-complete for its current scope: 343 screens and 30 paper sizes, side by side / overlay / free arrange, pages and PDFs (with margin cropping), video, e-book and website previews, reference comparison, megapixels, calibration, share links, offline use and Add to Home Screen, plus a Methodology page.
-- `main` is at the Phase 2 change (megapixels, video picture size, Methodology page, service worker v3).
-- All 425 automated checks pass (`unit.js`, `smoke.js`, `browser.js`). GitHub Actions runs them on every pull request.
-- The device database was audited on 27 Nov (records on the `device-database-audit` branch, not merged).
-- From 27 Nov, every change goes through a branch and a pull request that Thomas approves, and the repo's `index.html` is the only source (the old project-folder copy and `wrap.sh` are retired).
+- The site is live at https://didymusmonk.github.io/screen-compare/ and feature-complete for its current scope: built-in screens and paper sizes (counts in `README.md`), side by side / overlay / free arrange, pages and PDFs (with margin cropping), video, e-book and website previews, reference comparison, megapixels, calibration, share links, offline use and Add to Home Screen, plus a Methodology page.
+- Recent changes are listed in `CHANGELOG.md`; open work is in GitHub's open pull requests.
+- The automated tests (`unit.js`, `smoke.js`, `browser.js`) pass on `main`, and GitHub Actions runs them on every pull request.
+- The device database audit (27 Nov) is merged into `devices.csv`; its working records stay on the `device-database-audit` branch.
+- Every change goes through a branch and a pull request that Thomas approves, and the repo's `index.html` is the only source.
 
 ## Known bugs and limitations
 
@@ -33,9 +33,7 @@ Limitations (accepted; details in `DECISIONS.md`):
 
 ## Work underway
 
-- No other development branch is active as of this handover. The "Phase 2 refinements" work (megapixels, video picture diagonal and area, Methodology page) merged to `main` on 27 Nov.
-- This documentation pull request.
-- Before starting, check open pull requests and branches on GitHub: an open pull request is someone's active work (`AGENTS.md` rule 4).
+Check open pull requests and branches on GitHub before starting: an open pull request is someone's active work (`AGENTS.md` rule 4).
 
 ## Fragile or sensitive areas
 
@@ -53,26 +51,22 @@ Limitations (accepted; details in `DECISIONS.md`):
 | `index.html` head and closing scripts | Tags above `<title>` and the two scripts before `</body>` are live-site only; Claude's preview generator relies on the `<title>` line and the one-line service worker registration as markers. Removing the service worker line breaks offline use. | `AGENTS.md` section 6, `CLAUDE.md` |
 | Calibration | Visitors' saved values must stay valid across changes; phones need the upright card. | `ppiCal`, `drawCal`, `setCal`, `scaleNote` |
 
-## Areas that would benefit from independent review
-
-1. **Share links and saved settings sanitizing**: try malformed, huge or hostile `#s=` links and `tss:` values (HTML in custom names, odd numbers, very long lists).
-2. **Service worker update logic** (`sw.js`): stale-copy risks, the 3-second race, behavior across versions, pdf.js cache handover.
-3. **Crop white margins** heuristics on real scans, books and slides (false crops, slow pages).
-4. **`dprOf()` assumptions** against current default scaling on popular devices.
-5. **Accessibility** beyond axe-core: screen reader flow, keyboard use of Free arrange, focus after redraws.
-6. **Phone layout in real iOS Safari**: sticky quick bar, touch drag and rotate, safe areas.
-7. **The reference comparison and Phase 2 numbers** against hand calculations.
-8. **Device data spot checks** against makers' spec pages (report findings, don't edit the CSV without approval).
-9. **This documentation** for accuracy against the code.
-
 ## Tasks a second agent could take on without interfering
 
 Each should be its own branch and pull request (`AGENTS.md`). Check first that no open pull request touches the same area.
 
 Review only (no file changes, findings in a pull request comment or a report):
 
-- Independent review of any open pull request, or of the recent changes: reference comparison (`fdc439a`) and Phase 2 (`10d0e89`).
-- The review areas listed above.
+- Independent review of any open pull request.
+- Share links and saved settings sanitizing: malformed, huge or hostile `#s=` links and `tss:` values (HTML in custom names, odd numbers, very long lists).
+- Service worker update logic (`sw.js`): stale-copy risks, the 3-second race, behavior across versions, pdf.js cache handover.
+- Crop white margins heuristics on real scans, books and slides (false crops, slow pages).
+- `dprOf()` assumptions against current default scaling on popular devices.
+- Accessibility beyond axe-core: screen reader flow, keyboard use of Free arrange, focus after redraws.
+- Phone layout in real iOS Safari: sticky quick bar, touch drag and rotate, safe areas.
+- Reference comparison numbers against hand calculations.
+- Device data spot checks against makers' spec pages (report findings, don't edit the CSV without approval).
+- `docs/` against the code, for accuracy.
 
 Small, self-contained changes (one at a time, with Thomas's go-ahead):
 

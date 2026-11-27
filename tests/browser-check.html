@@ -189,11 +189,42 @@ async function run() {
   const real = errors.filter(e => !/Failed to load resource/.test(e));
   check("no JavaScript errors", real.length === 0, real.slice(0, 3).join(" | "));
   sum.textContent = `${window.__check.passed} passed, ${window.__check.failed} failed`;
-  window.__check.done = true;
   document.getElementById("run").disabled = false;
 }
-document.getElementById("run").addEventListener("click", () => run().catch(e => { check("the check crashed", false, String(e && e.message || e)); window.__check.done = true; }));
-if (/[?&]auto\b/.test(location.search)) run().catch(e => { check("the check crashed", false, String(e && e.message || e)); window.__check.done = true; });
+// The app saves its settings in this browser (localStorage keys starting "tss:"), and this page shares them
+// with the real site. So the check sets the visitor's settings aside, runs the app from its defaults (a fresh
+// visit), then puts them back. The copy is kept until then, so closing the page mid-check loses nothing.
+const BACKUP = "screen-check-backup";
+function restoreSettings() {
+  try {
+    const saved = localStorage.getItem(BACKUP); if (saved == null) return;
+    for (const k of Object.keys(localStorage)) if (k.startsWith("tss:")) localStorage.removeItem(k);
+    for (const [k, v] of Object.entries(JSON.parse(saved))) localStorage.setItem(k, v);
+    localStorage.removeItem(BACKUP);
+  } catch (e) {}
+}
+function setSettingsAside() {
+  try {
+    const mine = {};
+    for (const k of Object.keys(localStorage)) if (k.startsWith("tss:")) mine[k] = localStorage.getItem(k);
+    localStorage.setItem(BACKUP, JSON.stringify(mine));
+    for (const k of Object.keys(mine)) localStorage.removeItem(k);
+  } catch (e) {}
+}
+restoreSettings(); // an earlier check that was interrupted
+async function runSafely() {
+  setSettingsAside();
+  try { await run(); }
+  catch (e) { check("the check crashed", false, String(e && e.message || e)); document.getElementById("run").disabled = false; }
+  finally {
+    const frame = document.getElementById("app");
+    frame.src = "about:blank"; await new Promise(r => { frame.onload = r; setTimeout(r, 2000); });
+    restoreSettings();
+    window.__check.done = true;
+  }
+}
+document.getElementById("run").addEventListener("click", runSafely);
+if (/[?&]auto\b/.test(location.search)) runSafely();
 </script>
 </body>
 </html>

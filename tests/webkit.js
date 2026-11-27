@@ -58,17 +58,25 @@ async function waitFor(b, script, ms = 60000) {
   while (Date.now() - t < ms) { try { const v = await b.exec(script); if (v) return v; } catch (e) {} await sleep(250); }
   return null;
 }
-async function runCheckPage(label, base, env, size, query = "") {
+async function runCheckPage(label, base, env, size, query = "", seed = false) {
   console.log(`\n${label}`);
   const b = await browser(env);
   try {
     if (size) await b.size(size[0], size[1]);
+    // a returning visitor: only paper sizes shown, plus a made-up setting. The check must run from the
+    // defaults anyway and give these back untouched afterwards.
+    const mine = { "tss:state": JSON.stringify({ cat: "paper", sel: [] }), "tss:ppiCal": "123" };
+    if (seed) { await b.go(base + "tests/"); await b.exec("localStorage.clear(); for (const [k, v] of Object.entries(arguments[0])) localStorage.setItem(k, v); return true", mine); }
     await b.go(base + "tests/browser-check.html?auto" + query);
     const res = await waitFor(b, "return window.__check && window.__check.done ? window.__check : null", 300000);
     if (!res) { check("check page finished", false, "timed out"); return; }
     for (const r of res.results) {
       if (r.kind === "info") console.log("  - " + r.text);
       else check(r.text, r.kind === "ok", r.detail);
+    }
+    if (seed) {
+      const after = await b.exec("const o = {}; for (const k of Object.keys(localStorage)) o[k] = localStorage.getItem(k); return o");
+      check("the visitor's own saved settings are back afterwards", JSON.stringify(after) === JSON.stringify(mine), JSON.stringify(after).slice(0, 120));
     }
     return res;
   } finally { await b.quit(); }
@@ -78,7 +86,7 @@ async function runCheckPage(label, base, env, size, query = "") {
   let server = await serve();
   const port = server.address().port, base = `http://127.0.0.1:${port}/`;
   try {
-    const first = await runCheckPage("WebKit, desktop size", base, {}, null);
+    const first = await runCheckPage("WebKit, desktop size (as a returning visitor with saved settings)", base, {}, null, "", true);
     if (first) console.log("  - engine: WebKitGTK " + (first.env.userAgent.match(/AppleWebKit\/[\d.]+/) || [""])[0]);
     await runCheckPage("WebKit, phone size (390 px wide)", base, {}, [390, 844]);
     // WebKitGTK can't turn WebAssembly off from outside, so the check page removes it from pdf.js's worker

@@ -154,6 +154,7 @@ async function run(browser, base, label, ctxOptions) {
   const names = pg => pg.locator("#cards .card h3").evaluateAll(hs => hs.map(h => h.firstChild.textContent).join(", "));
   const want = await names(p);
   await ctx.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await p.selectOption("#paper", "a4-paper");
   await p.locator("[data-share]").filter({ visible: true }).first().click();
   const link = await p.evaluate(() => navigator.clipboard.readText());
   const ctx2 = await browser.newContext(ctxOptions);
@@ -163,13 +164,30 @@ async function run(browser, base, label, ctxOptions) {
   await p2.waitForSelector("#cards .card");
   const got = await names(p2);
   check("share link opens the same screens", link.includes("#s=") && got === want, `${want} vs ${got}`);
+  check("ordinary paper shares keep the chosen A4 preset", await p2.inputValue("#paper") === "a4-paper" && await p.locator(".pdf-share-note:visible").count() === 0);
   await ctx2.close();
 
   // PDF preview (loads pdf.js from pdfjs/ on demand)
   await p.click(`${content} button[data-v="page"]`);
-  await p.setInputFiles("#pdf-file", { name: "test.pdf", mimeType: "application/pdf", buffer: tinyPdf() });
+  const pdfButton = p.getByRole("button", { name: "Open a PDF" });
+  check("Pages shows Open a PDF without loading pdf.js", await pdfButton.isVisible() && await p.evaluate(() => !performance.getEntriesByType("resource").some(e => e.name.includes("/pdfjs/"))));
+  const [picker] = await Promise.all([p.waitForEvent("filechooser"), pdfButton.click()]);
+  await picker.setFiles({ name: "test.pdf", mimeType: "application/pdf", buffer: tinyPdf() });
   const pdfOk = await p.waitForFunction(() => /5\.00 × 7\.00 in/.test(document.querySelector("#pdf-status").textContent), null, { timeout: 15000 }).then(() => true, () => false);
   check("PDF opens and reports its page size", pdfOk, await p.textContent("#pdf-status"));
+  const share = p.locator("[data-share]").filter({ visible: true }).first();
+  const note = p.locator("#" + await share.getAttribute("aria-describedby"));
+  check("the visible Share control explains the PDF fallback and privacy", await note.isVisible() && /US Letter.*stays on your device/.test(await note.textContent()));
+  await share.click();
+  const pdfLink = await p.evaluate(() => navigator.clipboard.readText());
+  const recipientContext = await browser.newContext(ctxOptions);
+  await recipientContext.route(url => !url.href.startsWith(base), r => r.abort());
+  const receiver = await recipientContext.newPage();
+  await receiver.goto(pdfLink);
+  await receiver.waitForSelector("#cards .card");
+  check("a recipient gets US Letter and no sender PDF", await receiver.inputValue("#paper") === "us-letter-paper" && await receiver.locator(".pdf-share-note:visible").count() === 0 && await receiver.evaluate(() => !performance.getEntriesByType("resource").some(e => e.name.includes("/pdfjs/"))));
+  await recipientContext.close();
+
 
   // Crop white margins
   const status = () => p.textContent("#pdf-status");

@@ -140,7 +140,8 @@ button { font: inherit; cursor: pointer; }
 .res { display: flex; justify-content: space-between; gap: 8px; width: 100%; border: 0; background: transparent; color: var(--fg); text-align: left; padding: 6px 10px; font-size: 13.5px; }
 .res:hover, .res:focus-visible { background: var(--sunk); }
 .res small { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); white-space: nowrap; }
-.res[aria-disabled="true"] { opacity: 0.45; cursor: default; }
+.res[aria-pressed="true"] { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.res[aria-pressed="true"] > span:first-child { color: var(--accent); font-weight: 600; }
 .empty { padding: 12px; color: var(--muted); font-size: 13px; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .site-foot { font-size: 12px; color: var(--muted); display: grid; gap: 4px; padding: 4px 2px 12px; }
@@ -250,7 +251,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <input id="q" type="text" placeholder="Search, e.g. Surface Pro, iPad, Pixel" autocomplete="off" aria-label="Search devices">
         <div class="chips" id="cats" role="group" aria-label="Filter by type"></div>
         <div class="results" id="results" role="group" aria-label="Devices"></div>
-        <p class="hint">Click a device to add it. Up to 12 at once.</p>
+        <p class="hint">Click a device to add it, and click it again to remove it. Up to 12 at once.</p>
       </section>
 
       <section class="panel">
@@ -568,7 +569,7 @@ function renderResults() {
     html += items.map(d => {
       const on = S.sel.some(s => s.id === d.id);
       const spec = d.sheet ? `${sizeTag(d)}` : d.aspectOnly ? `${d.d}″ · ${aspectLabel(d.w, d.h)}` : `${d.d}″ · ${Math.round(Math.hypot(d.w, d.h) / d.d)} ppi`;
-      return `<button class="res" data-id="${esc(d.id)}" aria-disabled="${on}"${on ? ` title="Already added"` : ""}><span>${on ? `<span aria-label="Added:">✓ </span>` : ""}${esc(d.n)}</span><small>${spec}</small></button>`;
+      return `<button class="res" data-id="${esc(d.id)}" aria-pressed="${on}" title="${on ? "Added. Click to remove" : "Click to add"}"><span>${on ? `<span aria-hidden="true">✓ </span>` : ""}${esc(d.n)}</span><small>${spec}</small></button>`;
     }).join("");
   }
   $("#results").innerHTML = html || `<div class="empty">No match. Try fewer words, or enter the screen yourself below.</div>`;
@@ -1320,9 +1321,16 @@ bindSeg("orient", "orient", () => { S.sel.forEach(x => x.flip = false); save(); 
 bindSeg("ebookCols", "ebookCols", () => { S.sel.forEach(x => delete x.cols); save(); renderAll(); });
 bindSeg("fit", "fit", () => { S.sel.forEach(x => delete x.fit); save(); renderAll(); });
 $("#q").addEventListener("input", renderResults);
-$("#q").addEventListener("keydown", e => { if (e.key === "Enter") { const b = $("#results .res[aria-disabled='false']"); if (b) addDevice(b.dataset.id); } });
+$("#q").addEventListener("keydown", e => { if (e.key === "Enter") { const b = $("#results .res[aria-pressed='false']"); if (b) addDevice(b.dataset.id); } });
 $("#cats").addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; S.cat = b.dataset.k; save(); renderCats(); renderResults(); });
-$("#results").addEventListener("click", e => { const b = e.target.closest(".res"); if (b && b.getAttribute("aria-disabled") !== "true") addDevice(b.dataset.id); });
+// click a device to add it; click it again to take it off (every copy of it)
+$("#results").addEventListener("click", e => {
+  const b = e.target.closest(".res"); if (!b) return;
+  const id = b.dataset.id;
+  if (S.sel.some(x => x.id === id)) { S.sel = S.sel.filter(x => x.id !== id); save(); renderAll(); }
+  else addDevice(id);
+  const again = document.querySelector(`#results .res[data-id="${CSS.escape(id)}"]`); if (again) again.focus({ preventScroll: true });
+});
 $("#cards").addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
   const i = +b.dataset.i;

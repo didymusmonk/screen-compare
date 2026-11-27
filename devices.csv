@@ -2,6 +2,59 @@
 # type is one of: phone, tablet, ereader, tablet pc, laptop, monitor, paper
 # For paper, leave diagonal empty and give width and height in inches instead of pixels.
 name,type,diagonal,width,height
+iPad Pro 13-inch (M4/M5),tablet,13.0,2752,2064
+iPad Pro 11-inch (M4/M5),tablet,11.1,2420,1668
+iPad Pro 12.9-inch (1st to 6th gen),tablet,12.9,2732,2048
+iPad Pro 11-inch (1st to 4th gen),tablet,11.0,2388,1668
+iPad Pro 10.5-inch,tablet,10.5,2224,1668
+iPad Pro 9.7-inch,tablet,9.7,2048,1536
+iPad Air 13-inch (M2 to M4),tablet,12.9,2732,2048
+iPad Air 11-inch (M2 to M4),tablet,10.86,2360,1640
+iPad Air (4th/5th gen),tablet,10.86,2360,1640
+iPad Air (3rd gen),tablet,10.5,2224,1668
+iPad Air 2 / iPad Air,tablet,9.7,2048,1536
+iPad (11th gen / A16) / iPad 10th gen,tablet,10.86,2360,1640
+iPad (7th/8th/9th gen),tablet,10.2,2160,1620
+iPad (5th/6th gen),tablet,9.7,2048,1536
+"iPad mini (A20 Pro, 2026)",tablet,8.5,2316,1512
+iPad mini (A17 Pro) / 6th gen,tablet,8.3,2266,1488
+iPad mini (4th/5th gen),tablet,7.9,2048,1536
+Galaxy Tab S11 Ultra,tablet,14.6,2960,1848
+Galaxy Tab S11,tablet,11.0,2560,1600
+Galaxy Tab S10 Ultra,tablet,14.6,2960,1848
+Galaxy Tab S10+,tablet,12.4,2800,1752
+Galaxy Tab S10 FE+,tablet,13.1,2880,1800
+Galaxy Tab S10 FE,tablet,10.9,2304,1440
+Galaxy Tab S9 Ultra,tablet,14.6,2960,1848
+Galaxy Tab S9+,tablet,12.4,2800,1752
+Galaxy Tab S9,tablet,11.0,2560,1600
+Galaxy Tab S9 FE+,tablet,12.4,2560,1600
+Galaxy Tab S9 FE,tablet,10.9,2304,1440
+Galaxy Tab S8 Ultra,tablet,14.6,2960,1848
+Galaxy Tab S8+ / S7+,tablet,12.4,2800,1752
+Galaxy Tab S8 / S7,tablet,11.0,2560,1600
+Galaxy Tab S6 Lite,tablet,10.4,2000,1200
+Galaxy Tab A9+,tablet,11.0,1920,1200
+Galaxy Tab A9,tablet,8.7,1340,800
+Galaxy Tab A8,tablet,10.5,1920,1200
+Lenovo Tab Extreme,tablet,14.5,3000,1876
+Lenovo Tab P12 / Idea Tab Pro,tablet,12.7,2944,1840
+Lenovo Tab P12 Pro,tablet,12.6,2560,1600
+Lenovo Tab P11 Pro (Gen 2),tablet,11.2,2560,1536
+Lenovo Tab P11 (Gen 2),tablet,11.5,2000,1200
+Lenovo Tab M11,tablet,11.0,1920,1200
+Lenovo Tab M10 Plus (Gen 3),tablet,10.6,2000,1200
+Lenovo Tab M9,tablet,9.0,1340,800
+Lenovo Yoga Tab Plus,tablet,12.7,2944,1840
+Lenovo Yoga Tab 13,tablet,13.0,2160,1350
+Lenovo Yoga Tab 11,tablet,11.0,2000,1200
+Lenovo Legion Tab,tablet,8.8,2560,1600
+Pixel Tablet,tablet,10.95,2560,1600
+Amazon Fire Max 11,tablet,11.0,2000,1200
+Amazon Fire HD 10,tablet,10.1,1920,1200
+Amazon Fire HD 8,tablet,8.0,1280,800
+Amazon Fire 7,tablet,7.0,1024,600
+OnePlus Pad 2,tablet,12.1,3000,2120
 iPhone Duo (inner),phone,7.6,2670,1878
 iPhone Duo (front),phone,5.4,2034,1398
 iPhone 18 Pro Max,phone,6.9,2868,1320
@@ -41,62 +94,10 @@ iPhone XR,phone,6.1,1792,828
 iPhone 8 Plus / 7 Plus,phone,5.5,1920,1080
 iPhone SE (2nd/3rd gen) / 8,phone,4.7,1334,750
 iPhone SE (1st gen),phone,4.0,1136,640
-iPad Pro 13-inch (M4/M5),tablet,13.0,2752,2064
-iPad Pro 11-inch (M4/M5),tablet,11.1,2420,1668
-iPad Pro 12.9-inch (1st to 6th gen),tablet,12.9,2732,2048
-iPad Pro 11-inch (1st to 4th gen),tablet,11.0,2388,1668
-iPad Pro 10.5-inch,tablet,10.5,2224,1668
-iPad Pro 9.7-inch,tablet,9.7,2048,1536
-iPad Air 13-inch (M2 to M4),tablet,12.9,2732,2048
-iPad Air 11-inch (M2 to M4),tablet,10.86,2360,1640
-iPad Air (4th/5th gen),tablet,10.86,2360,1640
-iPad Air (3rd gen),tablet,10.5,2224,1668
-iPad Air 2 / iPad Air,tablet,9.7,2048,1536
-iPad (11th gen / A16) / iPad 10th gen,tablet,10.86,2360,1640
-iPad (7th/8th/9th gen),tablet,10.2,2160,1620
-iPad (5th/6th gen),tablet,9.7,2048,1536
-"iPad mini (A20 Pro, 2026)",tablet,8.5,2316,1512
-iPad mini (A17 Pro) / 6th gen,tablet,8.3,2266,1488
-iPad mini (4th/5th gen),tablet,7.9,2048,1536
-"Surface Pro 11th Edition (13"")",tablet pc,13.0,2880,1920
-Surface Pro 12-inch (2025),tablet pc,12.0,2196,1464
-Surface Pro 10 for Business,tablet pc,13.0,2880,1920
-Surface Pro 9,tablet pc,13.0,2880,1920
-Surface Pro 8,tablet pc,13.0,2880,1920
-Surface Pro X,tablet pc,13.0,2880,1920
-Surface Pro 7 / 7+,tablet pc,12.3,2736,1824
-Surface Pro 6,tablet pc,12.3,2736,1824
-Surface Pro (2017) / Pro 5,tablet pc,12.3,2736,1824
-Surface Pro 4,tablet pc,12.3,2736,1824
-Surface Pro 3,tablet pc,12.0,2160,1440
-Surface Pro 2 / Pro (1st gen),tablet pc,10.6,1920,1080
-Surface 3,tablet pc,10.8,1920,1280
-Surface 2,tablet pc,10.6,1920,1080
-Surface RT,tablet pc,10.6,1366,768
-Surface Go 4 / Go 3 / Go 2,tablet pc,10.5,1920,1280
-Surface Go (1st gen),tablet pc,10.0,1800,1200
-Surface Laptop Studio 2 / Studio,tablet pc,14.4,2400,1600
-"Surface Book 3 / Book 2 (13.5"")",tablet pc,13.5,3000,2000
-"Surface Book 3 / Book 2 (15"")",tablet pc,15.0,3240,2160
-Surface Book (1st gen) / Book with Performance Base,tablet pc,13.5,3000,2000
-Surface Duo 2 (one screen),tablet pc,5.8,1892,1344
-Surface Duo (one screen),tablet pc,5.6,1800,1350
-"Surface Laptop 7th Edition 13.8""",laptop,13.8,2304,1536
-"Surface Laptop 7th Edition 15""",laptop,15.0,2496,1664
-Surface Laptop 13-inch (2025),laptop,13.0,1920,1280
-"Surface Laptop 3 / 4 / 5 / 6 (13.5"")",laptop,13.5,2256,1504
-"Surface Laptop 3 / 4 / 5 / 6 (15"")",laptop,15.0,2496,1664
-Surface Laptop / Laptop 2,laptop,13.5,2256,1504
-Surface Laptop Go 3 / Go 2 / Go,laptop,12.45,1536,1024
-Surface Laptop SE,laptop,11.6,1366,768
-Surface Studio 2+ / Studio 2 / Studio,monitor,28.0,4500,3000
 Galaxy S26 Ultra,phone,6.9,3120,1440
 Galaxy S26+,phone,6.7,3120,1440
 Galaxy S26,phone,6.3,2340,1080
 Galaxy S26 FE,phone,6.7,2340,1080
-Xiaomi 17 Ultra,phone,6.9,2608,1200
-Redmi Note 15,phone,6.77,2392,1080
-POCO F9 Ultra,phone,6.9,2608,1200
 Galaxy S25 Ultra,phone,6.9,3120,1440
 Galaxy S25 Edge,phone,6.7,3120,1440
 Galaxy S25+,phone,6.7,3120,1440
@@ -125,8 +126,6 @@ Galaxy Z Fold8 Ultra (inner),phone,8.0,2504,2256
 Galaxy Z Fold8 Ultra (cover),phone,6.5,2520,1080
 Galaxy Z Fold8 (inner),phone,7.6,2448,1848
 Galaxy Z Fold8 (cover),phone,5.5,1972,1248
-Galaxy Z Flip8,phone,6.9,2520,1080
-Galaxy Z Flip8 (cover),phone,4.1,1048,948
 Galaxy Z Fold7 (inner),phone,8.0,2184,1968
 Galaxy Z Fold7 (cover),phone,6.5,2520,1080
 Galaxy Z Fold6 (inner),phone,7.6,2160,1856
@@ -135,11 +134,23 @@ Galaxy Z Fold5 / Fold4 (inner),phone,7.6,2176,1812
 Galaxy Z Fold5 / Fold4 (cover),phone,6.2,2316,904
 Galaxy Z Fold3 (inner),phone,7.6,2208,1768
 Galaxy Z Fold3 (cover),phone,6.2,2268,832
+Galaxy Z Flip8,phone,6.9,2520,1080
+Galaxy Z Flip8 (cover),phone,4.1,1048,948
 Galaxy Z Flip7,phone,6.9,2520,1080
 Galaxy Z Flip7 (cover),phone,4.1,1048,948
 Galaxy Z Flip7 FE / Flip6 / Flip5 / Flip4,phone,6.7,2640,1080
 Galaxy Z Flip7 FE / Flip6 / Flip5 (cover),phone,3.4,748,720
 Galaxy Z Flip4 (cover),phone,1.9,512,260
+Galaxy A56,phone,6.7,2340,1080
+Galaxy A55 / A35,phone,6.6,2340,1080
+Galaxy A54,phone,6.4,2340,1080
+Galaxy A16,phone,6.7,2340,1080
+Galaxy A15,phone,6.5,2340,1080
+Pixel 10 Pro XL,phone,6.8,2992,1344
+Pixel 9 Pro XL,phone,6.8,2992,1344
+Pixel 9 Pro,phone,6.3,2856,1280
+Pixel 9,phone,6.3,2424,1080
+Pixel 9a,phone,6.3,2424,1080
 Pixel 11 Pro Fold (inner),phone,8.0,2152,2076
 Pixel 11 Pro Fold (cover),phone,6.5,2342,1080
 Pixel 10 Pro Fold (inner),phone,8.0,2152,2076
@@ -148,33 +159,14 @@ Pixel 9 Pro Fold (inner),phone,8.0,2152,2076
 Pixel 9 Pro Fold (cover),phone,6.3,2424,1080
 Pixel Fold (inner),phone,7.6,2208,1840
 Pixel Fold (cover),phone,5.8,2092,1080
-Oppo Find N5 (inner),phone,8.12,2480,2248
-Oppo Find N5 (cover),phone,6.62,2616,1140
+Xiaomi 17 Ultra,phone,6.9,2608,1200
+Redmi Note 15,phone,6.77,2392,1080
+POCO F9 Ultra,phone,6.9,2608,1200
 OnePlus Open / Oppo Find N3 (inner),phone,7.82,2440,2268
 OnePlus Open / Oppo Find N3 (cover),phone,6.31,2484,1116
-Galaxy A56,phone,6.7,2340,1080
-Galaxy A55 / A35,phone,6.6,2340,1080
-Galaxy A54,phone,6.4,2340,1080
-Galaxy A16,phone,6.7,2340,1080
-Galaxy A15,phone,6.5,2340,1080
-Galaxy Tab S11 Ultra,tablet,14.6,2960,1848
-Galaxy Tab S11,tablet,11.0,2560,1600
-Galaxy Tab S10 Ultra,tablet,14.6,2960,1848
-Galaxy Tab S10+,tablet,12.4,2800,1752
-Galaxy Tab S10 FE+,tablet,13.1,2880,1800
-Galaxy Tab S10 FE,tablet,10.9,2304,1440
-Galaxy Tab S9 Ultra,tablet,14.6,2960,1848
-Galaxy Tab S9+,tablet,12.4,2800,1752
-Galaxy Tab S9,tablet,11.0,2560,1600
-Galaxy Tab S9 FE+,tablet,12.4,2560,1600
-Galaxy Tab S9 FE,tablet,10.9,2304,1440
-Galaxy Tab S8 Ultra,tablet,14.6,2960,1848
-Galaxy Tab S8+ / S7+,tablet,12.4,2800,1752
-Galaxy Tab S8 / S7,tablet,11.0,2560,1600
-Galaxy Tab S6 Lite,tablet,10.4,2000,1200
-Galaxy Tab A9+,tablet,11.0,1920,1200
-Galaxy Tab A9,tablet,8.7,1340,800
-Galaxy Tab A8,tablet,10.5,1920,1200
+OnePlus 13,phone,6.82,3168,1440
+Oppo Find N5 (inner),phone,8.12,2480,2248
+Oppo Find N5 (cover),phone,6.62,2616,1140
 Kindle Scribe 3 / Scribe Colorsoft (2025),ereader,11.0,2640,1980
 Kindle Scribe (1st/2nd gen),ereader,10.2,2480,1860
 Kindle Colorsoft / Colorsoft 2,ereader,7.0,1680,1264
@@ -185,32 +177,6 @@ Kindle Oasis (2017/2019),ereader,7.0,1680,1264
 Kindle (2022/2024/2026) / Kindle aluminum,ereader,6.0,1448,1072
 Kindle (2019),ereader,6.0,800,600
 Kindle Voyage,ereader,6.0,1448,1072
-Amazon Fire Max 11,tablet,11.0,2000,1200
-Amazon Fire HD 10,tablet,10.1,1920,1200
-Amazon Fire HD 8,tablet,8.0,1280,800
-Amazon Fire 7,tablet,7.0,1024,600
-Lenovo Tab Extreme,tablet,14.5,3000,1876
-Lenovo Tab P12 / Idea Tab Pro,tablet,12.7,2944,1840
-Lenovo Yoga Tab Plus,tablet,12.7,2944,1840
-Lenovo Tab P12 Pro,tablet,12.6,2560,1600
-Lenovo Tab P11 Pro (Gen 2),tablet,11.2,2560,1536
-Lenovo Tab P11 (Gen 2),tablet,11.5,2000,1200
-Lenovo Yoga Tab 13,tablet,13.0,2160,1350
-Lenovo Yoga Tab 11,tablet,11.0,2000,1200
-Lenovo Tab M11,tablet,11.0,1920,1200
-Lenovo Tab M10 Plus (Gen 3),tablet,10.6,2000,1200
-Lenovo Tab M9,tablet,9.0,1340,800
-Lenovo Legion Tab,tablet,8.8,2560,1600
-Lenovo ThinkPad X1 Fold 16,tablet pc,16.3,2560,2024
-Lenovo ThinkPad X1 Fold (2020),tablet pc,13.3,2048,1536
-Lenovo ThinkPad X1 Tablet (Gen 3),tablet pc,13.0,3000,2000
-Lenovo ThinkPad X12 Detachable,tablet pc,12.3,1920,1280
-Lenovo Yoga Book 9i (one screen),tablet pc,13.3,2880,1800
-Lenovo Yoga 7i 14 (2-in-1),tablet pc,14.0,1920,1200
-Lenovo ThinkPad X1 Carbon Gen 14 Aura Edition,laptop,14.0,2880,1800
-Lenovo ThinkPad P1 Gen 8,laptop,16.0,3840,2400
-Lenovo ThinkPad T14 Gen 6 (Intel/AMD),laptop,14.0,1920,1200
-Lenovo ThinkPad T16 Gen 5 (Intel/AMD),laptop,16.0,1920,1200
 Boox Note Max,ereader,13.3,3200,2400
 Boox Tab X C,ereader,13.3,3200,2400
 Boox Tab X,ereader,13.3,2200,1650
@@ -233,6 +199,94 @@ Boox Go 6 / Go 6 (Gen II),ereader,6.0,1448,1072
 Boox Palma 3,ereader,6.13,1648,824
 Boox Palma / Palma 2 / Palma 2 Pro,ereader,6.13,1648,824
 Boox Picco,ereader,3.97,800,480
+Kobo Elipsa 2E,ereader,10.3,1872,1404
+Kobo Libra Colour,ereader,7,1680,1264
+reMarkable 2,ereader,10.3,1872,1404
+reMarkable Paper Pro,ereader,11.8,2160,1620
+Surface Pro 12-inch (2025),tablet pc,12.0,2196,1464
+"Surface Pro 11th Edition (13"")",tablet pc,13.0,2880,1920
+Surface Pro 10 for Business,tablet pc,13.0,2880,1920
+Surface Pro 9,tablet pc,13.0,2880,1920
+Surface Pro 8,tablet pc,13.0,2880,1920
+Surface Pro X,tablet pc,13.0,2880,1920
+Surface Pro 7 / 7+,tablet pc,12.3,2736,1824
+Surface Pro 6,tablet pc,12.3,2736,1824
+Surface Pro (2017) / Pro 5,tablet pc,12.3,2736,1824
+Surface Pro 4,tablet pc,12.3,2736,1824
+Surface Pro 3,tablet pc,12.0,2160,1440
+Surface Pro 2 / Pro (1st gen),tablet pc,10.6,1920,1080
+Surface 3,tablet pc,10.8,1920,1280
+Surface 2,tablet pc,10.6,1920,1080
+Surface RT,tablet pc,10.6,1366,768
+Surface Go 4 / Go 3 / Go 2,tablet pc,10.5,1920,1280
+Surface Go (1st gen),tablet pc,10.0,1800,1200
+Surface Laptop Studio 2 / Studio,tablet pc,14.4,2400,1600
+"Surface Book 3 / Book 2 (13.5"")",tablet pc,13.5,3000,2000
+"Surface Book 3 / Book 2 (15"")",tablet pc,15.0,3240,2160
+Surface Book (1st gen) / Book with Performance Base,tablet pc,13.5,3000,2000
+Surface Duo 2 (one screen),tablet pc,5.8,1892,1344
+Surface Duo (one screen),tablet pc,5.6,1800,1350
+Lenovo ThinkPad X1 Fold 16,tablet pc,16.3,2560,2024
+Lenovo ThinkPad X1 Fold (2020),tablet pc,13.3,2048,1536
+Lenovo ThinkPad X1 Tablet (Gen 3),tablet pc,13.0,3000,2000
+Lenovo ThinkPad X12 Detachable,tablet pc,12.3,1920,1280
+Lenovo Yoga Book 9i (one screen),tablet pc,13.3,2880,1800
+Lenovo Yoga 7i 14 (2-in-1),tablet pc,14.0,1920,1200
+Dell XPS 13 2-in-1 (9315),tablet pc,13,2880,1920
+HP Spectre x360 14,tablet pc,14,2880,1800
+HP Spectre x360 16,tablet pc,16,2880,1800
+ASUS ROG Flow Z13,tablet pc,13.4,2560,1600
+"MacBook Neo 13""",laptop,13.0,2408,1506
+"MacBook Air 13"" (M2 to M5)",laptop,13.6,2560,1664
+"MacBook Air 15"" (M2 to M5)",laptop,15.3,2880,1864
+"MacBook Air 13"" (M1)",laptop,13.3,2560,1600
+"MacBook Pro 14"" (M1 to M5)",laptop,14.2,3024,1964
+"MacBook Pro 16"" (M1 to M5)",laptop,16.2,3456,2234
+"MacBook Pro 13"" (M2)",laptop,13.3,2560,1600
+Surface Laptop 13-inch (2025),laptop,13.0,1920,1280
+"Surface Laptop 7th Edition 13.8""",laptop,13.8,2304,1536
+"Surface Laptop 7th Edition 15""",laptop,15.0,2496,1664
+"Surface Laptop 3 / 4 / 5 / 6 (13.5"")",laptop,13.5,2256,1504
+"Surface Laptop 3 / 4 / 5 / 6 (15"")",laptop,15.0,2496,1664
+Surface Laptop / Laptop 2,laptop,13.5,2256,1504
+Surface Laptop Go 3 / Go 2 / Go,laptop,12.45,1536,1024
+Surface Laptop SE,laptop,11.6,1366,768
+Lenovo ThinkPad X1 Carbon Gen 14 Aura Edition,laptop,14.0,2880,1800
+Lenovo ThinkPad P1 Gen 8,laptop,16.0,3840,2400
+Lenovo ThinkPad T14 Gen 6 (Intel/AMD),laptop,14.0,1920,1200
+Lenovo ThinkPad T16 Gen 5 (Intel/AMD),laptop,16.0,1920,1200
+Dell XPS 13 (9350),laptop,13.4,2560,1600
+Dell XPS 14 (9440),laptop,14.5,3200,2000
+Dell XPS 16 (9640),laptop,16.3,3840,2400
+ASUS Zenbook 14 OLED,laptop,14,2880,1800
+Framework Laptop 13 (2.8K),laptop,13.5,2880,1920
+Framework Laptop 13 (2.2K),laptop,13.5,2256,1504
+Framework Laptop 16,laptop,16,2560,1600
+"Typical 15.6"" Full HD laptop",laptop,15.6,1920,1080
+"Typical 14"" Full HD laptop",laptop,14,1920,1080
+"Typical 11.6"" Chromebook",laptop,11.6,1366,768
+iMac 24-inch (M1 to M4),monitor,23.5,4480,2520
+"27"" 5K (Apple Studio Display) monitor",monitor,27,5120,2880
+"32"" 6K (Pro Display XDR) monitor",monitor,32,6016,3384
+Surface Studio 2+ / Studio 2 / Studio,monitor,28.0,4500,3000
+"21.5"" Full HD monitor",monitor,21.5,1920,1080
+"24"" Full HD monitor",monitor,23.8,1920,1080
+"24"" QHD 1440p monitor",monitor,23.8,2560,1440
+"24"" 4K monitor",monitor,23.8,3840,2160
+"27"" Full HD monitor",monitor,27,1920,1080
+"27"" QHD 1440p monitor",monitor,27,2560,1440
+"27"" 4K monitor",monitor,27,3840,2160
+"32"" QHD 1440p monitor",monitor,31.5,2560,1440
+"32"" 4K monitor",monitor,31.5,3840,2160
+"29"" ultrawide 1080p monitor",monitor,29,2560,1080
+"34"" ultrawide 1080p monitor",monitor,34,2560,1080
+"34"" ultrawide 1440p monitor",monitor,34,3440,1440
+"38"" ultrawide monitor",monitor,37.5,3840,1600
+"40"" ultrawide 5K2K monitor",monitor,39.7,5120,2160
+"45"" ultrawide 1440p monitor",monitor,44.5,3440,1440
+"49"" super ultrawide monitor",monitor,49,5120,1440
+"42"" 4K OLED monitor",monitor,41.5,3840,2160
+"15.6"" portable monitor",monitor,15.6,1920,1080
 US Letter paper,paper,,8.5,11
 US Legal paper,paper,,8.5,14
 Tabloid / Ledger paper,paper,,11,17
@@ -263,57 +317,3 @@ Notebook pocket 3.5 × 5.5,paper,,3.5,5.5
 Notebook large 5 × 8.25,paper,,5,8.25
 Credit card,paper,,2.125,3.37
 Business card (US),paper,,2,3.5
-Pixel 10 Pro XL,phone,6.8,2992,1344
-Pixel 9 Pro XL,phone,6.8,2992,1344
-Pixel 9 Pro,phone,6.3,2856,1280
-Pixel 9,phone,6.3,2424,1080
-Pixel 9a,phone,6.3,2424,1080
-OnePlus 13,phone,6.82,3168,1440
-Pixel Tablet,tablet,10.95,2560,1600
-OnePlus Pad 2,tablet,12.1,3000,2120
-Kobo Elipsa 2E,ereader,10.3,1872,1404
-Kobo Libra Colour,ereader,7,1680,1264
-reMarkable 2,ereader,10.3,1872,1404
-reMarkable Paper Pro,ereader,11.8,2160,1620
-HP Spectre x360 14,tablet pc,14,2880,1800
-HP Spectre x360 16,tablet pc,16,2880,1800
-Dell XPS 13 2-in-1 (9315),tablet pc,13,2880,1920
-ASUS ROG Flow Z13,tablet pc,13.4,2560,1600
-"MacBook Neo 13""",laptop,13.0,2408,1506
-"MacBook Air 13"" (M2 to M5)",laptop,13.6,2560,1664
-"MacBook Air 15"" (M2 to M5)",laptop,15.3,2880,1864
-"MacBook Air 13"" (M1)",laptop,13.3,2560,1600
-"MacBook Pro 14"" (M1 to M5)",laptop,14.2,3024,1964
-"MacBook Pro 16"" (M1 to M5)",laptop,16.2,3456,2234
-"MacBook Pro 13"" (M2)",laptop,13.3,2560,1600
-Dell XPS 13 (9350),laptop,13.4,2560,1600
-Dell XPS 14 (9440),laptop,14.5,3200,2000
-Dell XPS 16 (9640),laptop,16.3,3840,2400
-Framework Laptop 13 (2.8K),laptop,13.5,2880,1920
-Framework Laptop 13 (2.2K),laptop,13.5,2256,1504
-Framework Laptop 16,laptop,16,2560,1600
-ASUS Zenbook 14 OLED,laptop,14,2880,1800
-"Typical 15.6"" Full HD laptop",laptop,15.6,1920,1080
-"Typical 14"" Full HD laptop",laptop,14,1920,1080
-"Typical 11.6"" Chromebook",laptop,11.6,1366,768
-"21.5"" Full HD monitor",monitor,21.5,1920,1080
-"24"" Full HD monitor",monitor,23.8,1920,1080
-"24"" QHD 1440p monitor",monitor,23.8,2560,1440
-"24"" 4K monitor",monitor,23.8,3840,2160
-"27"" Full HD monitor",monitor,27,1920,1080
-"27"" QHD 1440p monitor",monitor,27,2560,1440
-"27"" 4K monitor",monitor,27,3840,2160
-iMac 24-inch (M1 to M4),monitor,23.5,4480,2520
-"27"" 5K (Apple Studio Display) monitor",monitor,27,5120,2880
-"32"" QHD 1440p monitor",monitor,31.5,2560,1440
-"32"" 4K monitor",monitor,31.5,3840,2160
-"32"" 6K (Pro Display XDR) monitor",monitor,32,6016,3384
-"29"" ultrawide 1080p monitor",monitor,29,2560,1080
-"34"" ultrawide 1080p monitor",monitor,34,2560,1080
-"34"" ultrawide 1440p monitor",monitor,34,3440,1440
-"38"" ultrawide monitor",monitor,37.5,3840,1600
-"40"" ultrawide 5K2K monitor",monitor,39.7,5120,2160
-"45"" ultrawide 1440p monitor",monitor,44.5,3440,1440
-"49"" super ultrawide monitor",monitor,49,5120,1440
-"42"" 4K OLED monitor",monitor,41.5,3840,2160
-"15.6"" portable monitor",monitor,15.6,1920,1080

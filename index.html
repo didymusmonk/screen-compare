@@ -1595,7 +1595,7 @@ function refTable(items, ref, mode, paper) {
   const details = {
     screen: " Native resolution is compared by total pixel count.",
     page: " Page visibility uses each screen’s selected fit.",
-    video: ` Picture dimensions and pixels use the ${S.video} preview ratio.`,
+    video: ` Picture dimensions and pixels use the ${(VIDEOS.find(v => v[0] === S.video) || VIDEOS[0])[0]} preview ratio.`,
     ebook: ` E-book values use ${REF_EBOOK_PT} pt (medium).${twoCol ? " Lines per screen count every column." : ""}`,
   };
   return `<p class="hint">Each percentage shows how much higher or lower a value is than on the reference screen. They describe size, not which is better.${details[mode] || ""}</p>

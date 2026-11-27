@@ -677,7 +677,7 @@ async function reference() {
     title: box.querySelector("h2").textContent,
     head: [...box.querySelectorAll("thead th")].slice(1).map(t => t.textContent),
     rows: [...box.querySelectorAll("tbody tr")].map(tr => ({
-      name: tr.querySelector(".rn").firstChild.textContent, ref: tr.classList.contains("is-ref"),
+      name: tr.querySelector(".rn").firstChild.textContent, orientation: tr.querySelector(".ref-orientation").textContent, ref: tr.classList.contains("is-ref"),
       color: getComputedStyle(tr.querySelector(".swatch")).color,
       cells: [...tr.querySelectorAll("td")].map(td => [td.querySelector(".rv").textContent, (td.querySelector(".rd") || { textContent: "" }).textContent]),
     })),
@@ -690,7 +690,7 @@ async function reference() {
   let t = await table();
   check("setting Test 13 as the reference marks its card and shows the table", (await refCards()).join() === "Test 13" && t && t.title === "Compared with Test 13" && (await p.textContent('#cards [data-act="ref"][data-i="0"]')) === "Clear reference");
   check("screen mode includes native resolution and aspect ratio", t.head.join("|") === "Width|Height|Diagonal|Area|PPI|Megapixels|Native resolution|Aspect ratio", t.head.join("|"));
-  check("rows follow the card order and the reference row says so", t.rows.map(r => r.name).join() === "Test 13,Big 26,Low 13,Shape only" && t.rows[0].ref && t.rows.filter(r => r.ref).length === 1);
+  check("rows follow the card order, show orientation and identify the reference", t.rows.map(r => r.name).join() === "Test 13,Big 26,Low 13,Shape only" && t.rows[0].ref && t.rows.filter(r => r.ref).length === 1 && t.rows.every(r => r.orientation === "Portrait"));
   const cardColors = await p.$$eval("#cards .card", cs => cs.map(c => getComputedStyle(c).color));
   check("each row uses its screen's color", t.rows.every((r, k) => r.color === cardColors[k]) && new Set(cardColors).size === 4, JSON.stringify(t.rows.map(r => r.color)));
   check("the reference row is the baseline", t.rows[0].cells.every(c => c[1] === "baseline") && t.rows[0].cells[0][0] === "5.00″");
@@ -724,7 +724,7 @@ async function reference() {
   // The table follows every change at once
   await cardBtn(p, 1, "orient", "landscape");
   t = await table();
-  check("turning a screen updates its row (Big 26 landscape: 24.00″ wide, +380%)", JSON.stringify(t.rows[1].cells[0]) === JSON.stringify(["24.00″", "+380%"]), JSON.stringify(t.rows[1].cells[0]));
+  check("turning a screen updates its row (Big 26 landscape: 24.00″ wide, +380%)", t.rows[1].orientation === "Landscape" && t.rows[0].orientation === "Portrait" && JSON.stringify(t.rows[1].cells[0]) === JSON.stringify(["24.00″", "+380%"]), JSON.stringify(t.rows[1].cells[0]));
   await cardBtn(p, 1, "orient", "portrait");
   await click(p, '#units button[data-v="cm"]');
   t = await table();
@@ -732,7 +732,7 @@ async function reference() {
   await click(p, '#units button[data-v="in"]');
   const modes = {
     page: "12 pt text · Fit page|12 pt text · Fit width|Page visible at once",
-    video: "Picture diagonal|Picture area|Picture pixels|Screen used · 16:9|Screen used · 2.39:1|Screen used · 4:3|Screen used · 9:16",
+    video: "Screen used · 16:9|Screen used · 2.39:1|Screen used · 4:3|Screen used · 9:16",
     ebook: "Words per screen|Characters per line|Lines per screen|Columns",
     site: "Browser width (CSS px)|Browser height (CSS px)|Estimated display scaling|16 CSS px body text|Layout",
   };
@@ -754,20 +754,19 @@ async function reference() {
     const cs = await cards(p);
     let same;
     if (m === "page") same = t.rows.every((r, k) => r.cells[0][0] === cs[k]["12 pt text looks like"] && r.cells[2][0] === cs[k]["Page visible at once"]);
-    if (m === "video") same = t.rows.every((r, k) => r.cells[0][0] === cs[k]["Picture diagonal"] && r.cells[1][0] === cs[k]["Picture area"] && r.cells[2][0] === (cs[k]["Picture pixels"] || "–"));
+    if (m === "video") same = t.rows.every((r, k) => r.cells[0][0] + " of screen" === cs[k]["Picture uses"]);
     if (m === "ebook") same = t.rows.every((r, k) => "about " + r.cells[0][0] === cs[k]["Words per screen"] && "about " + r.cells[1][0] === cs[k]["Characters per line"] && r.cells[2][0] === cs[k]["Lines per screen"] && r.cells[3][0] === cs[k]["Columns"]);
     if (m === "site") same = t.rows.every((r, k) => cs[k]["Browser width"] ? `${r.cells[0][0]} × ${r.cells[1][0]} CSS px` === cs[k]["Browser width"] && cs[k]["Display scaling"].startsWith(r.cells[2][0] + " ") && cs[k]["16 px body text"] === "looks like " + r.cells[3][0] + " print" && r.cells[4][0] === cs[k]["Layout"] && r.cells[4][1] === "" : r.cells.every(c => c[0] === "–"));
     check(`${m} mode: its own columns, same numbers as the cards`, t.head.join("|") === head && same && JSON.stringify(t) === JSON.stringify(tabTables[m]), t.head.join("|") + " " + JSON.stringify(t.rows.map(r => r.cells)));
   }
   await click(p, '#content button[data-v="video"]');
   t = await table();
-  check("video coverage compares four fixed ratios on the upright 5 × 12 in screen", JSON.stringify(t.rows[0].cells.slice(3).map(c => c[0])) === JSON.stringify(["23%", "17%", "31%", "74%"]) && t.rows[1].cells.slice(3).every(c => c[1] === "0%") && t.rows[3].cells.slice(3).every(c => c[0] !== "–"));
+  check("video coverage compares four fixed ratios on the upright 5 × 12 in screen", JSON.stringify(t.rows[0].cells.map(c => c[0])) === JSON.stringify(["23%", "17%", "31%", "74%"]) && t.rows[1].cells.every(c => c[1] === "0%") && t.rows[3].cells.every(c => c[0] !== "–"));
+  const pictureArea = (await cards(p))[0]["Picture area"];
   await p.selectOption("#video", "4:3");
   const otherVideo = await table();
-  check("the preview changes picture dimensions while fixed coverage stays the same", otherVideo.rows[0].cells[1][0] !== t.rows[0].cells[1][0] && JSON.stringify(otherVideo.rows.map(r => r.cells.slice(3))) === JSON.stringify(t.rows.map(r => r.cells.slice(3))));
+  check("the preview changes the cards' picture dimensions while the Video table stays the same", (await cards(p))[0]["Picture area"] !== pictureArea && JSON.stringify(otherVideo) === JSON.stringify(t));
   await p.selectOption("#video", "16:9");
-  // 16:9 on 5 × 12 in: 5 × 2.8125 in picture, 500 × 281 pixels; on 10 × 24 in: 1000 × 563 (4.007× as many)
-  check("video: twice the picture diagonal (+100%), four times the area (+300%), +301% pixels; Low 13 −75%; no pixel count gives a dash", JSON.stringify(t.rows[1].cells.slice(0, 3).map(c => c[1])) === JSON.stringify(["+100%", "+300%", "+301%"]) && t.rows[2].cells[2][1] === "−75%" && t.rows[3].cells[2][0] === "–", JSON.stringify(t.rows.map(r => r.cells)));
   await click(p, '#content button[data-v="ebook"]');
   await cardBtn(p, 1, "cols", "2");
   t = await table();

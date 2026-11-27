@@ -1491,9 +1491,6 @@ const REF_COLS = {
     ["Page visible at once", st => st.page && st.page.shown, st => Math.round(st.page.shown * 100) + "%"],
   ]],
   video: ["Video", [
-    ["Picture diagonal", st => st.video && st.video.diag, st => fmtLen(st.video.diag)],
-    ["Picture area", st => st.video && st.video.area, st => areaTxt(st.video.area)],
-    ["Picture pixels", st => st.video && st.video.px, st => `${st.video.pxW} × ${st.video.pxH}`],
     ...["16:9", "2.39:1", "4:3", "9:16"].map(ratio => [
       `Screen used · ${ratio}`, st => st.video && videoFit(st.g, ratio).used,
       (_, used) => Math.round(used * 100) + "%",
@@ -1589,13 +1586,12 @@ function refTable(items, ref, mode, paper) {
       const d = me ? `<span class="rd">baseline</span>` : p == null ? `<span class="rd" title="No reference value to compare with">–</span>` : `<span class="rd${signClass}">${pct}</span>`;
       return `<td><span class="rv">${c[2](x.st, v)}</span>${d}</td>`;
     }).join("");
-    return `<tr${me ? ` class="is-ref"` : ""}><th scope="row"><span class="swatch" style="color:var(${x.color})" aria-hidden="true"></span><span class="rn">${esc(x.dev.n)}${me ? `<small>Reference</small>` : ""}</span></th>${cells}</tr>`;
+    return `<tr${me ? ` class="is-ref"` : ""}><th scope="row"><span class="swatch" style="color:var(${x.color})" aria-hidden="true"></span><span class="rn">${esc(x.dev.n)}<small><span class="ref-orientation">${isPortrait(x.s) ? "Portrait" : "Landscape"}</span>${me ? " · Reference" : ""}</small></span></th>${cells}</tr>`;
   }).join("");
   const twoCol = mode === "ebook" && items.some(x => x.st.ebook && x.st.ebook.e.cols > 1);
   const details = {
     screen: " Native resolution is compared by total pixel count.",
     page: " Page visibility uses each screen’s selected fit.",
-    video: ` Picture dimensions and pixels use the ${(VIDEOS.find(v => v[0] === S.video) || VIDEOS[0])[0]} preview ratio.`,
     ebook: ` E-book values use ${REF_EBOOK_PT} pt (medium).${twoCol ? " Lines per screen count every column." : ""}`,
   };
   return `<p class="hint">Each percentage shows how much higher or lower a value is than on the reference screen. They describe size, not which is better.${details[mode] || ""}</p>

@@ -838,7 +838,7 @@ async function reference() {
   while ((await p.locator("#cards .card").count()) > 2) await cardBtn(p, 2, "remove");
   await cardBtn(p, 0, "ref");
   await cardBtn(p, 1, "remove");
-  check("with only the reference left, the card stays marked and the table hides", (await refCards()).length === 1 && !(await panel()));
+  check("with only the reference left, the card stays marked and the table and shortcut hide", (await refCards()).length === 1 && !(await panel()) && !await p.getByRole("button", { name: "View comparison" }).isVisible());
   await p.fill("#q", "Twin 13"); await p.locator("#results .res").first().click(); await p.fill("#q", "");
   check("adding another screen brings the table back", await panel() && (await table()).rows.length === 2);
   await click(p, "#reset-btn");
@@ -861,6 +861,32 @@ async function reference() {
     const o = await open({ state });
     check(`saved settings with ${what}: no reference, no errors`, (await o.p.locator("#cards .card.is-ref").count()) === 0 && await o.p.$eval("#ref-panel", e => e.hidden) && o.p.errors.length === 0, o.p.errors.join(" | "));
     await o.ctx.close();
+  }
+  for (const [width, ids] of [[320, ["c-tri", "c-shape"]], [390, ["c-tri", "c-big", "c-low", "c-shape"]]]) {
+    const phone = devices["iPhone 13"];
+    const { ctx: mobile, p: page } = await open({
+      custom, state: { sel: sel(...ids), content: "none" },
+      ctxOptions: { ...phone, viewport: { ...phone.viewport, width }, screen: { ...phone.screen, width } },
+    });
+    const refButton = page.locator('#cards [data-act="ref"]').first();
+    await refButton.scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => scrollY);
+    await refButton.click();
+    const shortcut = page.getByRole("button", { name: "View comparison" });
+    check(`${width} px: reference confirmation appears without scrolling`, await page.getByText("Reference selected", { exact: true }).isVisible() && await shortcut.isVisible() && Math.abs(await page.evaluate(() => scrollY) - before) <= 1);
+    await refButton.press("Tab");
+    check(`${width} px: Tab reaches View comparison`, await shortcut.evaluate(b => b === document.activeElement));
+    await shortcut.press("Enter");
+    const heading = await page.locator("#ref-title").evaluate(h => ({ focused: document.activeElement === h, top: h.getBoundingClientRect().top, bar: document.querySelector("#quickbar").getBoundingClientRect().bottom, viewport: innerHeight }));
+    check(`${width} px: shortcut focuses the heading below the quick controls`, heading.focused && heading.top >= heading.bar && heading.top < heading.viewport, JSON.stringify(heading));
+    const overflow = page.getByText("Scroll sideways to see more columns.");
+    await overflow.waitFor();
+    const table = await page.locator(".ref-scroll").evaluate(el => {
+      el.scrollLeft = el.scrollWidth;
+      return { rows: el.querySelectorAll("tbody tr").length, missing: !!el.querySelector("td .sr-only"), scroll: el.scrollLeft, pageOverflow: document.documentElement.scrollWidth - innerWidth };
+    });
+    check(`${width} px: ${ids.length} rows, including unavailable values, scroll inside the table`, await overflow.isVisible() && table.rows === ids.length && table.missing && table.scroll > 0 && table.pageOverflow <= 0, JSON.stringify(table));
+    await mobile.close();
   }
   // On an iPhone: the table scrolls inside its box, never the page
   const ph = await open({ custom, state: { sel: sel("c-tri", "c-big", "c-low", "c-shape"), content: "none", ref: "t0" }, ctxOptions: { ...devices["iPhone 13"] } });

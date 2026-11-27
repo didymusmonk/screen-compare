@@ -220,6 +220,8 @@ dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-num
 .card.is-ref.lit { box-shadow: inset 4px 0 0 currentColor, 0 0 0 2px currentColor; }
 .ref-tag { color: var(--fg); font-weight: 600; }
 .ref-panel { gap: 8px; }
+.ref-confirmation { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; }
+@media (max-width: 700px) { .ref-confirmation button { min-height: 44px; } }
 .ref-tabs { justify-self: start; }
 .ref-panel [role="tabpanel"] { min-width: 0; }
 .ref-tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
@@ -1475,6 +1477,7 @@ function renderCards() {
         <button class="icon-btn" data-act="remove" data-i="${x.i}" title="Remove" aria-label="Remove ${esc(x.dev.n)}">✕</button>
       </div>
       <div class="card-ctrl"><span class="seg mini" role="group" aria-label="Orientation"><button data-act="orient" data-v="portrait" data-i="${x.i}" aria-pressed="${isPortrait(x.s)}">Portrait</button><button data-act="orient" data-v="landscape" data-i="${x.i}" aria-pressed="${!isPortrait(x.s)}">Landscape</button></span><button class="ref-btn" data-act="ref" data-i="${x.i}" aria-label="${isRef ? `Clear ${esc(x.dev.n)} as the reference` : `Set ${esc(x.dev.n)} as the reference`}">${isRef ? "Clear reference" : "Set as reference"}</button></div>
+      ${isRef ? `<div class="hint ref-confirmation"><span>Reference selected</span><button class="linkish" type="button" data-view-comparison hidden>View comparison</button></div>` : ""}
       <div class="ppi-big" style="color:var(--fg)">${x.dev.sheet ? `<b>${fmtLen(g.w)} × ${fmtLen(g.h)}</b>` : ppi ? `<b>${Math.round(ppi)}</b><span>pixels per inch (PPI)</span>` : `<b>–</b><span>PPI unknown, add the pixel count</span>`}</div>
       <dl style="color:var(--fg)">
         ${x.dev.sheet ? "" : `<dt>Diagonal</dt>`}<dd ${x.dev.sheet ? "hidden" : ""}>${diagTxt(x.dev.d)}</dd>
@@ -1545,8 +1548,15 @@ function fmtPct(p) {
 }
 // This selection belongs to the visible reference panel, so saved comparisons still open on the preview mode.
 let refTab;
+const refOverflow = new ResizeObserver(() => {
+  const scroll = $("#ref-panel .ref-scroll");
+  if (scroll) $("#ref-overflow").hidden = scroll.scrollWidth <= scroll.clientWidth;
+});
 function renderRef(items, previewPaper) {
   const box = $("#ref-panel"), ref = items.find(x => x.s.uid === S.ref);
+  refOverflow.disconnect();
+  const shortcut = $("#cards [data-view-comparison]");
+  if (shortcut) shortcut.hidden = true;
   box.hidden = !ref || items.length < 2;
   if (box.hidden) { refTab = null; box.innerHTML = ""; box.onclick = box.onkeydown = null; return; }
   if (refTab?.preview !== S.content || refTab?.reference !== S.ref) refTab = null;
@@ -1559,9 +1569,15 @@ function renderRef(items, previewPaper) {
   const comparisonRef = comparison.find(x => x.s.uid === S.ref);
   const tabs = modes.map(key => `<button type="button" role="tab" id="ref-tab-${key}" data-ref-tab="${key}" aria-controls="ref-view-${key}" aria-selected="${key === mode}" tabindex="${key === mode ? 0 : -1}">${REF_COLS[key][0]}</button>`).join("");
   const panels = modes.map(key => `<div role="tabpanel" id="ref-view-${key}" aria-labelledby="ref-tab-${key}"${key === mode ? "" : " hidden"}>${key === mode ? refTable(comparison, comparisonRef, mode, paper) : ""}</div>`).join("");
-  box.innerHTML = `<span class="eyebrow">Reference comparison</span><h2 id="ref-title">Compared with ${esc(ref.dev.n)}</h2>
+  box.innerHTML = `<span class="eyebrow">Reference comparison</span><h2 id="ref-title" tabindex="-1">Compared with ${esc(ref.dev.n)}</h2>
     <div class="seg ref-tabs" role="tablist" aria-label="Reference comparison modes">${tabs}</div>
     ${panels}`;
+  const scroll = $(".ref-scroll");
+  if (scroll) {
+    if (shortcut) shortcut.hidden = false;
+    refOverflow.observe(scroll);
+    refOverflow.observe(scroll.firstElementChild);
+  }
   if (focusedTab) $(`#ref-tab-${mode}`).focus({ preventScroll: true });
   const selectTab = key => {
     if (key !== mode) {
@@ -1620,6 +1636,7 @@ function refTable(items, ref, mode, paper) {
     ebook: ` E-book values use ${REF_EBOOK_PT} pt (medium).${twoCol ? " Lines per screen count every column." : ""}`,
   };
   return `<p class="hint">Signed percentages show the relative change from the reference screen. For example, +100% means twice the reference value.${details[mode] || ""}</p>
+    <p class="hint" id="ref-overflow" hidden>Scroll sideways to see more columns.</p>
     <div class="ref-scroll" role="region" aria-labelledby="ref-title" tabindex="0"><table class="ref-table">
       <caption class="sr-only">${title} of each screen, with the difference from ${esc(ref.dev.n)} in percent</caption>
       <thead><tr><th scope="col">Screen</th>${head}</tr></thead><tbody>${rows}</tbody>
@@ -1700,6 +1717,13 @@ $("#results").addEventListener("click", e => {
   const again = document.querySelector(`#results .res[data-id="${CSS.escape(id)}"]`); if (again) again.focus({ preventScroll: true });
 });
 $("#cards").addEventListener("click", e => {
+  if (e.target.closest("[data-view-comparison]")) {
+    const heading = $("#ref-title");
+    heading.style.scrollMarginTop = `${$("#quickbar").offsetHeight + 12}px`;
+    heading.focus({ preventScroll: true });
+    heading.scrollIntoView({ block: "start" });
+    return;
+  }
   const b = e.target.closest("[data-act]"); if (!b) return;
   const i = +b.dataset.i;
   const act = b.dataset.act;

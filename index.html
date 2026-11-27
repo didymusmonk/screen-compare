@@ -42,7 +42,7 @@
   --accent: #1f5fd1;
   --accent-ink: #ffffff;
   --paper: #ffffff;
-  --paper-text: #9aa6b4;
+  --paper-text: #9aa6b4; --paper-ink: #252c35;
   --paper-edge: #8794a3;
   --c1: #1f5fd1; --c2: #ba3d28; --c3: #11784f; --c4: #985916;
   --c5: #7b45c7; --c6: #0a7184; --c7: #b6367e; --c8: #59651f;
@@ -164,6 +164,7 @@ details[open] > summary { margin-bottom: 12px; }
 .stage-foot { padding: 10px 16px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; font-size: 12.5px; color: var(--muted); }
 .stage-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); padding: 24px; text-align: center; }
 svg text { font-family: var(--font-mono); }
+svg .prose text { font-family: Georgia, "Iowan Old Style", "Times New Roman", serif; }
 .zoom { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .zoom input { width: 140px; }
 .arr-help { margin: 0; padding: 8px 16px; font-size: 12.5px; color: var(--muted); border-bottom: 1px solid var(--line); }
@@ -858,6 +859,54 @@ $("#zoom").addEventListener("input", e => {
   document.querySelectorAll("#scaleMode button").forEach(b => b.setAttribute("aria-pressed", "false"));
   renderStage();
 });
+// ---------- Sample text ----------
+// Lorem ipsum laid out line by line at the real font size. Below about 3.5 screen pixels per letter it can't be read,
+// so the previews draw simple bars instead (and the page stays fast with many screens).
+const LOREM = ("lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua " +
+  "ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor " +
+  "in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident " +
+  "sunt in culpa qui officia deserunt mollit anim id est laborum").split(" ");
+const TEXT_MIN_PX = 3.5;
+// average letter width of the serif font this browser actually has, as a share of the font size (Georgia is about 0.5)
+const PROSE_EM = (() => {
+  try {
+    const c = document.createElement("canvas").getContext("2d"); c.font = `100px Georgia, "Iowan Old Style", "Times New Roman", serif`;
+    const t = LOREM.slice(0, 40).join(" "); const v = c.measureText(t).width / t.length / 100;
+    return v > 0.3 && v < 0.8 ? v * 1.03 : 0.53;
+  } catch { return 0.53; }
+})();
+function lorem(seed) {
+  let k = seed, words = 0, cap = true, buf = null;
+  const make = () => {
+    let w = LOREM[k++ % LOREM.length];
+    if (cap) { w = w[0].toUpperCase() + w.slice(1); cap = false; }
+    words++;
+    if ((words > 7 && k % 5 === 0) || words > 15) { w += "."; words = 0; cap = true; }
+    else if (words > 3 && k % 11 === 0) w += ",";
+    return w;
+  };
+  return {
+    line(cpl) { // as many words as fit in about cpl characters
+      const out = []; let len = 0;
+      for (;;) {
+        if (!buf) buf = make();
+        const add = buf.length + (out.length ? 1 : 0);
+        if (out.length && len + add > cpl) break;
+        out.push(buf); len += add; buf = null;
+        if (len >= cpl) break;
+      }
+      return { text: out.join(" "), len };
+    },
+    newPara() { if (buf) buf = buf[0].toUpperCase() + buf.slice(1); else cap = true; words = 0; },
+  };
+}
+// one line of text, left-aligned. (Stretching lines to full width with textLength looked nicer but made redraws ten times slower.)
+function textLine(x, y, w, fontPx, src, cpl, justify) {
+  let { text, len } = src.line(cpl);
+  if (!justify && text && !text.endsWith(".")) text = text.replace(/,$/, "") + "."; // a paragraph ends with a full stop
+  return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="${fontPx.toFixed(2)}">${text}</text>`;
+}
+
 function drawPage(x, r, s, paper0, i, col) {
   const spread = !!x.s.spread;
   const paper = spreadOf(x.s, paper0);
@@ -880,7 +929,18 @@ function drawPage(x, r, s, paper0, i, col) {
       // 12 pt body text with 1 inch margins, drawn to scale (line pitch 14.4 pt)
       const m = Math.min(1, paper0.w * 0.12) * k * s, lh = (14.4 / 72) * k * s, th = (7 / 72) * k * s;
       const lines = Math.floor((ph - 2 * m) / lh);
-      if (lh > 1.2) {
+      const fpx = (12 / 72) * k * s, tw = one - 2 * m;
+      if (fpx >= TEXT_MIN_PX && tw > fpx * 8) {
+        const cpl = Math.floor(tw / (fpx * PROSE_EM)), src = lorem(i * 31 + n * 97);
+        g += `<g class="prose" fill="var(--paper-ink)">`;
+        if (n === 0) g += `<text x="${(qx + m).toFixed(1)}" y="${(py + m + fpx * 1.6).toFixed(1)}" font-size="${(fpx * 1.6).toFixed(2)}" font-weight="700">Lorem ipsum dolor sit amet</text>`;
+        for (let l = n === 0 ? 2 : 0; l < lines; l++) {
+          const q = (l + n * 4) % 9;
+          if (q === 1) { src.newPara(); continue; } // paragraph break
+          g += textLine(qx + m, py + m + l * lh + lh * 0.78, tw, fpx, src, q === 0 ? Math.round(cpl * 0.62) : cpl, q !== 0);
+        }
+        g += `</g>`;
+      } else if (lh > 1.2) {
         if (n === 0) g += `<rect x="${qx + m}" y="${py + m}" width="${(one - 2 * m) * 0.55}" height="${th * 2}" fill="var(--paper-edge)" opacity="0.7"/>`;
         for (let l = n === 0 ? 2 : 0; l < lines; l++) {
           if ((l + n * 4) % 9 === 1) continue; // paragraph break
@@ -907,7 +967,20 @@ function drawVideo(x, r, s, i) {
 function drawEbook(x, r, s, i) {
   const e = ebookFit(x.g, colsOf(x.s)), m = EBOOK_MARGIN * s, lh = e.lh * s, th = Math.max(0.6, e.em * 0.5 * s), tw = e.tw * s;
   let g = `<g clip-path="url(#clip${i})"><rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="var(--paper)"/>`;
-  if (lh >= 1.5) for (let c = 0; c < e.cols; c++) {
+  const fpx = e.em * s;
+  if (fpx >= TEXT_MIN_PX) {
+    const src = lorem(i * 37);
+    g += `<g class="prose" fill="var(--paper-ink)">`;
+    for (let c = 0; c < e.cols; c++) {
+      const cx = r.x + m + c * (tw + EBOOK_GAP * s);
+      for (let l = 0; l < e.lines; l++) {
+        const L = l + c * e.lines, para = L % 8, indent = para === 0 ? fpx * 1.5 : 0;
+        if (para === 0) src.newPara();
+        g += textLine(cx + indent, r.y + m + l * lh + lh * 0.72, tw - indent, fpx, src, Math.floor((tw - indent) / (fpx * PROSE_EM)) - (para === 7 ? Math.floor(e.cpl * 0.5) : 0), para !== 7);
+      }
+    }
+    g += `</g>`;
+  } else if (lh >= 1.5) for (let c = 0; c < e.cols; c++) {
     const cx = r.x + m + c * (tw + EBOOK_GAP * s);
     for (let l = 0; l < e.lines; l++) {
       const L = l + c * e.lines;

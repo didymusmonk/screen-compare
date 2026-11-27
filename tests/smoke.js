@@ -219,6 +219,7 @@ async function run(browser, base, label, ctxOptions) {
   await p.locator('#cards [data-act="ref"][data-i="0"]').click();
   const rows = await p.locator("#ref-panel tbody tr").count();
   check("no reference until chosen; Set as reference shows the comparison table", noRef && await refShown() && rows === await cardCount(p) && (await p.locator("#cards .card.is-ref").count()) === 1, `${noRef}, ${rows} rows`);
+  check("the reference table offers all five comparison tabs", await p.getByRole("tablist", { name: "Reference comparison modes" }).getByRole("tab").count() === 5);
 
   if (phone) {
     const overflow = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);

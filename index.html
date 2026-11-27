@@ -213,6 +213,12 @@ dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-num
 .card.is-ref.lit { box-shadow: inset 4px 0 0 currentColor, 0 0 0 2px currentColor; }
 .ref-tag { color: var(--fg); font-weight: 600; }
 .ref-panel { gap: 8px; }
+.ref-tabs { justify-self: start; }
+.ref-panel [role="tabpanel"] { min-width: 0; }
+.ref-tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.ref-tabs button:focus-visible { outline-offset: -3px; }
+.ref-tabs button[aria-selected="true"]:focus-visible { outline-color: var(--accent-ink); }
+@media (max-width: 700px) { .ref-tabs.seg button { min-height: 44px; } }
 .ref-scroll { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
 .ref-table { border-collapse: collapse; font-size: 13px; }
 .ref-table th, .ref-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
@@ -614,8 +620,8 @@ function aspectLabel(a, b) {
   return `${r.toFixed(2)}:1`;
 }
 const fmtLen = (inch, dp = 2) => S.units === "cm" ? `${(inch * 2.54).toFixed(dp === 2 ? 1 : dp)} cm` : `${inch.toFixed(dp)}″`;
-const paperDims = () => {
-  if (S.content !== "page" || S.paper === "none") return null;
+const paperDims = (content = S.content) => {
+  if (content !== "page" || S.paper === "none") return null;
   if (S.paper === "upload") {
     if (!pdf.img) return null;
     const c = cropOf(), name = pdf.name || "Your PDF";
@@ -1356,7 +1362,7 @@ const trunc = (t, n) => t.length > n ? t.slice(0, n - 1) + "…" : t;
 // ---------- Cards ----------
 // The numbers behind one card, for the content shown now. The reference table reads the same numbers,
 // so the two can never disagree. Paper sheets get only their size.
-function statsOf(s, dev, paper) {
+function statsOf(s, dev, paper, content = S.content) {
   const g = geom(dev, s.flip), ppi = g.ppi;
   // megapixels come from the native pixel count, so turning the screen, zoom, calibration and display scaling can't change them
   const st = { g, ppi, area: g.area, diag: dev.sheet ? null : dev.d, mp: dev.sheet || dev.aspectOnly ? null : dev.w * dev.h / 1e6 };
@@ -1364,13 +1370,13 @@ function statsOf(s, dev, paper) {
   if (paper) {
     const fit = fitOf(s), f = pageFit(g, spreadOf(s, paper), fit);
     st.page = { fit, f, pt: 12 * f.k, eff: ppi ? ppi * f.k : null, shown: f.shown };
-  } else if (S.content === "video") {
+  } else if (content === "video") {
     const v = videoFit(g), pxW = ppi ? Math.round(v.vw * ppi) : null, pxH = ppi ? Math.round(v.vh * ppi) : null;
     st.video = { v, diag: Math.hypot(v.vw, v.vh), area: v.vw * v.vh, pxW, pxH, px: ppi ? pxW * pxH : null };
-  } else if (S.content === "ebook") {
+  } else if (content === "ebook") {
     const cm = colsOf(s), e = ebookFit(g, cm);
     st.ebook = { cm, e, lines: e.lines * e.cols };
-  } else if (S.content === "site") st.site = siteView(dev, g);
+  } else if (content === "site") st.site = siteView(dev, g);
   return st;
 }
 const areaTxt = a => S.units === "cm" ? `${(a * 6.4516).toFixed(0)} cm²` : `${a.toFixed(1)} sq in`;
@@ -1460,7 +1466,7 @@ function renderCards() {
       ${pdfHtml ? `<div style="color:var(--fg)">${pdfHtml}</div>` : ""}
     </article>`;
   }).join("");
-  renderRef(items);
+  renderRef(items, paper);
 }
 
 // ---------- Reference table ----------
@@ -1507,15 +1513,52 @@ function fmtPct(p) {
   const n = Math.round(p);
   return n === 0 ? "0%" : (n > 0 ? "+" : "−") + Math.abs(n).toLocaleString() + "%";
 }
-function refMode() {
-  if (S.content === "page") return paperDims() ? "page" : "screen";
-  return REF_COLS[S.content] ? S.content : "screen";
-}
-function renderRef(items) {
+// This selection belongs to the visible reference panel, so saved comparisons still open on the preview mode.
+let refTab;
+function renderRef(items, previewPaper) {
   const box = $("#ref-panel"), ref = items.find(x => x.s.uid === S.ref);
   box.hidden = !ref || items.length < 2;
-  if (box.hidden) { box.innerHTML = ""; return; }
-  const [title, cols] = REF_COLS[refMode()];
+  if (box.hidden) { refTab = null; box.innerHTML = ""; box.onclick = box.onkeydown = null; return; }
+  if (refTab?.preview !== S.content || refTab?.reference !== S.ref) refTab = null;
+  const mode = refTab?.mode || (Object.hasOwn(REF_COLS, S.content) ? S.content : "screen");
+  const modes = Object.keys(REF_COLS);
+  const focusedTab = box.contains(document.activeElement) && document.activeElement.dataset.refTab;
+  const paper = mode === S.content ? previewPaper : paperDims(mode);
+  const comparison = mode === S.content || mode === "screen"
+    ? items : items.map(x => ({ ...x, st: statsOf(x.s, x.dev, paper, mode) }));
+  const comparisonRef = comparison.find(x => x.s.uid === S.ref);
+  const tabs = modes.map(key => `<button type="button" role="tab" id="ref-tab-${key}" data-ref-tab="${key}" aria-controls="ref-view-${key}" aria-selected="${key === mode}" tabindex="${key === mode ? 0 : -1}">${REF_COLS[key][0]}</button>`).join("");
+  const panels = modes.map(key => `<div role="tabpanel" id="ref-view-${key}" aria-labelledby="ref-tab-${key}"${key === mode ? "" : " hidden"}>${key === mode ? refTable(comparison, comparisonRef, mode, paper) : ""}</div>`).join("");
+  box.innerHTML = `<span class="eyebrow">Reference comparison</span><h2 id="ref-title">Compared with ${esc(ref.dev.n)}</h2>
+    <div class="seg ref-tabs" role="tablist" aria-label="Reference comparison modes">${tabs}</div>
+    ${panels}`;
+  if (focusedTab) $(`#ref-tab-${mode}`).focus({ preventScroll: true });
+  const selectTab = key => {
+    if (key !== mode) {
+      refTab = { mode: key, preview: S.content, reference: S.ref };
+      renderRef(items, previewPaper);
+    }
+    $(`#ref-tab-${key}`).focus({ preventScroll: true });
+  };
+  box.onclick = e => {
+    const tab = e.target.closest("[data-ref-tab]");
+    if (tab) selectTab(tab.dataset.refTab);
+  };
+  box.onkeydown = e => {
+    const index = modes.indexOf(e.target.dataset.refTab);
+    if (index < 0) return;
+    const next = { ArrowLeft: (index + modes.length - 1) % modes.length, ArrowRight: (index + 1) % modes.length, Home: 0, End: modes.length - 1 };
+    if (!Object.hasOwn(next, e.key)) return;
+    e.preventDefault();
+    selectTab(modes[next[e.key]]);
+  };
+}
+function refTable(items, ref, mode, paper) {
+  if (mode === "page" && !paper) {
+    const message = S.paper === "upload" ? "Upload a PDF in the Pages preview to compare pages." : "Choose a page size in the Pages preview to compare pages.";
+    return `<p class="hint" tabindex="0">${message}</p>`;
+  }
+  const [title, cols] = REF_COLS[mode];
   const val = (c, st) => { const v = c[1](st); return typeof v === "number" && Number.isFinite(v) ? v : null; };
   const head = cols.map(c => `<th scope="col">${c[0]}</th>`).join("");
   const rows = items.map(x => {
@@ -1531,9 +1574,8 @@ function renderRef(items) {
     }).join("");
     return `<tr${me ? ` class="is-ref"` : ""}><th scope="row"><span class="swatch" style="color:var(${x.color})" aria-hidden="true"></span><span class="rn">${esc(x.dev.n)}${me ? `<small>Reference</small>` : ""}</span></th>${cells}</tr>`;
   }).join("");
-  const twoCol = refMode() === "ebook" && items.some(x => x.st.ebook && x.st.ebook.e.cols > 1);
-  box.innerHTML = `<span class="eyebrow">Reference comparison · ${title}</span><h2 id="ref-title">Compared with ${esc(ref.dev.n)}</h2>
-    <p class="hint">Each percentage shows how much higher or lower a value is than on the reference screen. They describe size, not which is better.${twoCol ? " Lines per screen count every column." : ""}</p>
+  const twoCol = mode === "ebook" && items.some(x => x.st.ebook && x.st.ebook.e.cols > 1);
+  return `<p class="hint">Each percentage shows how much higher or lower a value is than on the reference screen. They describe size, not which is better.${twoCol ? " Lines per screen count every column." : ""}</p>
     <div class="ref-scroll" role="region" aria-labelledby="ref-title" tabindex="0"><table class="ref-table">
       <caption class="sr-only">${title} of each screen, with the difference from ${esc(ref.dev.n)} in percent</caption>
       <thead><tr><th scope="col">Screen</th>${head}</tr></thead><tbody>${rows}</tbody>

@@ -735,6 +735,18 @@ async function reference() {
     ebook: "Words per screen|Characters per line|Lines per screen",
     site: "Browser width (CSS px)|Browser height (CSS px)|Browser area (CSS px²)",
   };
+  const tabs = p.getByRole("tablist", { name: "Reference comparison modes" });
+  const activeTab = () => tabs.getByRole("tab", { selected: true });
+  const previewCards = await cards(p);
+  check("all comparison tabs are available before visiting the preview modes", (await tabs.getByRole("tab").allTextContents()).join("|") === "Screen size|Pages|Video|E-book|Website" && await activeTab().textContent() === "Screen size");
+  const tabTables = {};
+  for (const m of Object.keys(modes)) {
+    await p.locator(`#ref-tab-${m}`).click();
+    tabTables[m] = await table();
+  }
+  check("opening comparison tabs leaves the preview and cards alone", await p.getAttribute('#content button[data-v="none"]', "aria-pressed") === "true" && JSON.stringify(await cards(p)) === JSON.stringify(previewCards));
+  await p.keyboard.press("ArrowRight");
+  check("the tabs wrap by keyboard and keep focus on the selected tab", await activeTab().textContent() === "Screen size" && await activeTab().evaluate(tab => tab === document.activeElement) && await p.getByRole("tabpanel").count() === 1);
   for (const [m, head] of Object.entries(modes)) {
     await click(p, `#content button[data-v="${m}"]`);
     t = await table();
@@ -744,7 +756,7 @@ async function reference() {
     if (m === "video") same = t.rows.every((r, k) => r.cells[0][0] === cs[k]["Picture diagonal"] && r.cells[1][0] === cs[k]["Picture area"] && r.cells[2][0] === (cs[k]["Picture pixels"] || "–"));
     if (m === "ebook") same = t.rows.every((r, k) => "about " + r.cells[0][0] === cs[k]["Words per screen"] && "about " + r.cells[1][0] === cs[k]["Characters per line"] && r.cells[2][0] === cs[k]["Lines per screen"]);
     if (m === "site") same = t.rows.every((r, k) => cs[k]["Browser width"] ? `${r.cells[0][0]} × ${r.cells[1][0]} CSS px` === cs[k]["Browser width"] : r.cells[0][0] === "–");
-    check(`${m} mode: its own columns, same numbers as the cards`, t.head.join("|") === head && same, t.head.join("|") + " " + JSON.stringify(t.rows.map(r => r.cells)));
+    check(`${m} mode: its own columns, same numbers as the cards`, t.head.join("|") === head && same && JSON.stringify(t) === JSON.stringify(tabTables[m]), t.head.join("|") + " " + JSON.stringify(t.rows.map(r => r.cells)));
   }
   await click(p, '#content button[data-v="video"]');
   t = await table();
@@ -760,7 +772,12 @@ async function reference() {
   check("changing the text size updates the table", t2.rows[0].cells[0][0] !== t.rows[0].cells[0][0]);
   await click(p, '#content button[data-v="page"]');
   await p.selectOption("#paper", "none");
-  check("Pages with no page chosen falls back to screen size", (await table()).head[0] === "Width");
+  check("Pages prompts for a page size and Screen size is still available", await activeTab().textContent() === "Pages" && /Choose a page size/.test(await p.getByRole("tabpanel").textContent()) && (await table()).head.length === 0);
+  await tabs.getByRole("tab", { name: "Screen size", exact: true }).click();
+  check("Screen size still works with no page chosen", (await table()).head[0] === "Width");
+  await p.selectOption("#paper", "upload");
+  await tabs.getByRole("tab", { name: "Pages", exact: true }).click();
+  check("Pages prompts for a PDF when no file is loaded", /Upload a PDF/.test(await p.getByRole("tabpanel").textContent()) && (await table()).head.length === 0);
   await p.selectOption("#paper", "us-letter-paper");
 
   // A paper sheet in the comparison has no screen numbers to compare

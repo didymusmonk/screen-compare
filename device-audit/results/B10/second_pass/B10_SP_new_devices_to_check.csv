@@ -1,0 +1,11 @@
+new_id,manufacturer,device_name,display_variant,category
+NEW-B10-01,Samsung,Galaxy Tab S10 Lite,standard,tablet
+NEW-B10-02,OnePlus,OnePlus Pad,standard,tablet
+NEW-B10-03,OnePlus,OnePlus Pad Go,standard,tablet
+NEW-B10-04,Xiaomi,Xiaomi Pad 6,standard,tablet
+NEW-B10-05,Xiaomi,Xiaomi Pad 6S Pro 12.4,standard,tablet
+NEW-B10-06,Xiaomi,Redmi Pad Pro,standard,tablet
+NEW-B10-07,Xiaomi,Redmi Pad SE,standard,tablet
+NEW-B10-08,Huawei,Huawei MatePad 11.5S,PaperMatte,tablet
+NEW-B10-09,Huawei,Huawei MatePad Pro 12.2,PaperMatte,tablet
+NEW-B10-10,Honor,Honor MagicPad 2,standard,tablet

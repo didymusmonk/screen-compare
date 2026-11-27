@@ -413,7 +413,7 @@ Paste the right card as the first message of each chat, after attaching the file
 ## C2. Second-pass verifier (the other model)
 
 > ROLE: SECOND-PASS VERIFIER for True Size Screens, batch `<B..>`-SP.
-> Follow MASTER_PROMPT.md (Parts A and B) and DATABASE_CONTRACT.md. The attached file lists rows chosen for independent verification. It shows only the original database values, not another researcher's conclusions. Research each row from scratch, as if no one had looked at it. Open and read every source. For each row, fill the same verification columns with `pass` set to `second_pass`. Return the three CSV files and a summary. Don't try to guess what an earlier researcher concluded.
+> Follow MASTER_PROMPT.md (Parts A and B) and DATABASE_CONTRACT.md. The attached `<B..>_SP_verification_results.csv` lists rows chosen for independent verification, and `<B..>_SP_new_devices_to_check.csv` lists proposed new devices by name only: research their specs and return them in a missing_devices file keeping the same new_id. It shows only the original database values, not another researcher's conclusions. Research each row from scratch, as if no one had looked at it. Open and read every source. For each row, fill the same verification columns with `pass` set to `second_pass`. Return `<B..>_SP_verification_results.csv`, `<B..>_SP_missing_devices.csv` and `<B..>_SP_unresolved_issues.csv` and a summary. For grouped rows, check every model and every display option sold under the name. Quote the source's own words in `evidence`. Don't try to guess what an earlier researcher concluded.
 
 ## C3. Adjudicator and integrator (Claude)
 

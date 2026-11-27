@@ -1455,7 +1455,7 @@ $("#cal-done").addEventListener("click", () => { $("#cal").hidden = true; S.scal
 
 // PDF upload (pdf.js runs in the page; nothing is uploaded anywhere)
 // The PDF reader (about 100 KB) loads only when someone opens a PDF.
-const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+const PDFJS = "pdfjs/"; // pdf.js 3.11.174, hosted in this repo (Apache-2.0)
 const loadScript = src => new Promise((res, rej) => {
   const sc = document.createElement("script");
   sc.src = src; sc.onload = res; sc.onerror = () => rej(new Error(src));
@@ -1463,7 +1463,7 @@ const loadScript = src => new Promise((res, rej) => {
 });
 let pdfjsReady = null;
 function loadPdfjs() {
-  if (!pdfjsReady) pdfjsReady = Promise.all([loadScript(PDFJS + "pdf.min.js"), loadScript(PDFJS + "pdf.worker.min.js")])
+  if (!pdfjsReady) pdfjsReady = loadScript(PDFJS + "pdf.min.js")
     .catch(e => { pdfjsReady = null; throw e; });
   return pdfjsReady;
 }

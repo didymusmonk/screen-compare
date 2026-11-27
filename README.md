@@ -8,7 +8,7 @@ Compare phone, tablet, laptop, tablet PC (including Surface Pro) and monitor scr
 - Side by side, overlay, or free arrange with drag, snapping guides and rotation
 - Calibrate "Actual size" with a bank card to see screens at real size on your monitor
 
-It's a single static `index.html` with no build step and no server. PDFs open in your browser and are never uploaded.
+It's a single static `index.html` with no build step and no server or outside services. PDFs open in your browser and are never uploaded.
 
 ## Adding or fixing a device
 
@@ -28,4 +28,4 @@ To edit it on GitHub, open `devices.csv`, click the pencil icon, make your chang
 
 ## License
 
-MIT License, © 2026 DidymusMonk. See [LICENSE](LICENSE). Product names are trademarks of their owners.
+MIT License, © 2026 DidymusMonk. See [LICENSE](LICENSE). The PDF preview uses [pdf.js](https://mozilla.github.io/pdf.js/) 3.11.174 by Mozilla, included in [`pdfjs/`](pdfjs/) under the Apache License 2.0 ([pdfjs/LICENSE](pdfjs/LICENSE)). Product names are trademarks of their owners.

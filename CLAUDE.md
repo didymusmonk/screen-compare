@@ -19,6 +19,7 @@ The site is static, with no build step, no framework, no backend and no npm depe
 | `devices.csv` | Built-in screens and paper sizes, loaded with `fetch()` at startup |
 | `manifest.webmanifest`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` | "Add to Home Screen" support |
 | `favicon.svg`, `og-image.png` | Tab icon and link-preview image |
+| `pdfjs/` | pdf.js 3.11.174 (`pdf.min.js`, `pdf.worker.min.js`, Apache-2.0 `LICENSE`), copied unchanged from the `pdfjs-dist` npm package |
 | `README.md`, `LICENSE` | Public description and the MIT license (© 2026 DidymusMonk) |
 
 Inside `index.html`, all state lives in one object, `S`, and is saved to `localStorage` under the `tss:` prefix. Every change calls `save()` and then `renderAll()`, which redraws the category list, search results, the SVG stage and the cards. Main functions:
@@ -31,14 +32,14 @@ Inside `index.html`, all state lives in one object, `S`, and is saved to `localS
 - `renderCards`: the info card for each selected screen.
 - `shareUrl` / `fromShare`: share links in the form `#s=<base64url JSON>`.
 - `myScreenMatches` / `setupMyPhone`: the "Compare with my screen" feature.
-- `loadPdfjs` / `openPdf`: the PDF preview. pdf.js 3.11.174 loads from cdnjs only when a PDF is opened.
+- `loadPdfjs` / `openPdf`: the PDF preview. `pdfjs/pdf.min.js` loads only when a PDF is opened, and the parsing runs in a background Web Worker (`pdfjs/pdf.worker.min.js`).
 
 ## Key decisions and why
 
 - **One file, no build.** The owner is new to coding and can edit it on GitHub directly. It also loads fast, at about 37 KB compressed per visit.
 - **Devices live in a CSV, not in the code.** This lets non-programmers add or fix a device on GitHub (the README explains how).
 - **Outlines show the screen area only, never the bezels.** The size comes from the diagonal and the pixel aspect ratio, because those are what spec sheets publish reliably.
-- **PDFs never leave the browser.** pdf.js renders them locally. It loads on demand because most visitors never open a PDF, and it is the biggest download (about 100 KB).
+- **PDFs never leave the browser.** pdf.js renders them locally. It loads on demand because most visitors never open a PDF, and it is the biggest download (about 90 KB plus a 290 KB worker, compressed). It is hosted in the repo, not on a CDN, so the site depends on no outside service.
 - **The website previews are generic and unbranded** (news, search, social, shop, wiki) to avoid trademark trouble and to stay original.
 - **The default first visit shows only two screens:** iPad mini (A20 Pro) and iPad Pro 11" (M5), both portrait, with a Letter page fit. A short page suits phone visitors.
 - **Lorem text is drawn as real SVG `<text>`, ragged right.** `textLength` justification made redraws about 10× slower. `PROSE_EM` measures the browser's real serif width so that lines wrap correctly. Below 3.5 px, the text turns into gray bars.
@@ -47,6 +48,7 @@ Inside `index.html`, all state lives in one object, `S`, and is saved to `localS
 
 ## Conventions
 
+- To upgrade pdf.js, replace both files in `pdfjs/` with a matching pair from the same `pdfjs-dist` version (and the Artifact preview's extra files). Version 4+ ships as ES modules (`.mjs`), so moving to it needs code changes.
 - Plain JavaScript with small helpers: `$` for querySelector, `esc()` for HTML escaping, and the `store` wrapper for localStorage.
 - Every user-facing string is plain English in sentence case. Avoid jargon, or explain it in the glossary.
 - Accessibility is required. Text contrast must be at least 4.5:1 in both themes, every control must work by keyboard, and the SVG stage has an `aria-label`. Arrange mode announces changes through `#sr-live`, and focus is restored after redraws. Check changes with axe-core.
@@ -65,7 +67,6 @@ The working copies sit outside the repo, in a Claude project folder (`/mnt/proje
 
 ## Known issues and limits
 
-- **The PDF preview needs cdnjs.** If cdnjs is down or blocked, PDFs can't open, and the user sees a "check your connection" message. Everything else works.
 - **Opening `index.html` straight from disk (`file://`) shows no devices**, because browsers block `fetch()` of local files there. Use a local web server.
 - **"Compare with my screen" is a best guess.** It uses `screen.width × devicePixelRatio`, which display scaling and browser zoom can change. On a Mac it only matches by aspect ratio, then filters to Apple models.
 - **The `dprOf()` display-scaling values are approximations**, so website previews show roughly what each device fits, not exactly.
@@ -77,7 +78,6 @@ The working copies sit outside the repo, in a Claude project folder (`/mnt/proje
 ## Next steps (ideas, not commitments)
 
 - Add new devices as they ship (iPad 12th gen when it's released, 2027 phones).
-- Optionally host pdf.js in the repo so the PDF preview doesn't depend on cdnjs.
 - Offline support (a service worker) so the Home Screen app works without signal.
 - A search for "devices similar in size to X".
 - Keep a small saved Playwright smoke test in the repo, so checks don't have to be rewritten each time.

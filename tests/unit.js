@@ -179,6 +179,18 @@ const E = ebookApp(synth);
 }
 
 // ---------------------------------------------------------------------------------------------------------
+section("Calibration card");
+{
+  const cal = load(["CARD_MM", "CAL_UPRIGHT", "CAL_MIN", "CAL_MAX", "okCal", "ZOOM_MIN", "ZOOM_MAX"]);
+  check("the calibration card is a standard bank card (ISO/IEC 7810 ID-1), 85.60 × 53.98 mm", cal.CARD_MM[0] === 85.6 && cal.CARD_MM[1] === 53.98);
+  check("which is 3.3701 × 2.1252 in", near(cal.CARD_MM[0] / 25.4, 3.37008, 1e-5) && near(cal.CARD_MM[1] / 25.4, 2.12520, 1e-5));
+  check("phones (150 to 165 px per inch) get the card upright: sideways it needs about 556 px", near(cal.CAL_UPRIGHT, 556.06, 0.01));
+  check("saved calibrations are accepted only as numbers from 50 to 260", cal.okCal(50) && cal.okCal(132.5) && cal.okCal(260) && ![49.9, 260.5, "120", null, NaN, -5, Infinity].some(cal.okCal));
+  check("the zoom slider reaches every calibrated actual-size scale", cal.ZOOM_MIN <= cal.CAL_MIN && cal.ZOOM_MAX >= cal.CAL_MAX);
+  const slider = (id, html) => html.match(new RegExp(`id="${id}" type="range" min="(\\d+)" max="(\\d+)"`)).slice(1).map(Number);
+  check("and the sliders in the page match those limits", JSON.stringify(slider("zoom", html)) === JSON.stringify([cal.ZOOM_MIN, cal.ZOOM_MAX]) && JSON.stringify(slider("cal-range", html)) === JSON.stringify([cal.CAL_MIN, cal.CAL_MAX]));
+}
+
 section("PDF page fit");
 {
   const LETTER = { w: 8.5, h: 11 };

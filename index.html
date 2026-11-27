@@ -212,7 +212,11 @@ dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-num
 
 .glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; font-size: 13.5px; color: var(--muted); }
 .glossary b { color: var(--fg); display: block; font-weight: 600; margin-bottom: 2px; }
-.cal-card { margin: 8px 0; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 35%, var(--surface)), var(--surface)); border: 1px solid var(--accent); border-radius: 10px; display: grid; place-items: center; color: var(--muted); font-size: 12px; max-width: 100%; }
+.cal-card { margin: 8px 0; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 35%, var(--surface)), var(--surface)); border: 1px solid var(--accent); border-radius: 10px; display: grid; place-items: center; text-align: center; color: var(--muted); font-size: 12px; margin: 8px auto; box-sizing: border-box; }
+.cal-wrap { overflow-x: auto; margin-inline: -16px; } /* the full width of the panel, so the card fits upright on a phone */
+.cal-ctl { display: flex; gap: 8px; align-items: center; }
+.cal-ctl input { flex: 1; min-width: 0; }
+.cal-ctl .btn { min-width: 44px; min-height: 44px; font-size: 20px; padding: 0 12px; }
 input[type="range"] { width: 100%; accent-color: var(--accent); }
 .file-drop { border: 1.5px dashed var(--line); border-radius: 8px; padding: 12px; text-align: center; font-size: 13px; color: var(--muted); }
 .file-drop.over { border-color: var(--accent); color: var(--fg); }
@@ -339,7 +343,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
           <div class="row" id="stage-more">
             <div class="seg" id="units" aria-label="Units"><button data-v="in">in</button><button data-v="cm">cm</button></div>
             <div class="seg" id="scaleMode" aria-label="Scale"><button data-v="fit">Fit</button><button data-v="actual">Actual size</button></div>
-            <label class="zoom">Zoom<input id="zoom" type="range" min="6" max="240" step="1"></label>
+            <label class="zoom">Zoom<input id="zoom" type="range" min="6" max="260" step="1"></label>
           </div>
         </div>
         <p class="arr-help" id="arr-help" hidden>Drag screens to move them. Edges and centers snap to each other (hold Alt or Option to stop snapping). Double-click a screen or use its ⟳ button to rotate it. With a keyboard, press Tab to pick a screen, the arrow keys to move it (hold Shift to move 1″ at a time) and R to rotate it. <button class="linkish" id="arr-reset" type="button">Reset layout</button></p>
@@ -349,10 +353,10 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
           <span class="row"><button class="btn ghost" type="button" data-share style="padding:4px 10px; font-size:12.5px">Share this comparison</button><button class="btn ghost" id="reset-btn" type="button" style="padding:4px 10px; font-size:12.5px">Reset to start</button><button class="btn ghost" id="cal-btn" type="button" style="padding:4px 10px; font-size:12.5px">Calibrate actual size</button></span>
         </div>
         <div id="cal" class="panel" style="border:0; border-top:1px solid var(--line); border-radius:0" hidden>
-          <h2>Calibrate to your monitor</h2>
-          <p class="hint">Hold a bank card (or any ID-1 card) against the screen and drag the slider until the blue card matches it exactly. After that, "Actual size" draws screens at their real physical size on this monitor.</p>
-          <div style="overflow-x:auto"><div class="cal-card" id="cal-card">85.6 × 54 mm card</div></div>
-          <input id="cal-range" type="range" min="50" max="260" step="0.5" aria-label="Pixels per inch on this monitor">
+          <h2>Calibrate to this screen</h2>
+          <p class="hint">Hold a bank card (or any card the same size, like most ID cards) flat against the screen. Drag the slider, or use − and +, until the blue card matches your card's edges exactly. On a phone the card is shown upright. After that, "Actual size" draws screens at their real physical size on this screen. If you change the browser's zoom, calibrate again.</p>
+          <div class="cal-wrap"><div class="cal-card" id="cal-card">85.60 × 53.98 mm card</div></div>
+          <div class="cal-ctl"><button class="btn ghost" id="cal-minus" type="button" aria-label="Make the card smaller">−</button><input id="cal-range" type="range" min="50" max="260" step="0.5" aria-label="Pixels per inch on this screen"><button class="btn ghost" id="cal-plus" type="button" aria-label="Make the card bigger">+</button></div>
           <div class="row"><span class="hint" id="cal-val"></span><button class="btn ghost" id="cal-done" type="button">Done</button></div>
         </div>
       </section>
@@ -525,8 +529,23 @@ if (!isObj(S.pos)) S.pos = {};
 for (const k of Object.keys(S.pos)) if (!isObj(S.pos[k]) || !Number.isFinite(S.pos[k].x) || !Number.isFinite(S.pos[k].y)) delete S.pos[k];
 if (!Array.isArray(S.zo)) S.zo = [];
 if (!EBOOK_PTS.some(p => p[0] === S.ebookPt)) S.ebookPt = 12;
-let ppiCal = store.get("ppiCal", 96);
-if (!(typeof ppiCal === "number" && ppiCal >= 50 && ppiCal <= 260)) ppiCal = 96; // the calibration slider's range
+// The drawing scale, in screen (CSS) pixels per inch. "Fit" picks it, the zoom slider sets it ("manual"),
+// and "Actual size" uses the calibration. A saved zoom that isn't a usable number goes back to the default.
+const ZOOM_MIN = 6, ZOOM_MAX = 260;
+if (!["fit", "actual", "manual"].includes(S.scale)) S.scale = "fit";
+if (!(typeof S.zoom === "number" && S.zoom >= ZOOM_MIN && S.zoom <= ZOOM_MAX)) S.zoom = 50;
+// Calibration: how many screen (CSS) pixels make one real inch on this screen. Saved by itself as tss:ppiCal (a plain
+// number, the same as before), so it survives reloads, "Reset to start" and share links. 96 is the web's nominal value,
+// which is right for few screens, so until you calibrate the note says so. Anything outside the slider's range is ignored.
+// tss:ppiCalDpr remembers the browser zoom and display scaling at calibration, so a later change can be pointed out.
+const CAL_MIN = 50, CAL_MAX = 260;
+const okCal = v => typeof v === "number" && v >= CAL_MIN && v <= CAL_MAX;
+let ppiCal = store.get("ppiCal", null);
+let calibrated = okCal(ppiCal);
+ppiCal = calibrated ? Math.round(ppiCal * 2) / 2 : 96; // the slider moves in half steps
+let calDpr = store.get("ppiCalDpr", null);
+if (!(calibrated && typeof calDpr === "number" && calDpr > 0 && calDpr < 20)) calDpr = null;
+const calStale = () => !!calDpr && Math.abs((window.devicePixelRatio || 1) / calDpr - 1) > 0.01;
 let pdf = { doc: null, page: 1, pages: 0, img: null, img2: null, w: 0, h: 0, name: "", ink: new Map(), typ: null, scan: null, crops: null };
 const COLORS = ["--c1", "--c2", "--c3", "--c4", "--c5", "--c6", "--c7", "--c8", "--c9", "--c10", "--c11", "--c12"];
 const MAX = 12;
@@ -778,9 +797,12 @@ function renderStage() {
   stage.innerHTML = out;
   view = { items, s, padX, padTop, W, H };
   if (keepUid) { const g = stage.querySelector(`.scr[data-uid="${keepUid}"]`); if (g) g.focus({ preventScroll: true }); }
+  scaleNote(s);
+}
+function scaleNote(s) {
   const how = S.scale === "actual"
-    ? `Drawn at actual size using ${ppiCal} screen pixels per inch${ppiCal === 96 ? " (default, calibrate for accuracy)" : " (calibrated)"}.`
-    : `Drawn to scale: 1 inch = ${s.toFixed(0)} px on your screen.`;
+    ? `Drawn at actual size using ${ppiCal} screen pixels per inch${!calibrated ? " (default, calibrate for accuracy)" : calStale() ? ", but your browser zoom or display has changed since you calibrated, so calibrate again" : " (calibrated)"}.`
+    : `Drawn to scale: 1 inch = ${s.toFixed(0)} px on your screen${calibrated ? `, ${Math.round(s / ppiCal * 100)}% of actual size` : ""}.`;
   $("#scale-note").textContent = how + " Outlines are the lit screen area only, not the bezel or case.";
 }
 
@@ -1564,12 +1586,30 @@ $("#custom").addEventListener("submit", e => {
 });
 
 // calibration
+// A bank card is an ID-1 card (ISO/IEC 7810): 85.60 × 53.98 mm. There are 25.4 mm in an inch.
+const CARD_MM = [85.6, 53.98];
+// Below this width the card is shown upright: a card lying sideways at a phone's 150 to 165 px per inch is wider than the phone.
+const CAL_UPRIGHT = 85.6 / 25.4 * 165;
 const calCard = $("#cal-card"), calRange = $("#cal-range");
-const drawCal = () => { calCard.style.width = (3.370 * ppiCal) + "px"; calCard.style.height = (2.125 * ppiCal) + "px"; $("#cal-val").textContent = `${ppiCal} px per inch`; };
+const drawCal = () => {
+  const [lw, sw] = CARD_MM.map(mm => mm / 25.4 * ppiCal), upright = calCard.parentElement.clientWidth < CAL_UPRIGHT;
+  calCard.style.width = (upright ? sw : lw) + "px"; calCard.style.height = (upright ? lw : sw) + "px";
+  calCard.textContent = `85.60 × 53.98 mm card${upright ? ", upright" : ""}`;
+  $("#cal-val").textContent = `${ppiCal} px per inch`;
+};
+const setCal = v => {
+  ppiCal = Math.min(CAL_MAX, Math.max(CAL_MIN, v)); calibrated = true; calDpr = window.devicePixelRatio || 1;
+  store.set("ppiCal", ppiCal); store.set("ppiCalDpr", calDpr);
+  calRange.value = ppiCal; drawCal();
+  if (S.scale === "actual") renderStage(); else if (view) scaleNote(view.s);
+};
 calRange.value = ppiCal;
-calRange.addEventListener("input", () => { ppiCal = +calRange.value; store.set("ppiCal", ppiCal); drawCal(); if (S.scale === "actual") renderStage(); });
+calRange.addEventListener("input", () => setCal(+calRange.value));
+$("#cal-minus").addEventListener("click", () => setCal(ppiCal - 0.5));
+$("#cal-plus").addEventListener("click", () => setCal(ppiCal + 0.5));
+new ResizeObserver(() => { if (!$("#cal").hidden) drawCal(); }).observe(calCard.parentElement);
 $("#cal-btn").addEventListener("click", () => { $("#cal").hidden = !$("#cal").hidden; drawCal(); });
-$("#cal-done").addEventListener("click", () => { $("#cal").hidden = true; S.scale = "actual"; save(); document.querySelectorAll("#scaleMode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === "actual"))); renderStage(); });
+$("#cal-done").addEventListener("click", () => { $("#cal").hidden = true; if (!calibrated || calStale()) setCal(ppiCal); S.scale = "actual"; save(); document.querySelectorAll("#scaleMode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === "actual"))); renderStage(); });
 
 // PDF upload (pdf.js runs in the page; nothing is uploaded anywhere)
 // The PDF reader (about 150 KB, plus a 400 KB background worker) loads only when someone opens a PDF.

@@ -205,6 +205,14 @@ async function run(browser, base, label, ctxOptions) {
   await p.click('#spreadAll button[data-v="single"]');
   await p.uncheck("#crop");
 
+  // Calibration: the card opens at bank-card size and + makes it bigger (left open for the checks below)
+  await p.click("#cal-btn");
+  const calW = () => p.$eval("#cal-card", e => e.getBoundingClientRect().width);
+  const w0 = await calW();
+  await p.click("#cal-plus");
+  const w1 = await calW();
+  check("calibration card shows and + makes it bigger", await p.isVisible("#cal-card") && w1 > w0 && /upright/.test(await p.textContent("#cal-card")) === phone, `${w0} → ${w1}`);
+
   if (phone) {
     const overflow = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     check("no sideways scrolling on a phone", overflow <= 0, overflow + " px too wide");

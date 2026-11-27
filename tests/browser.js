@@ -120,7 +120,8 @@ async function geometry() {
   await setRange(p, "#cal-range", 120);
   o = await outlines(p);
   check("calibrating to 120 px per inch redraws at that scale (5 in → 600 px)", near(o[0].w, 600, 0.05), o[0].w);
-  check("the calibration card is 3.37 × 2.125 in at that scale", await p.$eval("#cal-card", e => e.style.width === "404.4px" && e.style.height === "255px"));
+  const cc = await p.$eval("#cal-card", e => [parseFloat(e.style.width), parseFloat(e.style.height)]);
+  check("the calibration card is 85.60 × 53.98 mm at that scale (404.41 × 255.02 px)", near(cc[0], 85.6 / 25.4 * 120, 0.002) && near(cc[1], 53.98 / 25.4 * 120, 0.002), cc.join(" × "));
   check("calibration doesn't change any card numbers", statsOnly(await cards(p)) === beforeCal);
   check("and the note says it's calibrated", /120 screen pixels per inch \(calibrated\)/.test(await p.textContent("#scale-note")));
   await p.reload(); await p.waitForSelector("#cards .card");
@@ -439,6 +440,11 @@ async function malformed() {
     ["your screens saved as something that isn't a list", { custom: null, raw: { "tss:custom": JSON.stringify({ oops: 1 }) } }],
     ["a broken entry among your screens", { custom: null, raw: { "tss:custom": JSON.stringify([null, { id: "c-bad", n: "Bad", c: "custom", d: -1, w: 0, h: 0 }, TEST13]), "tss:state": JSON.stringify({ sel: [{ id: "c-bad", uid: "a" }, { id: "c-tri", uid: "b" }] }) } }],
     ["a calibration that isn't a number", { raw: { "tss:ppiCal": "\"abc\"", "tss:state": JSON.stringify({ sel: [{ id: "ipad-mini-a20-pro-2026", uid: "a" }], scale: "actual" }) } }],
+    ["a calibration far out of range", { raw: { "tss:ppiCal": "1e9", "tss:ppiCalDpr": "\"x\"", "tss:state": JSON.stringify({ sel: [{ id: "ipad-mini-a20-pro-2026", uid: "a" }], scale: "actual" }) } }],
+    ["a zoom that isn't a number", { raw: { "tss:state": JSON.stringify({ sel: [{ id: "ipad-mini-a20-pro-2026", uid: "a" }], scale: "manual", zoom: "abc" }) } }],
+    ["a zoom of zero", { raw: { "tss:state": JSON.stringify({ sel: [{ id: "ipad-mini-a20-pro-2026", uid: "a" }], scale: "manual", zoom: 0 }) } }],
+    ["a huge zoom", { raw: { "tss:state": JSON.stringify({ sel: [{ id: "ipad-mini-a20-pro-2026", uid: "a" }], scale: "manual", zoom: 1e9 }) } }],
+    ["an unknown scale", { raw: { "tss:state": JSON.stringify({ sel: [{ id: "ipad-mini-a20-pro-2026", uid: "a" }], scale: "huge", zoom: 50 }) } }],
     ["a negative calibration", { raw: { "tss:ppiCal": "-5", "tss:state": JSON.stringify({ sel: [{ id: "ipad-mini-a20-pro-2026", uid: "a" }], scale: "actual" }) } }],
     ["a share link that isn't valid", { hash: "#s=%%%not-base64" }],
     ["a share link with a screen list that isn't a list", { hash: b64({ sel: 5 }) }],
@@ -455,6 +461,92 @@ async function malformed() {
     check(`${what}: the page still works`, usable && p.errors.length === 0 && ms < 6000, (!ok ? "device list never appeared; " : "") + (/NaN|Infinity/.test(svg) ? "drawing has NaN; " : "") + p.errors.slice(0, 2).join(" | ") + (ms >= 6000 ? ` took ${ms} ms` : ""));
     await ctx.close();
   }
+}
+
+// ---------------------------------------------------------------------------------------------------------
+async function calibration() {
+  section("Calibration");
+  const note = p => p.textContent("#scale-note");
+  const card = p => p.$eval("#cal-card", e => { const r = e.getBoundingClientRect(); return { w: parseFloat(e.style.width), h: parseFloat(e.style.height), bw: r.width, bh: r.height, left: r.left, right: r.right, text: e.textContent }; });
+  const mm = (v, ppi) => v / 25.4 * ppi;
+  let { ctx, p } = await open({ state: { sel: sel("c-tri"), content: "page", scale: "fit" } });
+  await click(p, "#cal-btn");
+  let c = await card(p);
+  check("the card is a bank card, 85.60 × 53.98 mm, lying sideways at the default 96 px per inch", near(c.w, mm(85.6, 96), 0.002) && near(c.h, mm(53.98, 96), 0.002) && near(c.bw, c.w, 0.05) && near(c.bh, c.h, 0.05) && /85\.60 × 53\.98 mm/.test(c.text), JSON.stringify(c));
+  check("before calibrating, the note doesn't claim a percentage of actual size", !/actual size/.test(await note(p)), await note(p));
+  await setRange(p, "#cal-range", 120);
+  await click(p, "#cal-plus"); await click(p, "#cal-plus"); await click(p, "#cal-minus");
+  check("+ and − change the calibration in half steps and save it", await p.$eval("#cal-range", e => e.value) === "120.5" && await p.evaluate(() => localStorage.getItem("tss:ppiCal")) === "120.5" && /120\.5 px per inch/.test(await p.textContent("#cal-val")));
+  check("the drawing scale knows the calibration while on Fit (\"% of actual size\")", /1 inch = (\d+) px on your screen, (\d+)% of actual size/.test(await note(p)), await note(p));
+  const fitNote = (await note(p)).match(/1 inch = (\d+) px.*?(\d+)% of actual/);
+  if (fitNote) check("and the percentage is the drawing scale ÷ the calibration", Math.abs(+fitNote[2] - +fitNote[1] / 120.5 * 100) <= 1, fitNote[0]);
+  await setRange(p, "#cal-range", 96);
+  await click(p, '#scaleMode button[data-v="actual"]');
+  check("calibrating to exactly 96 px per inch counts as calibrated", /96 screen pixels per inch \(calibrated\)/.test(await note(p)), await note(p));
+  await setRange(p, "#cal-range", 250);
+  check("the zoom slider shows the actual-size scale, even at 250 px per inch", await p.$eval("#zoom", e => e.value) === "250");
+  await setRange(p, "#zoom", 125);
+  check("zooming from actual size says how big that is compared with actual size (125 ÷ 250 = 50%)", /1 inch = 125 px on your screen, 50% of actual size/.test(await note(p)), await note(p));
+  // Every content mode draws the whole picture, outlines and content, at the calibrated scale
+  await setRange(p, "#cal-range", 120);
+  for (const content of ["page", "video", "ebook", "site", "none"]) {
+    await click(p, `#content button[data-v="${content}"]`);
+    await setRange(p, "#zoom", 60);
+    await p.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+    // the content's size on screen: everything inside the screen except its background
+    const box = () => p.$eval("#stage .scr", g => {
+      const r = g.querySelector("rect"), c = g.querySelector("g[clip-path]"), kids = c ? [...c.children] : [];
+      const bs = (kids.length > 1 ? kids.slice(1) : kids).map(k => k.getBoundingClientRect()).filter(b => b.width || b.height);
+      const L = Math.min(...bs.map(b => b.left)), R = Math.max(...bs.map(b => b.right)), T = Math.min(...bs.map(b => b.top)), B = Math.max(...bs.map(b => b.bottom));
+      return { w: +r.getAttribute("width"), h: +r.getAttribute("height"), cw: bs.length ? R - L : 0, ch: bs.length ? B - T : 0 };
+    });
+    const half = await box(), stats = statsOnly(await cards(p));
+    await click(p, '#scaleMode button[data-v="actual"]');
+    await p.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))); // let a resize redraw finish
+    const full = await box();
+    const ok = near(full.w, 600, 0.05) && near(full.w / half.w, 2, 0.002) && near(full.h / half.h, 2, 0.002) && (content === "none" || (near(full.cw / half.cw, 2, 0.04) && near(full.ch / half.ch, 2, 0.04)));
+    check(`"${content}" mode: actual size draws outline and content at 120 px per inch (twice zoom 60), card numbers unchanged`, ok && statsOnly(await cards(p)) === stats, JSON.stringify({ half, full }));
+  }
+  await click(p, '#content button[data-v="page"]');
+  // Closing the browser and coming back keeps the calibration
+  const storageState = await ctx.storageState();
+  await ctx.close();
+  ctx = await browser.newContext({ storageState, viewport: { width: 1280, height: 800 } });
+  await ctx.route(url => !url.href.startsWith(base), r => r.abort());
+  p = await ctx.newPage(); p.errors = []; p.on("pageerror", e => p.errors.push(e.message));
+  await p.goto(base); await p.waitForSelector("#cards .card");
+  check("a new browser session keeps the calibration and actual size (5 in → 600 px)", near((await outlines(p))[0].w, 600, 0.05) && /120 screen pixels per inch \(calibrated\)/.test(await note(p)), await note(p));
+  noErrors(p, "calibration");
+  await ctx.close();
+
+  // Settings saved before this change (a plain number, no zoom record) still count as calibrated
+  ({ ctx, p } = await open({ state: { sel: sel("c-tri"), scale: "actual" }, ppiCal: 132.5 }));
+  check("an older saved calibration still works (132.5 px per inch, 5 in → 662.5 px)", near((await outlines(p))[0].w, 662.5, 0.05) && /132\.5 screen pixels per inch \(calibrated\)/.test(await note(p)), await note(p));
+  await ctx.close();
+  ({ ctx, p } = await open({ state: { sel: sel("c-tri"), scale: "actual" }, raw: { "tss:ppiCal": "300" } }));
+  check("a saved calibration outside the slider's range is ignored, and the note says it's the default", near((await outlines(p))[0].w, 480, 0.05) && /96 screen pixels per inch \(default/.test(await note(p)), await note(p));
+  await ctx.close();
+
+  // Browser zoom or display scaling changed since calibrating
+  ({ ctx, p } = await open({ state: { sel: sel("c-tri"), scale: "actual" }, raw: { "tss:ppiCal": "120", "tss:ppiCalDpr": "1" }, ctxOptions: { viewport: { width: 1280, height: 800 }, deviceScaleFactor: 2 } }));
+  check("if the browser zoom or display changed since calibrating, the note asks to calibrate again", /calibrate again/.test(await note(p)) && near((await outlines(p))[0].w, 600, 0.05), await note(p));
+  await click(p, "#cal-btn"); await click(p, "#cal-done");
+  check("pressing Done on the calibration confirms it for the current zoom", /120 screen pixels per inch \(calibrated\)/.test(await note(p)) && await p.evaluate(() => localStorage.getItem("tss:ppiCalDpr")) === "2", await note(p));
+  await ctx.close();
+
+  // On a phone the card is shown upright, at full size, inside the screen
+  ({ ctx, p } = await open({ state: { sel: sel("c-tri") }, ppiCal: 153, ctxOptions: { ...devices["iPhone 13"] } }));
+  await p.tap("#cal-btn");
+  await p.locator("#cal-card").scrollIntoViewIfNeeded();
+  c = await card(p);
+  check("iPhone 13 at 153 px per inch: the card is upright, 53.98 × 85.60 mm, not squeezed", near(c.w, mm(53.98, 153), 0.002) && near(c.h, mm(85.6, 153), 0.002) && near(c.bw, c.w, 0.05) && /upright/.test(c.text), JSON.stringify(c));
+  check("and all of it is on screen", c.left >= 0 && c.right <= 390, `${c.left} to ${c.right}`);
+  const sizes = await p.$$eval("#cal-minus, #cal-plus", bs => bs.map(b => { const r = b.getBoundingClientRect(); return Math.min(r.width, r.height); }));
+  check("the − and + buttons are at least 44 px for fingers", sizes.length === 2 && sizes.every(v => v >= 44), sizes.join(", "));
+  await p.tap("#cal-plus");
+  check("tapping + saves 153.5 px per inch", await p.evaluate(() => localStorage.getItem("tss:ppiCal")) === "153.5");
+  noErrors(p, "calibration on iPhone");
+  await ctx.close();
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -522,7 +614,7 @@ async function serviceWorkerUpdate() {
   const server = await serve(ROOT, pth => override(pth));
   base = `http://127.0.0.1:${server.address().port}/`;
   browser = await chromium.launch();
-  const ALL = [geometry, customForm, pages, pdfs, video, () => ebook({ viewport: { width: 1280, height: 800 } }, ""), () => ebook({ ...devices["iPhone 13"] }, " (iPhone 13)"), website, persistence, malformed, devicesById, failures, serviceWorkerUpdate];
+  const ALL = [geometry, customForm, pages, pdfs, video, () => ebook({ viewport: { width: 1280, height: 800 } }, ""), () => ebook({ ...devices["iPhone 13"] }, " (iPhone 13)"), website, persistence, calibration, malformed, devicesById, failures, serviceWorkerUpdate];
   const only = (process.env.ONLY || "").split(",").filter(Boolean);
   const steps = only.length ? ALL.filter(f => only.some(o => (f.name || "").includes(o) || f.toString().includes(o))) : ALL;
   for (const step of steps) {

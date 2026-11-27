@@ -86,18 +86,15 @@ Details and reasons are in `docs/DECISIONS.md`. In short:
 - Commit messages: a short, plain-English summary line, then details if needed.
 - Device rows: `name,type,diagonal,width,height`. Paper rows leave `diagonal` empty and give inches. Sorting: see `docs/DECISIONS.md`.
 
-## 6. How the files are produced (read before editing `index.html`)
+## 6. `index.html` is the only source
 
-Thomas's Claude workflow keeps a working copy of `index.html` outside the repo, without the `<head>` wrapper, for a Claude Artifact preview, and builds the repo copy with a script (`wrap.sh`) that adds the `<head>` tags, the service worker registration and the analytics snippet. Those files are **not** in the repo (see `CLAUDE.md`).
+The repository's `index.html` is the **only** authoritative, editable copy of the app (decided by Thomas, 27 Nov 2026). Every agent edits it directly, on a branch, like any other file. There is no build step and no generated copy to keep in sync.
 
-For agents that only have the repository (for example Codex):
-
-- Edit the repo's `index.html` directly. Keep the `<head>` block and the two `<script>` tags just before `</body>` (service worker registration and GoatCounter) unchanged.
-- Say in your pull request that `index.html` changed, so Claude can bring Thomas's preview copy up to date after the merge.
-
-This split is a known coordination risk (`docs/HANDOVER.md`, "Fragile areas").
+- The `<head>` is in two parts. Everything **above the `<title>` line** is for the live site only (meta description, Open Graph and Twitter tags, favicon, canonical link, manifest, Apple tags, theme colors, a small base style). The `<title>` line and everything after it is the app itself.
+- The two `<script>` tags just before `</body>` register the service worker (offline use) and load GoatCounter (analytics). They are live-site only too. Keep them as they are, and keep the service worker one as a single line containing `navigator.serviceWorker.register`.
+- Claude can make a temporary preview of a branch from this file (see `CLAUDE.md`). The preview is always generated **from** the repo and is never copied back into it. Nothing in the repo depends on it.
 
 ## 7. Agent-specific files
 
-- `CLAUDE.md`: Claude-specific notes (Thomas's Claude project folder, preview Artifact, project memory). It defers to this file.
+- `CLAUDE.md`: Claude-specific notes (the temporary Artifact preview, running tests in Claude's cloud sandbox, project memory). It defers to this file.
 - Codex reads this file (`AGENTS.md`) directly. Put any future Codex-only notes in a clearly marked section at the end of this file rather than in a separate file, unless Thomas decides otherwise.

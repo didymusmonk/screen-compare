@@ -6,20 +6,31 @@
 
 Since 27 Nov 2026 Claude no longer commits straight to `main`: work on a branch, open a pull request, and wait for Thomas to approve the merge (`AGENTS.md` section 2). OpenAI Codex also works on this repository as a second developer and reviewer, so don't touch its branches (usually `codex/...`) without Thomas's permission.
 
-## Thomas's Claude project folder
+## The Artifact preview (temporary, generated from the repo)
 
-Working copies sit outside the repo, in the Claude project folder `/mnt/project-files/screen-compare/`. They are not authoritative: **the repository is.** Before editing them, check they match the latest `main` (Codex and merged pull requests change the repo directly).
+Since 27 Nov 2026 the repository's `index.html` is the only source (`AGENTS.md` section 6). Edit it in the repo, on your branch. The old project-folder workflow (`/mnt/project-files/screen-compare/index.html` as the source, built into the repo copy by `wrap.sh`) is **retired**: never edit those files and never copy anything from the project folder into the repo.
 
-- `index.html` there is the **Artifact preview source**, without the `<!doctype>`/`<head>` wrapper. Preview: https://claude.ai/artifact/WhqeFfcgT7a4HBnUySpaFa (publish it with `devices.csv` as an extra file). Republish it only after the change is approved or when Thomas asks.
-- `wrap.sh` builds the repo's `index.html` from that source: it adds the doctype, meta description, Open Graph and Twitter tags, favicon, canonical link, manifest and Apple tags, theme color, and the service worker registration and GoatCounter script (GitHub copy only). Don't hand-edit the two copies separately.
-- **Sync first.** If the repo's `index.html` changed since the preview source was last built (for example a Codex pull request was merged), recreate the preview source from the repo copy before editing: the lines after the `<style>[hidden]...` line that `wrap.sh` writes, without the `</head>` and `<body>` lines `wrap.sh` inserts, and without the last 5 lines (service worker script, GoatCounter script, `</body>`, `</html>`). For example: `awk 'NR>25' index.html | grep -v '^</head>$' | grep -v '^<body>$' | head -n -5` (check the line number of the `<style>[hidden]` line first; it was 25 on 27 Nov 2026, when this reproduced the preview source byte for byte). Then check that `wrap.sh` rebuilds a file identical to the repo copy.
-- `methodology.html` is the same file in the repo and the project folder (not built by `wrap.sh`).
-- `devices.csv` itself is the source since the Nov 2026 device audit. `gen_csv.py <in.csv> <out.csv>` only sorts it. The old `gen_csv_legacy.py` and `raw.json` are stale: never use them, they would undo the audit.
-- The project folder adds C2PA metadata to SVG files written there (it bloated `favicon.svg` from 316 bytes to 8 KB). Edit `favicon.svg` in the repo itself and don't copy it back.
+Thomas's preview Artifact is https://claude.ai/artifact/WhqeFfcgT7a4HBnUySpaFa. To show a branch there (only when Thomas asks, or after a merge):
+
+1. Generate the preview page from the repo file into your scratchpad (it leaves out the live-site-only head tags above `<title>`, the `</head>`/`<body>` lines, and everything from the service worker script on):
+   ```
+   awk '/^<title>/{on=1} /^<\/head>$/||/^<body>$/{next} /navigator\.serviceWorker\.register/{exit} on' index.html > <scratchpad>/preview/index.html
+   ```
+   On 27 Nov 2026 this reproduced the last preview source byte for byte. If the result is empty or much shorter than `index.html`, someone moved the `<title>` line or the service worker line: look before publishing.
+2. Publish that file to the same Artifact URL, with `devices.csv` and `methodology.html` from the repo as extra files. pdf.js files already published there are kept between publishes; republish them only after a pdf.js upgrade (below).
+3. Never commit the generated file or write it back over the repo copy.
+
+What the preview can't do (tell Thomas when it matters): it has no service worker (no offline test), no analytics, none of the live site's link-preview or Home Screen tags, and it runs inside Claude's Artifact frame, so it isn't a test of iOS Safari. Saved settings there are separate from the live site's. Use the tests and the live site after a merge for those.
+
+Other notes about the old project folder:
+
+- `devices.csv` and `methodology.html` there are retired copies; the repo versions are the source.
+- `gen_csv.py` (sorts `devices.csv` by category, brand and family) still lives only in the project folder. The sort rules are in `docs/DECISIONS.md` section 2. `gen_csv_legacy.py` and `raw.json` are stale: never use them, they would undo the device audit.
+- The project folder adds C2PA metadata to SVG files written there (it bloated `favicon.svg` from 316 bytes to 8 KB). Edit `favicon.svg` in the repo itself.
 
 ## Artifact preview and pdf.js
 
-When pdf.js is upgraded (README steps), also republish the Artifact preview with the new files (`.mjs` as `text/javascript`, `.wasm` as `application/wasm`) and the old paths removed. The Artifact service refuses text files containing an ESC byte, and `pdf.worker.min.mjs` 6.5.438 has two inside string literals, so the preview's copy has them written as `\x1b` (same behavior, checked by rendering the sample PDFs). The repo copy stays unchanged.
+When pdf.js is upgraded (README steps), also republish the Artifact preview (generated as above) with the new files (`.mjs` as `text/javascript`, `.wasm` as `application/wasm`) and the old paths removed. The Artifact service refuses text files containing an ESC byte, and `pdf.worker.min.mjs` 6.5.438 has two inside string literals, so the preview's copy has them written as `\x1b` (same behavior, checked by rendering the sample PDFs). The repo copy stays unchanged.
 
 Background research behind the pdf.js choice: Safari audit (Nov 2026, Claude Doc, visible to Thomas's account): https://claude.ai/artifact/C8pkfzDjYNn6n9H49pJjR2. Its conclusions are recorded in `docs/DECISIONS.md` section 5.
 

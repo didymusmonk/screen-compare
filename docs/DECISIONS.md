@@ -141,7 +141,7 @@ To change a decision, describe the conflict to Thomas first (`AGENTS.md`, rule 1
 **Decisions**
 - **Fresh when online**, so changes to `index.html` and `devices.csv` reach visitors without bumping anything.
 - **Bump `VERSION`** after changing `sw.js` itself, an icon, the manifest or the list of saved files (it is v3 since the methodology page). A pdf.js upgrade changes `PDFJS_VERSION` instead.
-- The service worker is registered only in the GitHub copy (not in Thomas's Artifact preview).
+- The service worker is registered only on the live site; Claude's generated Artifact preview leaves the registration out.
 
 **Open questions**
 - A tab left open across a pdf.js upgrade can't open its first PDF until reloaded (old files are deleted); it says "The PDF reader didn't load". Accepted.
@@ -164,6 +164,7 @@ To change a decision, describe the conflict to Thomas first (`AGENTS.md`, rule 1
 **Decisions**
 - **Static site, one file, no build step**, so Thomas can edit on GitHub directly; it loads fast (about 37 KB compressed per visit).
 - **Deployment = merge to `main`** (GitHub Pages, root folder). There is no staging site.
+- **The repo's `index.html` is the only source** (Thomas, 27 Nov, after Codex's review of the collaboration docs). Until then Claude edited a copy without the `<head>` in its project folder and rebuilt the repo copy with `wrap.sh`; an edit made only in the repo (by Codex, say) could have been overwritten by the next rebuild. Alternatives considered: moving `wrap.sh` into the repo (rejected: it keeps a second editable copy and adds a build step), or keeping the old workflow with a sync rule (rejected: easy to forget). Claude's Artifact preview is now generated from the repo file by a one-line command and never copied back. No build system, framework or dependency was added for it.
 - **Branch per task, pull request, Thomas approves every merge** (27 Nov). This replaces the earlier practice of committing straight to `main`. See `AGENTS.md`.
 - Every bug fix gets a regression test; tests are never weakened.
 - Accessibility is required: 4.5:1 text contrast in both themes, full keyboard use, axe-core clean.

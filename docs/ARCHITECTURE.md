@@ -34,7 +34,7 @@ Browser
 | `.gitattributes` | Marks `pdfjs/` as third-party (`linguist-vendored`) for GitHub's language bar only. |
 | `README.md`, `LICENSE`, `AGENTS.md`, `CLAUDE.md`, `CHANGELOG.md`, `docs/` | Documentation and the MIT license (© 2026 DidymusMonk). |
 
-The `<head>` of the repo's `index.html` (meta description, Open Graph and Twitter tags, favicon, canonical link, manifest and Apple tags, theme colors) and the two scripts before `</body>` (service worker registration and GoatCounter) are added by Thomas's `wrap.sh` build script, which lives outside the repo. See `AGENTS.md` section 6.
+`index.html` is the only source (no build step, no generated copy). The head tags above the `<title>` line (meta description, Open Graph and Twitter tags, favicon, canonical link, manifest and Apple tags, theme colors) and the two scripts before `</body>` (service worker registration and GoatCounter) are for the live site only; Claude's temporary Artifact preview leaves them out when it generates its page from this file. See `AGENTS.md` section 6 and `CLAUDE.md`.
 
 ## 3. The script inside `index.html`
 
@@ -193,4 +193,4 @@ All reads go through `store.get` with try/catch, and are validated before use.
 - `tests/browser.js` (Playwright): exact card numbers, drawing, calibration, forms, PDF fit, saving, share links (including a frozen old link), broken saved settings, missing device list, service worker update.
 - `tests/browser-check.html` + `tests/webkit.js`: in-page PDF check for real iPhones (via the live site) and WebKitGTK.
 - `.github/workflows/tests.yml`: runs `run-all.js` on pushes to `main` and on pull requests.
-- **Deployment:** merging to `main` publishes the site through GitHub Pages ("pages build and deployment" action). There is no staging site; Thomas's Claude Artifact preview is updated separately.
+- **Deployment:** merging to `main` publishes the site through GitHub Pages ("pages build and deployment" action). There is no staging site. Claude can generate a temporary Artifact preview of a branch from `index.html` (no offline, no analytics).

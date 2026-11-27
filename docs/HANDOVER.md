@@ -8,7 +8,7 @@ A snapshot for a new developer or AI agent (written 27 Nov 2026, when Codex join
 - `main` is at the Phase 2 change (megapixels, video picture size, Methodology page, service worker v3).
 - All 425 automated checks pass (`unit.js`, `smoke.js`, `browser.js`). GitHub Actions runs them on every pull request.
 - The device database was audited on 27 Nov (records on the `device-database-audit` branch, not merged).
-- From 27 Nov, every change goes through a branch and a pull request that Thomas approves.
+- From 27 Nov, every change goes through a branch and a pull request that Thomas approves, and the repo's `index.html` is the only source (the old project-folder copy and `wrap.sh` are retired).
 
 ## Known bugs and limitations
 
@@ -16,6 +16,8 @@ Bugs (not fixed yet):
 
 1. **"Compare with my screen" never offers tablet PCs on touch devices.** `myScreenMatches()` in `index.html` checks `d.c === "tablet pc"` (twice), but the loader stores the category as `tabletpc`. A one-word fix plus a regression test.
 2. **iPhone SE: the calibration panel scrolls by about 3 px.** Cosmetic.
+3. **`index.html` has two `<meta name="description">` tags**: the live-site one near the top and an older, shorter one after `<title>`. Search engines normally use the first. Harmless, left as is (removing it is a visitor-facing change for a separate task).
+4. **The "PDF reader didn't load" message says Safari 18**, while testing shows 17.4+ works. Conservative wording, not wrong for visitors.
 
 Limitations (accepted; details in `DECISIONS.md`):
 
@@ -49,7 +51,7 @@ Limitations (accepted; details in `DECISIONS.md`):
 | E-book layout | Counts depend on canvas text measurement and caching; preview and counts must stay in step. | `ebookText`, `layoutEbook`, `ebookFit` |
 | `statsOf()` | Shared by cards and the reference table; must never read zoom or calibration. | `index.html` |
 | Test extraction | `tests/lib/app.js` copies functions by text: top-level declarations start at column 0 and multi-line ones end with a line starting `}` or `]`. Reformatting breaks `unit.js`. | `index.html`, `tests/lib/app.js` |
-| Two copies of `index.html` | Thomas's Claude workflow edits a preview copy outside the repo and rebuilds the repo copy with `wrap.sh` (also outside the repo). An edit made only in the repo can be overwritten by the next rebuild unless the preview copy is synced first. | `CLAUDE.md`, `AGENTS.md` section 6 |
+| `index.html` head and closing scripts | Tags above `<title>` and the two scripts before `</body>` are live-site only; Claude's preview generator relies on the `<title>` line and the one-line service worker registration as markers. Removing the service worker line breaks offline use. | `AGENTS.md` section 6, `CLAUDE.md` |
 | Calibration | Visitors' saved values must stay valid across changes; phones need the upright card. | `ppiCal`, `drawCal`, `setCal`, `scaleNote` |
 
 ## Areas that would benefit from independent review
@@ -83,6 +85,6 @@ Ideas from earlier work (not commitments, need Thomas's go-ahead): add new devic
 
 Needs a decision from Thomas before anyone starts:
 
-- Moving `wrap.sh` (and the preview workflow) into the repo, or making the repo's `index.html` the only source, to remove the two-copy risk.
+- Moving `gen_csv.py` (the device list sorter, still only in Claude's project folder) into the repo, so every agent can sort `devices.csv` the same way.
 - A shim for Safari 16.4–17.3 PDF support (only if such visitors appear).
 - Any new device, CSV column, dependency or feature.

@@ -243,6 +243,26 @@ async function pages() {
   c = await cards(p);
   check("two pages on an upright 5 × 12 in screen: 29%", c[1]["Size vs. printed page"] === "29%");
   check("the two-page view draws two pages side by side", (await p.$$eval('#stage .scr[data-i="1"] rect[fill="var(--paper)"]', r => r.length)) === 2);
+  // Comic and manga page sizes draw panels instead of book text, exactly over each page (screen 1 at 100%, screen 2 two pages)
+  const art = () => p.$$eval("#stage .scr", gs => gs.map(g => {
+    const v = r => ["x", "y", "width", "height"].map(a => +r.getAttribute(a));
+    return { pages: [...g.querySelectorAll('rect[fill="var(--paper)"]')].map(v), art: [...g.querySelectorAll("svg.comic")].map(e => ({ cls: e.getAttribute("class"), v: v(e), panels: e.querySelectorAll(":scope > svg").length, text: e.textContent })), prose: g.querySelectorAll(".prose text").length };
+  }));
+  const fitsPages = a => a.every(g => g.art.length === g.pages.length && g.art.every((x, n) => x.v.every((q, j) => near(q, g.pages[n][j], 0.1))));
+  await p.selectOption("#paper", "us-comic-book");
+  let a = await art(); c = await cards(p);
+  check("US comic book draws colored comic panels, not text, on every page", a.every(g => g.prose === 0 && g.art.length && g.art.every(x => x.cls === "comic comic" && x.panels === 5)), JSON.stringify(a.map(g => [g.prose, g.art.map(x => x.cls + x.panels)])));
+  check("the comic art covers each page exactly, so it scales with Fit and 100%", fitsPages(a));
+  check("at 100% the comic page is 6.625 in wide at the drawing's scale", near(a[0].art[0].v[2], 6.625 * s, 0.5), a[0].art[0].v[2] + " vs " + 6.625 * s);
+  const comicBox = pdfBox(c[1]);
+  await p.selectOption("#paper", "graphic-novel-6-625-10-25");
+  check("the card numbers are the same as any page of that size (graphic novel, same size)", pdfBox((await cards(p))[1]) === comicBox && (await art()).every(g => g.art.every(x => x.cls === "comic comic")), comicBox);
+  await p.selectOption("#paper", "manga-tankobon");
+  a = await art();
+  check("Manga (tankobon) draws black-and-white manga panels", a.every(g => g.prose === 0 && g.art.every(x => x.cls === "comic manga")) && fitsPages(a));
+  check("manga reads right to left: in two pages, page 1 is on the right", a[1].art.length === 2 && /DASH/.test(a[1].art[1].text) && /ZOOM/.test(a[1].art[0].text), a[1].art.map(x => x.text.slice(0, 40)).join(" | "));
+  await p.selectOption("#paper", "us-letter-paper");
+  check("other page sizes go back to book text", (await art()).every(g => g.art.length === 0));
   noErrors(p, "page fit");
   await ctx.close();
 }

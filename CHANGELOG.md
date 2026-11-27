@@ -4,6 +4,8 @@ Significant changes to True Size Screens, newest first. The full detail is in th
 
 ## Unreleased
 
+- Pages mode: the comic book, graphic novel and manga page sizes now show simple drawn comic or manga panels (with 8 pt lettering) instead of book text.
+
 - Agent docs: a task-to-section reading map and efficiency tips in `AGENTS.md`, a which-test-to-run table in `tests/README.md`, `ONLY=` in `browser.js` matches exact step names, and stale counts removed from the handover.
 
 - Put each preview mode’s options directly below a single mode picker and above the drawing.

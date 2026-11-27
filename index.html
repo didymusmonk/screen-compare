@@ -182,6 +182,7 @@ details[open] > summary { margin-bottom: 12px; }
 .stage-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); padding: 24px; text-align: center; }
 svg text { font-family: var(--font-mono); }
 svg .prose text { font-family: Georgia, "Iowan Old Style", "Times New Roman", serif; }
+svg .comic text { font-family: "Trebuchet MS", Verdana, Arial, sans-serif; }
 .zoom { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .zoom input { width: 140px; }
 .arr-help { margin: 0; padding: 8px 16px; font-size: 12.5px; color: var(--muted); border-bottom: 1px solid var(--line); }
@@ -1122,6 +1123,98 @@ function textLine(x, y, fontPx, text) {
   return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="${fontPx.toFixed(2)}">${text}</text>`;
 }
 
+// ---------- Comic and manga sample pages ----------
+// The comic, graphic novel and manga page sizes show simple drawn panels instead of book text. The art is drawn in
+// points (1/72 in) on the page itself, so it scales exactly like the text pages. Lettering is 8 pt, a common comic size.
+const comicStyle = name => /manga/i.test(name) ? "manga" : /comic|graphic novel/i.test(name) ? "comic" : null;
+// two pages per style: [x, y, width, height] as shares of the area inside the margins, the scene, and the words
+// (sky and city scenes get a caption box, rocket and speed scenes a sound effect, the rest a speech bubble; | = new line)
+const COMIC_PAGES = {
+  comic: [
+    [[0, 0, 1, .3, "sky", "MEANWHILE, IN A|QUIET VALLEY..."], [0, .32, .48, .33, "one", "HELLO! IS|ANYBODY HOME?"], [.52, .32, .48, .33, "two", "WE BUILT A|ROCKET!"],
+      [0, .67, .62, .33, "rocket", "3... 2... 1..."], [.64, .67, .36, .33, "one", "WOW!"]],
+    [[0, 0, .38, .45, "one", "HOLD ON|TIGHT!"], [.4, 0, .6, .45, "rocket", "WHOOSH!"], [0, .47, 1, .22, "city", "LOOK! THERE'S|OUR TOWN!"],
+      [0, .71, .5, .29, "two", "LET'S GO|HOME FOR|DINNER."], [.52, .71, .48, .29, "sky", "THE END?"]],
+  ],
+  // manga reads right to left, so the first panel of each row is on the right
+  manga: [
+    [[0, 0, 1, .24, "city", "SPRING. THE FIRST|DAY OF SCHOOL."], [.65, .26, .35, .36, "one", "I'M LATE!"], [0, .26, .63, .36, "speed", "DASH!"],
+      [.38, .64, .62, .36, "two", "GOOD|MORNING!"], [0, .64, .36, .36, "one", "PHEW..."]],
+    [[.45, 0, .55, .3, "one", "WHO ARE|YOU?"], [0, 0, .43, .3, "sky", ""], [0, .32, 1, .34, "speed", "ZOOM!"],
+      [.7, .68, .3, .32, "one", "!!"], [0, .68, .68, .32, "two", "THE NEW|STUDENT!"]],
+  ],
+};
+const COMIC_COLORS = {
+  comic: { ink: "#1a1a1a", sky: "#cfe8ff", room: "#fff1c9", night: "#1d2a5a", hill: "#5cae5a", sun: "#ffd23f", skin: "#f6d2b0", hair: ["#6b3e26", "#e3a21a"], shirt: ["#2f6fd6", "#d6452f"], town: ["#8a9bb3", "#b6c3d6", "#6f7f99"], caption: "#fff3a0", sfx: "#ffd23f", rocket: "#e9eef5", fin: "#d6452f" },
+  manga: { ink: "#111", sky: "#fff", room: "#fff", night: "#3a3a3a", hill: "#bbb", sun: "#fff", skin: "#fff", hair: ["#222", "#fff"], shirt: ["#fff", "#999"], town: ["#ccc", "#e6e6e6", "#999"], caption: "#fff", sfx: "#fff", rocket: "#fff", fin: "#888" },
+};
+// one simple, original character standing on y = base, centered on x, with a head of radius r. Returns [svg, top of head].
+function comicPerson(x, base, r, who, C) {
+  const hy = base - 3.1 * r, a = r * 0.35, e = r * 0.1, f = v => v.toFixed(1);
+  let g = `<path d="M${f(x - 1.6 * r)} ${f(base)}q0 ${f(-2.2 * r)} ${f(1.6 * r)} ${f(-2.2 * r)}t${f(1.6 * r)} ${f(2.2 * r)}z" fill="${C.shirt[who]}"/>`;
+  if (who) g += `<circle cx="${f(x - 0.9 * r)}" cy="${f(hy - 0.8 * r)}" r="${f(0.4 * r)}" fill="${C.hair[1]}"/><circle cx="${f(x + 0.9 * r)}" cy="${f(hy - 0.8 * r)}" r="${f(0.4 * r)}" fill="${C.hair[1]}"/>`;
+  g += `<circle cx="${f(x)}" cy="${f(hy)}" r="${f(r)}" fill="${C.skin}"/><path d="M${f(x - r)} ${f(hy)}a${f(r)} ${f(r)} 0 0 1 ${f(2 * r)} 0z" fill="${C.hair[who]}"/>`;
+  g += `<circle cx="${f(x - a)}" cy="${f(hy + 0.2 * r)}" r="${f(e)}" fill="${C.ink}"/><circle cx="${f(x + a)}" cy="${f(hy + 0.2 * r)}" r="${f(e)}" fill="${C.ink}"/>`;
+  g += `<path d="M${f(x - a)} ${f(hy + 0.5 * r)}q${f(a)} ${f(0.35 * r)} ${f(2 * a)} 0" fill="none"/>`;
+  return [g, hy - r];
+}
+// one panel, drawn in its own box from (0, 0) to (w, h); the box also cuts off anything that spills over
+function comicPanel([fx, fy, fw, fh, scene, words], X, Y, W, H, C, ptPx) {
+  const f = v => v.toFixed(1), x = X + fx * W, y = Y + fy * H, w = fw * W, h = fh * H, m = Math.min(w, h);
+  const outdoor = scene !== "one" && scene !== "two", dark = scene === "rocket";
+  let g = `<svg x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}"><rect width="${f(w)}" height="${f(h)}" fill="${dark ? C.night : outdoor ? C.sky : C.room}"/>`;
+  g += `<g stroke="${C.ink}" stroke-width="1">`;
+  let tx = w / 2, ty = h * 0.6;
+  if (scene === "sky") {
+    g += `<circle cx="${f(w * 0.8)}" cy="${f(h * 0.3)}" r="${f(m * 0.14)}" fill="${C.sun}"/><ellipse cx="${f(w * 0.3)}" cy="${f(h * 1.05)}" rx="${f(w * 0.6)}" ry="${f(h * 0.35)}" fill="${C.hill}"/>`;
+    g += `<rect x="${f(w * 0.55)}" y="${f(h * 0.62)}" width="${f(m * 0.3)}" height="${f(m * 0.24)}" fill="${C.room}"/><path d="M${f(w * 0.55 - m * 0.04)} ${f(h * 0.62)}l${f(m * 0.19)} ${f(-m * 0.16)}l${f(m * 0.19)} ${f(m * 0.16)}z" fill="${C.fin}"/>`;
+  } else if (scene === "city") {
+    for (let b = 0; b < 7; b++) g += `<rect x="${f(b * w / 7)}" y="${f(h * (0.35 + ((b * 5) % 7) / 14))}" width="${f(w / 7)}" height="${f(h)}" fill="${C.town[b % 3]}"/>`;
+  } else if (scene === "rocket") {
+    for (let t = 0; t < 9; t++) g += `<circle cx="${f(w * ((t * 0.37) % 1))}" cy="${f(h * ((t * 0.61) % 1))}" r="${f(m * 0.012)}" fill="#fff" stroke="none"/>`;
+    const rx = w * 0.72, rb = h * 0.85, rw = m * 0.12, rh = m * 0.5;
+    g += `<path d="M${f(rx - rw * 0.8)} ${f(rb + rh * 0.2)}l${f(rw * 0.8)} ${f(rh * 0.25)}l${f(rw * 0.8)} ${f(-rh * 0.25)}z" fill="${C.sun}"/>`;
+    g += `<path d="M${f(rx - rw * 1.4)} ${f(rb)}l${f(rw * 0.6)} ${f(-rh * 0.3)}h${f(rw * 1.6)}l${f(rw * 0.6)} ${f(rh * 0.3)}z" fill="${C.fin}"/>`;
+    g += `<path d="M${f(rx - rw)} ${f(rb)}v${f(-rh * 0.7)}q${f(rw)} ${f(-rh * 0.5)} ${f(2 * rw)} 0v${f(rh * 0.7)}z" fill="${C.rocket}"/><circle cx="${f(rx)}" cy="${f(rb - rh * 0.6)}" r="${f(rw * 0.45)}" fill="${C.sky}"/>`;
+    tx = w * 0.35; ty = h * 0.4;
+  } else if (scene === "speed") {
+    for (let t = 0; t < 24; t++) { const a = t * 0.2618, c = Math.cos(a), s = Math.sin(a), r0 = m * (0.3 + (t % 3) * 0.06), r1 = Math.max(w, h); g += `<path d="M${f(w / 2 + c * r0)} ${f(h / 2 + s * r0)}L${f(w / 2 + c * r1)} ${f(h / 2 + s * r1)}" stroke-width="${t % 2 ? 0.6 : 1.4}"/>`; }
+    g += comicPerson(w / 2, h * 0.95, m * 0.12, 0, C)[0];
+    tx = w * 0.3; ty = h * 0.3;
+  } else {
+    const two = scene === "two", r = Math.min(h * 0.13, w * (two ? 0.1 : 0.2)), p0 = comicPerson(w * (two ? 0.3 : 0.5), h, r, 0, C);
+    g += p0[0] + (two ? comicPerson(w * 0.7, h, r, 1, C)[0] : ""); tx = w * (two ? 0.3 : 0.5); ty = p0[1];
+  }
+  g += `</g>`;
+  if (words) {
+    // words: 8 pt lettering, or grey bars when it would be too small to read on this screen
+    const lines = words.split("|"), sfx = scene === "rocket" || scene === "speed";
+    const fs = sfx ? Math.min(m * 0.28, w * 0.55 / (words.length * 0.62)) : 8, lh = fs * 1.15, tw = Math.max(...lines.map(l => l.length)) * fs * 0.62, th = lines.length * lh;
+    let cx = tx, cy;
+    if (sfx) cy = ty;
+    else if (outdoor) { cx = Math.min(w / 2, tw / 2 + fs); cy = th / 2 + fs * 0.6; g += `<rect x="1" y="1" width="${f(tw + fs * 1.4)}" height="${f(th + fs * 0.8)}" fill="${C.caption}" stroke="${C.ink}" stroke-width="0.8"/>`; cx = 1 + (tw + fs * 1.4) / 2; }
+    else {
+      const rx = tw * 0.71 + fs * 0.9, ry = th * 0.71 + fs * 0.4; cx = Math.max(rx + 2, Math.min(w - rx - 2, tx)); cy = Math.max(ry + 3, ty - ry - fs * 2);
+      g += `<path d="M${f(cx - rx * 0.25)} ${f(cy + ry * 0.7)}L${f(tx)} ${f(Math.max(ty - 2, cy + ry + 2))}L${f(cx + rx * 0.1)} ${f(cy + ry * 0.8)}z" fill="#fff" stroke="${C.ink}" stroke-width="0.8"/>`;
+      g += `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="${f(rx)}" ry="${f(ry)}" fill="#fff" stroke="${C.ink}" stroke-width="0.8"/>`;
+    }
+    const y0 = cy - th / 2 + lh * 0.8;
+    if (fs * ptPx >= TEXT_MIN_PX) {
+      g += `<g font-size="${f(fs)}" font-weight="700" text-anchor="middle" fill="${sfx ? C.sfx : C.ink}"${sfx ? ` stroke="${C.ink}" stroke-width="${f(fs * 0.06)}" transform="rotate(-8 ${f(cx)} ${f(cy)})"` : ""}>`;
+      lines.forEach((l, k) => { g += `<text x="${f(cx)}" y="${f(y0 + k * lh)}">${l}</text>`; });
+      g += `</g>`;
+    } else lines.forEach((l, k) => { const lw = l.length * fs * 0.62; g += `<rect x="${f(cx - lw / 2)}" y="${f(y0 + k * lh - fs * 0.6)}" width="${f(lw)}" height="${f(fs * 0.5)}" fill="#9a9a9a"/>`; });
+  }
+  return g + `<rect x="0.6" y="0.6" width="${f(w - 1.2)}" height="${f(h - 1.2)}" fill="none" stroke="${C.ink}" stroke-width="1.2"/></svg>`;
+}
+// a whole page (page 0 or 1 of the style) as an SVG drawn into the given box on screen
+function comicPage(style, n, page, qx, py, one, ph, ptPx) {
+  const W = page.w * 72, H = page.h * 72, m = Math.min(W, H) * 0.07, C = COMIC_COLORS[style];
+  let g = `<svg class="comic ${style}" x="${qx.toFixed(1)}" y="${py.toFixed(1)}" width="${one.toFixed(1)}" height="${ph.toFixed(1)}" viewBox="0 0 ${W.toFixed(1)} ${H.toFixed(1)}">`;
+  for (const p of COMIC_PAGES[style][n % 2]) g += comicPanel(p, m, m, W - 2 * m, H - 2 * m, C, ptPx);
+  return g + `</svg>`;
+}
+
 function drawPage(x, r, s, paper0, i, col) {
   const spread = !!x.s.spread;
   const paper = spreadOf(x.s, paper0);
@@ -1135,6 +1228,7 @@ function drawPage(x, r, s, paper0, i, col) {
   const one = spread ? pw / 2 : pw;
   let g = `<g clip-path="url(#clip${i})">`;
   const src = lorem(); let gap = false; // page 2 carries on where page 1 stops
+  const art = S.paper !== "upload" && comicStyle(paper0.name || "");
   for (let n = 0; n < (spread ? 2 : 1); n++) {
     const qx = px + n * one;
     g += `<rect x="${qx}" y="${py}" width="${one}" height="${ph}" fill="var(--paper)" stroke="var(--paper-edge)" stroke-width="0.75"/>`;
@@ -1146,6 +1240,9 @@ function drawPage(x, r, s, paper0, i, col) {
         const W = pdf.w * 72, H = pdf.h * 72, f = v => (v * 1).toFixed(2);
         g += `<svg class="pdf-crop" x="${qx}" y="${py}" width="${one}" height="${ph}" viewBox="${f(c.x * W)} ${f(c.y * H)} ${f(c.w * W)} ${f(c.h * H)}" preserveAspectRatio="none"><image href="${img}" width="${W}" height="${H}" preserveAspectRatio="none"/></svg>`;
       } else if (img) g += `<image href="${img}" x="${qx}" y="${py}" width="${one}" height="${ph}" preserveAspectRatio="none"/>`;
+    } else if (art) {
+      // manga is read right to left, so its first page is the right-hand one of a two-page spread
+      g += comicPage(art, art === "manga" && spread ? 1 - n : n, paper0, qx, py, one, ph, k * s / 72);
     } else {
       // 12 pt body text with 1 inch margins, drawn to scale (line pitch 14.4 pt)
       const m = Math.min(1, paper0.w * 0.12) * k * s, lh = (14.4 / 72) * k * s, th = (7 / 72) * k * s;

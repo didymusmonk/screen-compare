@@ -3,14 +3,15 @@
 Compare phone, tablet, laptop, tablet PC (including Surface Pro) and monitor screens at true relative size.
 
 - Search 343 built-in screens plus 30 paper, book and card sizes, or enter your own screen (diagonal plus resolution or aspect ratio)
-- See each screen's pixel density (PPI), resolution, aspect ratio and physical size
+- See each screen's pixel density (PPI), resolution, megapixels, aspect ratio and physical size
 - Preview how Letter, A4, Legal and other page sizes, or your own PDF, fit on each screen
+- Video mode shows the picture's real size, diagonal and area without the black bars
 - Set one screen as the reference to see how the others compare, in percent: size, pages, video, e-book or websites
 - Side by side, overlay, or free arrange with drag, snapping guides and rotation
 - Calibrate "Actual size" with a bank card to see screens at real size on your monitor
 - Works offline after your first visit, including from your Home Screen
 
-It's a single static `index.html` with no build step and no server or outside services. PDFs open in your browser and are never uploaded.
+It's a single static `index.html` with no build step and no server. PDFs open in your browser and are never uploaded. [`methodology.html`](methodology.html) (linked as "Methodology" in the footer) explains how every number is worked out, how the device list was checked, and what the site can't show.
 
 ## Adding or fixing a device
 

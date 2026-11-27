@@ -240,6 +240,7 @@ dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-num
 
 .glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; font-size: 13.5px; color: var(--muted); }
 .glossary b { color: var(--fg); display: block; font-weight: 600; margin-bottom: 2px; }
+.glossary a { color: var(--accent); text-underline-offset: 2px; }
 .cal-card { margin: 8px 0; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 35%, var(--surface)), var(--surface)); border: 1px solid var(--accent); border-radius: 10px; display: grid; place-items: center; text-align: center; color: var(--muted); font-size: 12px; margin: 8px auto; box-sizing: border-box; }
 .cal-wrap { overflow-x: auto; margin-inline: -16px; } /* the full width of the panel, so the card fits upright on a phone */
 .cal-ctl { display: flex; gap: 8px; align-items: center; }
@@ -403,15 +404,16 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <div class="glossary">
           <div><b>PPI (pixels per inch)</b>How many screen pixels fit in one inch. Higher means sharper text. Phones are usually 400 to 500, tablets 260 to 330, laptops 200 to 250. Phone makers and spec sheets often call this DPI too.</div>
           <div><b>Crop white margins</b>Trims the empty border of your PDF so its text fills more of each screen. Each page is cut around its own text, so books with different inner and outer margins crop well, and every page keeps the same cropped size. Sizes stay true: at 100% the text is still its printed size. Your file isn't changed.</div>
+          <div><b>Megapixels (MP)</b>The total number of pixels, in millions: width × height in pixels ÷ 1,000,000. 1920 × 1080 is 2.07 MP. It says how much detail the screen can show in all, while PPI says how tightly the pixels are packed.</div>
           <div><b>Size vs. printed page</b>How big a PDF page looks on that screen compared with the same page printed on paper. At 80%, 12 pt text looks like 9.6 pt text.</div>
           <div><b>Pixels per page inch</b>How many screen pixels each inch of the page gets. It's the effective resolution of the page on that screen, like a scanner's DPI. Around 150 or more looks crisp.</div>
           <div><b>Reference screen</b>Press "Set as reference" on a card to compare the other screens with one you know. A table below the cards shows each value and how much higher or lower it is, in percent. +50% means one and a half times the reference. The percentages describe size, not which screen is better.</div>
-          <div><b>Sizes are screen only</b>Rectangles show the visible display area from the diagonal and pixel count, not bezels or the case. Diagonals are the maker's figures, which round a little and ignore rounded corners.</div>
+          <div><b>Sizes are screen only</b>Rectangles show the visible display area from the diagonal and pixel count, not bezels or the case. Diagonals are the maker's figures, which round a little and ignore rounded corners. <a href="methodology.html">How the numbers are worked out</a>.</div>
         </div>
         </details>
       </section>
       <footer class="site-foot">
-        <p>© 2026 DidymusMonk · <a href="https://github.com/didymusmonk/screen-compare/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a> · <a href="https://github.com/didymusmonk/screen-compare" target="_blank" rel="noopener">Source on GitHub</a> · <a href="https://github.com/didymusmonk/screen-compare/issues/new" target="_blank" rel="noopener">Spotted a wrong spec or missing device? Tell me</a></p>
+        <p>© 2026 DidymusMonk · <a href="https://github.com/didymusmonk/screen-compare/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a> · <a href="methodology.html">Methodology</a> · <a href="https://github.com/didymusmonk/screen-compare" target="_blank" rel="noopener">Source on GitHub</a> · <a href="https://github.com/didymusmonk/screen-compare/issues/new" target="_blank" rel="noopener">Spotted a wrong spec or missing device? Tell me</a></p>
         <p>Product names are trademarks of their owners. This site isn't affiliated with or endorsed by any of them. Specs come from public sources and may contain mistakes, so check the maker's figures before you buy.</p>
         <p>Privacy: visits are counted with GoatCounter, which uses no cookies and doesn't track you across sites. Any PDF you open stays in your browser and is never uploaded.</p>
       </footer>
@@ -1354,7 +1356,8 @@ const trunc = (t, n) => t.length > n ? t.slice(0, n - 1) + "…" : t;
 // so the two can never disagree. Paper sheets get only their size.
 function statsOf(s, dev, paper) {
   const g = geom(dev, s.flip), ppi = g.ppi;
-  const st = { g, ppi, area: g.area, diag: dev.sheet ? null : dev.d };
+  // megapixels come from the native pixel count, so turning the screen, zoom, calibration and display scaling can't change them
+  const st = { g, ppi, area: g.area, diag: dev.sheet ? null : dev.d, mp: dev.sheet || dev.aspectOnly ? null : dev.w * dev.h / 1e6 };
   if (dev.sheet) return st;
   if (paper) {
     const fit = fitOf(s), f = pageFit(g, spreadOf(s, paper), fit);
@@ -1370,6 +1373,7 @@ function statsOf(s, dev, paper) {
 }
 const areaTxt = a => S.units === "cm" ? `${(a * 6.4516).toFixed(0)} cm²` : `${a.toFixed(1)} sq in`;
 const diagTxt = d => S.units === "cm" ? (d * 2.54).toFixed(1) + " cm" : d + "″";
+const mpTxt = mp => mp.toFixed(2) + " MP";
 function renderCards() {
   const items = S.sel.map((s, i) => ({ s, dev: byId(s.id), color: COLORS[colIdx(s)], i })).filter(x => x.dev);
   const paper = paperDims();
@@ -1404,6 +1408,8 @@ function renderCards() {
         <dt>Picture uses</dt><dd>${Math.round(v.used * 100)}% of screen</dd>
         <dt>Black bars</dt><dd>${bars}</dd>
         <dt>Picture size</dt><dd>${fmtLen(v.vw)} × ${fmtLen(v.vh)}</dd>
+        <dt title="Measured across the picture itself, without the black bars">Picture diagonal</dt><dd>${fmtLen(st.video.diag)}</dd>
+        <dt title="The picture itself, without the black bars">Picture area</dt><dd>${areaTxt(st.video.area)}</dd>
         ${ppi ? `<dt>Picture pixels</dt><dd>${st.video.pxW} × ${st.video.pxH}</dd>` : ""}
       </dl></div>`;
     } else if (st.ebook) {
@@ -1443,6 +1449,7 @@ function renderCards() {
       <dl style="color:var(--fg)">
         ${x.dev.sheet ? "" : `<dt>Diagonal</dt>`}<dd ${x.dev.sheet ? "hidden" : ""}>${diagTxt(x.dev.d)}</dd>
         ${x.dev.aspectOnly ? "" : `<dt>Resolution</dt><dd>${g.pxW} × ${g.pxH}</dd>`}
+        ${st.mp ? `<dt>Megapixels</dt><dd>${mpTxt(st.mp)}</dd>` : ""}
         <dt>Aspect ratio</dt><dd>${aspectLabel(x.dev.w, x.dev.h)}</dd>
         ${x.dev.sheet ? "" : `<dt>Screen size</dt><dd>${dims}</dd>`}
         <dt>Area</dt><dd>${areaTxt(areaIn)}</dd>
@@ -1464,6 +1471,7 @@ const REF_COLS = {
     ["Diagonal", st => st.diag, st => diagTxt(st.diag)],
     ["Area", st => st.area, st => areaTxt(st.area)],
     ["PPI", st => st.ppi, st => String(Math.round(st.ppi))],
+    ["Megapixels", st => st.mp, st => st.mp.toFixed(2)],
   ]],
   page: ["Pages", [
     ["12 pt text looks like", st => st.page && st.page.pt, st => st.page.pt.toFixed(1) + " pt"],

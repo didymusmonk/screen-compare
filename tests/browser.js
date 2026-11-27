@@ -81,19 +81,20 @@ async function geometry() {
     && c[0]["Screen size"] === "5.00″ × 12.00″" && c[0]["Area"] === "60.0 sq in", JSON.stringify(c[0]));
   check("an identical screen shows identical numbers", JSON.stringify({ ...c[0], name: "" }) === JSON.stringify({ ...c[1], name: "" }));
   check("same size with half the pixels: same size and area, 50 PPI", c[2].ppi === "50" && c[2]["Screen size"] === c[0]["Screen size"] && c[2]["Area"] === c[0]["Area"]);
+  check("megapixels: 1200 × 500 is 0.60 MP, 600 × 250 is 0.15 MP", c[0]["Megapixels"] === "0.60 MP" && c[2]["Megapixels"] === "0.15 MP", JSON.stringify([c[0]["Megapixels"], c[2]["Megapixels"]]));
   let o = await outlines(p);
   check("the drawing makes identical screens identical in size", near(o[0].w, o[1].w, 0.01) && near(o[0].h, o[1].h, 0.01) && near(o[0].w, o[2].w, 0.01));
   check("the drawing keeps the 5 : 12 shape", near(o[0].h / o[0].w, 12 / 5, 0.01));
   await cardBtn(p, 0, "orient", "landscape");
   c = await cards(p); o = await outlines(p);
-  check("rotating one screen swaps its size and pixels, keeps PPI, area and diagonal", c[0].orient === "landscape" && c[0]["Screen size"] === "12.00″ × 5.00″" && c[0]["Resolution"] === "1200 × 500"
-    && c[0].ppi === "100" && c[0]["Area"] === "60.0 sq in" && c[0]["Diagonal"] === "13″" && c[1].orient === "portrait");
+  check("rotating one screen swaps its size and pixels, keeps PPI, area, diagonal and megapixels", c[0].orient === "landscape" && c[0]["Screen size"] === "12.00″ × 5.00″" && c[0]["Resolution"] === "1200 × 500"
+    && c[0].ppi === "100" && c[0]["Area"] === "60.0 sq in" && c[0]["Diagonal"] === "13″" && c[0]["Megapixels"] === "0.60 MP" && c[1].orient === "portrait");
   check("and its outline turns sideways", near(o[0].w / o[0].h, 12 / 5, 0.01) && near(o[0].w, o[1].h, 0.01));
   await cardBtn(p, 0, "orient", "portrait");
   o = await outlines(p);
   await click(p, '#units button[data-v="cm"]');
   c = await cards(p);
-  check("centimeters: 33.0 cm diagonal, 12.7 × 30.5 cm, 387 cm², PPI unchanged", c[0]["Diagonal"] === "33.0 cm" && c[0]["Screen size"] === "12.7 cm × 30.5 cm" && c[0]["Area"] === "387 cm²" && c[0].ppi === "100", JSON.stringify(c[0]));
+  check("centimeters: 33.0 cm diagonal, 12.7 × 30.5 cm, 387 cm², PPI and megapixels unchanged", c[0]["Diagonal"] === "33.0 cm" && c[0]["Screen size"] === "12.7 cm × 30.5 cm" && c[0]["Area"] === "387 cm²" && c[0].ppi === "100" && c[0]["Megapixels"] === "0.60 MP", JSON.stringify(c[0]));
   const o2 = await outlines(p);
   check("changing units doesn't move or resize anything in the drawing", JSON.stringify(o2) === JSON.stringify(o));
   await click(p, '#units button[data-v="in"]');
@@ -278,18 +279,30 @@ async function video() {
   const c169 = c[0];
   check("16:9 on an upright 5 × 12 in screen: 5.00 × 2.81 in picture, 4.59 in bars top and bottom, 23%", c[0]["Picture size"] === "5.00″ × 2.81″" && c[0]["Black bars"] === "top and bottom, 4.59″ each" && c[0]["Picture uses"] === "23% of screen" && c[0]["Picture pixels"] === "500 × 281", JSON.stringify(c[0]));
   check("turned sideways (12 × 5 in): 8.89 × 5.00 in, 1.56 in bars left and right, 74%", c[1]["Picture size"] === "8.89″ × 5.00″" && c[1]["Black bars"] === "left and right, 1.56″ each" && c[1]["Picture uses"] === "74% of screen" && c[1]["Picture pixels"] === "889 × 500", JSON.stringify(c[1]));
+  // upright: 5 × 45/16 in, diagonal 5 × √(1 + 81/256) = 5.737 in, area 14.0625 sq in; sideways: 80/9 × 5 in, diagonal 5 × √(256/81 + 1) = 10.199 in, area 44.44 sq in
+  check("picture diagonal and area leave out the bars: upright 5.74″ and 14.1 sq in, sideways 10.20″ and 44.4 sq in", c[0]["Picture diagonal"] === "5.74″" && c[0]["Picture area"] === "14.1 sq in" && c[1]["Picture diagonal"] === "10.20″" && c[1]["Picture area"] === "44.4 sq in", JSON.stringify([c[0]["Picture diagonal"], c[0]["Picture area"], c[1]["Picture diagonal"], c[1]["Picture area"]]));
+  await click(p, '#units button[data-v="cm"]');
+  const ccm = await cards(p);
+  check("in centimeters: 14.6 cm and 91 cm² upright, 25.9 cm and 287 cm² sideways", ccm[0]["Picture diagonal"] === "14.6 cm" && ccm[0]["Picture area"] === "91 cm²" && ccm[1]["Picture diagonal"] === "25.9 cm" && ccm[1]["Picture area"] === "287 cm²", JSON.stringify([ccm[0]["Picture diagonal"], ccm[0]["Picture area"], ccm[1]["Picture diagonal"], ccm[1]["Picture area"]]));
+  await click(p, '#units button[data-v="in"]');
   const pics = await p.$$eval("#stage .scr", gs => gs.map(g => { const s = g.querySelector("rect"), v = g.querySelector('rect[fill="url(#vidsky)"]'); const n = (r, a) => +r.getAttribute(a); return { sx: n(s, "x"), sy: n(s, "y"), sw: n(s, "width"), sh: n(s, "height"), vx: n(v, "x"), vy: n(v, "y"), vw: n(v, "width"), vh: n(v, "height") }; }));
   check("the drawn picture is 16:9 and centered, with equal bars", pics.every(q => near(q.vw / q.vh, 16 / 9, 0.01) && near(q.vx - q.sx, q.sx + q.sw - q.vx - q.vw, 0.5) && near(q.vy - q.sy, q.sy + q.sh - q.vy - q.vh, 0.5)));
+  const beforeCal = statsOnly(await cards(p));
+  await setRange(p, "#zoom", 25);
+  await click(p, '#scaleMode button[data-v="actual"]');
+  await click(p, "#cal-btn"); await setRange(p, "#cal-range", 150); await click(p, "#cal-done");
+  check("zoom, actual size and calibration don't change the picture diagonal, area or any other video number", statsOnly(await cards(p)) === beforeCal);
   await p.selectOption("#video", "2.39:1");
   c = await cards(p);
   check("2.39:1 cinema upright: 5.00 × 2.09 in picture, 4.95 in bars", c[0]["Picture size"] === "5.00″ × 2.09″" && c[0]["Black bars"] === "top and bottom, 4.95″ each", JSON.stringify(c[0]));
   await p.selectOption("#video", "9:16");
   c = await cards(p);
   check("9:16 vertical video nearly fills the upright screen (5 × 8.89 in, bars top and bottom)", c[0]["Picture size"] === "5.00″ × 8.89″" && c[0]["Black bars"] === "top and bottom, 1.56″ each");
+  check("…and the picture diagonal follows the shape: 10.20″ upright, 5.74″ sideways", c[0]["Picture diagonal"] === "10.20″" && c[1]["Picture diagonal"] === "5.74″", c[0]["Picture diagonal"] + " " + c[1]["Picture diagonal"]);
   await p.selectOption("#video", "16:9");
   const twin = await open({ state: { sel: sel("c-low"), content: "video", video: "16:9" } });
   const cl = await cards(twin.p);
-  check("same size with fewer pixels: same picture size, fewer picture pixels", cl[0]["Picture size"] === c169["Picture size"] && cl[0]["Picture pixels"] === "250 × 141");
+  check("same size with fewer pixels: same picture size, diagonal and area, fewer picture pixels", cl[0]["Picture size"] === c169["Picture size"] && cl[0]["Picture diagonal"] === c169["Picture diagonal"] && cl[0]["Picture area"] === c169["Picture area"] && cl[0]["Picture pixels"] === "250 × 141");
   await twin.ctx.close();
   noErrors(p, "video");
   await ctx.close();
@@ -636,16 +649,19 @@ async function reference() {
   await cardBtn(p, 0, "ref");
   let t = await table();
   check("setting Test 13 as the reference marks its card and shows the table", (await refCards()).join() === "Test 13" && t && t.title === "Compared with Test 13" && (await p.textContent('#cards [data-act="ref"][data-i="0"]')) === "Clear reference");
-  check("screen mode columns: width, height, diagonal, area, PPI", t.head.join("|") === "Width|Height|Diagonal|Area|PPI", t.head.join("|"));
+  check("screen mode columns: width, height, diagonal, area, PPI, megapixels", t.head.join("|") === "Width|Height|Diagonal|Area|PPI|Megapixels", t.head.join("|"));
   check("rows follow the card order and the reference row says so", t.rows.map(r => r.name).join() === "Test 13,Big 26,Low 13,Shape only" && t.rows[0].ref && t.rows.filter(r => r.ref).length === 1);
   const cardColors = await p.$$eval("#cards .card", cs => cs.map(c => getComputedStyle(c).color));
   check("each row uses its screen's color", t.rows.every((r, k) => r.color === cardColors[k]) && new Set(cardColors).size === 4, JSON.stringify(t.rows.map(r => r.color)));
   check("the reference row is the baseline", t.rows[0].cells.every(c => c[1] === "baseline") && t.rows[0].cells[0][0] === "5.00″");
-  check("twice the size: +100% width, height and diagonal, +300% area, same PPI (0%)", JSON.stringify(t.rows[1].cells) === JSON.stringify([["10.00″", "+100%"], ["24.00″", "+100%"], ["26″", "+100%"], ["240.0 sq in", "+300%"], ["100", "0%"]]), JSON.stringify(t.rows[1].cells));
-  check("half the pixels: same size (0%), −50% PPI with a real minus sign", JSON.stringify(t.rows[2].cells.map(c => c[1])) === JSON.stringify(["0%", "0%", "0%", "0%", "−50%"]));
-  check("a screen with no pixel count shows a dash for PPI, not 0 or −100%", JSON.stringify(t.rows[3].cells[4]) === JSON.stringify(["–", ""]) && t.rows[3].cells[0][1] === "0%");
+  check("twice the size: +100% width, height and diagonal, +300% area, same PPI (0%), four times the megapixels (+300%)", JSON.stringify(t.rows[1].cells) === JSON.stringify([["10.00″", "+100%"], ["24.00″", "+100%"], ["26″", "+100%"], ["240.0 sq in", "+300%"], ["100", "0%"], ["2.40", "+300%"]]), JSON.stringify(t.rows[1].cells));
+  check("half the pixels: same size (0%), −50% PPI with a real minus sign, a quarter of the megapixels (−75%)", JSON.stringify(t.rows[2].cells.map(c => c[1])) === JSON.stringify(["0%", "0%", "0%", "0%", "−50%", "−75%"]), JSON.stringify(t.rows[2].cells));
+  check("a screen with no pixel count shows a dash for PPI and megapixels, not 0 or −100%", JSON.stringify(t.rows[3].cells[4]) === JSON.stringify(["–", ""]) && JSON.stringify(t.rows[3].cells[5]) === JSON.stringify(["–", ""]) && t.rows[3].cells[0][1] === "0%");
   const c = await cards(p);
-  check("table values match the cards", t.rows.every((r, k) => r.cells[0][0] + " × " + r.cells[1][0] === c[k]["Screen size"] && r.cells[2][0] === c[k]["Diagonal"] && r.cells[3][0] === c[k]["Area"]));
+  check("table values match the cards", t.rows.every((r, k) => r.cells[0][0] + " × " + r.cells[1][0] === c[k]["Screen size"] && r.cells[2][0] === c[k]["Diagonal"] && r.cells[3][0] === c[k]["Area"] && (c[k]["Megapixels"] ? r.cells[5][0] + " MP" === c[k]["Megapixels"] : r.cells[5][0] === "–")));
+  await cardBtn(p, 1, "orient", "landscape");
+  check("turning a screen doesn't change its megapixels or their percentage", JSON.stringify((await table()).rows[1].cells[5]) === JSON.stringify(["2.40", "+300%"]));
+  await cardBtn(p, 1, "orient", "portrait");
 
   // One reference at a time; clear it, choose another
   await cardBtn(p, 1, "ref");
@@ -679,7 +695,7 @@ async function reference() {
     const cs = await cards(p);
     let same;
     if (m === "page") same = t.rows.every((r, k) => r.cells[0][0] === cs[k]["12 pt text looks like"] && (r.cells[1][0] === (cs[k]["Pixels per page inch"] || "–")) && r.cells[2][0] === cs[k]["Page visible at once"]);
-    if (m === "video") same = t.rows.every((r, k) => r.cells[2][0] === (cs[k]["Picture pixels"] || "–"));
+    if (m === "video") same = t.rows.every((r, k) => r.cells[0][0] === cs[k]["Picture diagonal"] && r.cells[1][0] === cs[k]["Picture area"] && r.cells[2][0] === (cs[k]["Picture pixels"] || "–"));
     if (m === "ebook") same = t.rows.every((r, k) => "about " + r.cells[0][0] === cs[k]["Words per screen"] && "about " + r.cells[1][0] === cs[k]["Characters per line"] && r.cells[2][0] === cs[k]["Lines per screen"]);
     if (m === "site") same = t.rows.every((r, k) => cs[k]["Browser width"] ? `${r.cells[0][0]} × ${r.cells[1][0]} CSS px` === cs[k]["Browser width"] : r.cells[0][0] === "–");
     check(`${m} mode: its own columns, same numbers as the cards`, t.head.join("|") === head && same, t.head.join("|") + " " + JSON.stringify(t.rows.map(r => r.cells)));

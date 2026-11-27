@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Methodology · True Size Screens</title>
+<meta name="description" content="How True Size Screens works out screen sizes, pixel density, page, e-book, video and website previews, and what it can't show.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://didymusmonk.github.io/screen-compare/methodology.html">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f141a" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Same colors and fonts as the main page (index.html) */
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --sunk: #e8ecf0; --fg: #17202b; --muted: #5b6878; --line: #cfd6de; --accent: #1f5fd1;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f141a; --surface: #161d25; --sunk: #1c252f; --fg: #e6ebf1; --muted: #93a1b2; --line: #2c3845; --accent: #6b9cff;
+} }
+:root[data-theme="dark"] { --bg: #0f141a; --surface: #161d25; --sunk: #1c252f; --fg: #e6ebf1; --muted: #93a1b2; --line: #2c3845; --accent: #6b9cff; }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+.wrap { max-width: 760px; margin: 0 auto; padding: calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 32px max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 16px; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+h1 { font-family: var(--font-display); font-size: clamp(26px, 6vw, 34px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; margin: 4px 0 0; }
+h2 { font-family: var(--font-display); font-size: 20px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; margin: 0; }
+h3 { font-size: 16px; font-weight: 600; margin: 8px 0 0; }
+p, ul { margin: 0; }
+ul { padding-left: 1.2em; display: grid; gap: 4px; }
+.eyebrow { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.lede { color: var(--muted); }
+.back { font-size: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: grid; gap: 10px; min-width: 0; }
+.toc ol { margin: 0; padding-left: 1.4em; columns: 2 220px; column-gap: 24px; font-size: 15px; }
+.toc li { break-inside: avoid; padding: 2px 0; }
+.f { font-family: var(--font-mono); font-size: 13.5px; background: var(--sunk); border-radius: 7px; padding: 8px 10px; overflow-wrap: anywhere; line-height: 1.5; display: grid; gap: 4px; }
+.f > div { padding-left: 1.5em; text-indent: -1.5em; } /* a long formula wraps with its continuation indented */
+code { font-family: var(--font-mono); font-size: 0.88em; }
+.note { font-size: 14.5px; color: var(--muted); }
+section { scroll-margin-top: 12px; }
+footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; padding: 0 2px; }
+footer a { color: inherit; }
+@media (max-width: 700px) { .back a, .toc a { display: inline-block; padding: 6px 0; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="back"><a href="./">← Back to True Size Screens</a></p>
+    <span class="eyebrow">Methodology and limits</span>
+    <h1>How True Size Screens works</h1>
+    <p class="lede">What every number on the site is based on, the formulas behind it, and what the site can't tell you. Everything here describes what the site actually does today.</p>
+  </header>
+
+  <nav class="panel toc" aria-labelledby="toc-h">
+    <h2 id="toc-h">Contents</h2>
+    <ol>
+      <li><a href="#geometry">Screen geometry</a></li>
+      <li><a href="#database">The device list</a></li>
+      <li><a href="#calibration">Actual-size calibration</a></li>
+      <li><a href="#pages">Pages and PDFs</a></li>
+      <li><a href="#ebooks">E-books</a></li>
+      <li><a href="#video">Video</a></li>
+      <li><a href="#websites">Websites</a></li>
+      <li><a href="#reference">Reference comparisons</a></li>
+      <li><a href="#privacy">Privacy and offline use</a></li>
+      <li><a href="#limits">What it doesn't show</a></li>
+    </ol>
+  </nav>
+
+  <main style="display:grid; gap:16px">
+  <section class="panel" id="geometry" aria-labelledby="geometry-h">
+    <h2 id="geometry-h">Screen geometry</h2>
+    <p>Each screen starts from three published figures: its diagonal in inches and its width and height in pixels. Pixels are assumed to be square, so the screen has the same shape as its pixel grid, and its size follows from the diagonal:</p>
+    <div class="f"><div>pixel diagonal = √(width px² + height px²)</div><div>width (in) = diagonal × width px ÷ pixel diagonal</div><div>height (in) = diagonal × height px ÷ pixel diagonal</div><div>area = width × height</div><div>PPI = pixel diagonal ÷ diagonal</div><div>megapixels = width px × height px ÷ 1,000,000</div></div>
+    <p>For example, a 13-inch screen of 1200 × 500 pixels is exactly 12 × 5 inches at 100 pixels per inch. The aspect ratio is the pixel width divided by the pixel height, shown with its common name (16:9, 3:2 and so on) when it matches one. Centimeters are inches × 2.54.</p>
+    <p>Turning a screen swaps its width and height. Its diagonal, area, PPI and megapixels stay the same. None of these numbers depend on the zoom, the calibration, or the display scaling a device uses.</p>
+    <p>The advertised diagonal is a rounded marketing figure (a "6.1-inch" phone may measure 6.06 or 6.12 inches), and many makers measure it as if the screen were a full rectangle. The site does the same: it treats every screen as a rectangle and doesn't model rounded corners, notches, camera holes or the crease of a folding screen, so the area you can actually see is a little smaller than shown. Outlines show the lit screen area only, never the bezel or the case. Sizes are typically accurate to about 1–2%.</p>
+    <p>If you enter your own screen with an aspect ratio instead of a pixel count, the site can work out its size but not its PPI, megapixels or anything else that needs pixels.</p>
+  </section>
+
+  <section class="panel" id="database" aria-labelledby="database-h">
+    <h2 id="database-h">The device list</h2>
+    <p>The built-in list is a plain spreadsheet file, <a href="https://github.com/didymusmonk/screen-compare/blob/main/devices.csv"><code>devices.csv</code></a>, with each screen's name, type, diagonal and pixel count, plus paper, book and card sizes in inches. The figures come from public sources, mostly makers' spec sheets.</p>
+    <p>In November 2026 every row was checked again. The research was done with an AI research assistant (Google's Gemini) comparing each entry with published specs, and scripts checked the results for consistency (missing or impossible values, duplicate names, grouped models, folding-phone screen pairs and categories). Disagreements and unclear cases were reviewed by hand. No existing size had to change, 58 missing devices were added, and some grouped names were completed. This was a careful check, but not every entry has been confirmed against the maker's own page, and research assistants make mistakes, so check the maker's figures before you buy.</p>
+    <ul>
+      <li><strong>Rounding:</strong> makers round diagonals to one decimal place or less, and different sources sometimes quote slightly different figures for the same screen.</li>
+      <li><strong>Grouped models:</strong> when several models share the same screen, one row covers them, such as "Galaxy Z Fold5 / Fold4".</li>
+      <li><strong>Folding phones:</strong> the inner and cover screens are listed separately. The inner screen is measured open and flat.</li>
+      <li><strong>Color e-ink:</strong> color e-readers are listed at their native panel resolution, the one their makers quote and the one used for PPI and megapixels. On many of these panels the color layer has a lower resolution than black-and-white text; the site doesn't model that.</li>
+      <li><strong>Unreleased products are left out</strong> until they're on sale.</li>
+    </ul>
+    <p><strong>Found a mistake, or missing a device?</strong> Please <a href="https://github.com/didymusmonk/screen-compare/issues/new">open an issue on GitHub</a> (a free GitHub account is needed) with the device name and, ideally, a link to the maker's specs. If you're comfortable with GitHub you can also propose the change to <code>devices.csv</code> directly; the <a href="https://github.com/didymusmonk/screen-compare#adding-or-fixing-a-device">README</a> explains the format. Screens you enter yourself stay in your own browser and are never collected.</p>
+  </section>
+
+  <section class="panel" id="calibration" aria-labelledby="calibration-h">
+    <h2 id="calibration-h">Actual-size calibration</h2>
+    <p>Browsers don't know the physical size of your screen. They work in "CSS pixels", and the web's nominal value is 96 CSS pixels per inch, which is right for few real screens. Until you calibrate, "Actual size" uses that estimate, and the note under the drawing says so.</p>
+    <p>To calibrate, press "Calibrate actual size" and hold a bank card against the screen. Bank cards (and most ID cards) are the ID-1 size, exactly <strong>85.60 × 53.98 mm</strong>. Move the slider, or tap − and +, until the card on screen matches your card's edges. The site then knows how many CSS pixels make a real inch on your screen:</p>
+    <div class="f"><div>CSS px per inch = card width on screen (px) ÷ (85.60 mm ÷ 25.4)</div></div>
+    <p>The setting is saved on your device only. It changes only how big the drawing is in "Actual size". No number on the cards depends on it.</p>
+    <ul>
+      <li><strong>Browser zoom and display settings</strong> change how big a CSS pixel is, so they make an old calibration wrong. On computers the site notices most changes and asks you to calibrate again. Safari on iPhone and iPad may not report its page zoom (the "aA" menu), so recalibrate yourself after changing it.</li>
+      <li><strong>Viewing conditions matter:</strong> hold the card flat against the screen and look straight at it. A card held off the glass or seen at an angle looks bigger or smaller than it is.</li>
+      <li>Safari can clear saved settings for a site you haven't visited for a week, which resets the calibration. A site added to the Home Screen keeps it.</li>
+    </ul>
+    <p>In "Fit" or with the zoom slider, the drawing is to scale but not actual size. Once you've calibrated, the note says what percentage of actual size you're seeing.</p>
+  </section>
+
+  <section class="panel" id="pages" aria-labelledby="pages-h">
+    <h2 id="pages-h">Pages and PDFs</h2>
+    <p>Paper sizes are stored in inches (Letter is 8.5 × 11, A4 is 8.27 × 11.69). For your own PDF, the size comes from the current page itself: PDF pages are measured in points, and 72 points make an inch. The page is then scaled by a factor <em>k</em>:</p>
+    <div class="f"><div>Fit page: k = smaller of (screen width ÷ page width) and (screen height ÷ page height)</div><div>Fit width: k = screen width ÷ page width</div><div>100%: k = 1 (the page at its printed size)</div></div>
+    <ul>
+      <li><strong>Size vs. printed page</strong> is k as a percentage, and <strong>12 pt text looks like</strong> 12 × k points. A point is 1/72 inch, so this is the physical size of the letters, whatever the screen's resolution.</li>
+      <li><strong>Pixels per page inch</strong> = PPI × k: how many screen pixels each inch of the original page gets, like a scanner's resolution.</li>
+      <li><strong>Page visible at once</strong> = the part of the scaled page that fits on the screen ÷ the whole scaled page. Fit page always shows 100%.</li>
+      <li><strong>Two pages</strong> puts the next page beside the current one, with no gap, and fits the pair as one wide page.</li>
+    </ul>
+    <h3>Crop white margins</h3>
+    <p>This optional setting trims the empty border of your PDF. It draws a sample of up to 12 pages at 800 pixels, takes the most common color as the background (so off-white scans work), treats anything clearly darker or different as content, ignores specks of dust, and keeps 0.12 inches around the content. Every page gets the same cropped size, placed separately on odd and even pages so books with mirrored margins crop well. The cropped page then replaces the page in Fit page, Fit width and the card numbers; at 100% the text stays at its printed size.</p>
+    <p class="note">Limits: a page with no clear background, such as a full-page photo, isn't cropped. Marks in a margin, such as a stamp or a scanner shadow that reaches into the page, can stop that margin from being trimmed. One page with much more content than the sample makes that page's crop larger.</p>
+  </section>
+
+  <section class="panel" id="ebooks" aria-labelledby="ebooks-h">
+    <h2 id="ebooks-h">E-books</h2>
+    <p>E-book mode lays out real text on each screen and counts what fits. Font sizes are <strong>physical typographic points</strong> (1 pt = 1/72 inch), not the numbered size settings of reading apps, so 12 pt text is the same physical size on every screen.</p>
+    <ul>
+      <li>The sample is a public-domain passage from Jane Austen's <cite>Pride and Prejudice</cite> (1813), chapter 42 to the start of chapter 43. On a very large screen at a small size it starts again from the beginning.</li>
+      <li>Each word is measured with your browser's own serif font (Georgia where available), then wrapped into lines. The preview draws exactly those lines, and the card's words, lines and characters per line are counted from the same layout.</li>
+      <li>Assumed layout: 0.3-inch margins on every side, line spacing 1.5 × the font size, a 1.5 em first-line indent for each paragraph, ragged right with no hyphenation, and 0.5 inches between columns.</li>
+      <li><strong>Auto</strong> columns tries one and two columns and picks the one whose lines come closer to 45–75 characters, a comfortable reading length.</li>
+    </ul>
+    <div class="f"><div>lines per column = whole lines in (screen height − 2 × 0.3 in) ÷ (1.5 × font size)</div></div>
+    <p class="note">Real reading apps use their own fonts, margins, line spacing, justification, hyphenation, headers and page numbers, so they show more or less text than this. The counts also differ a little between devices, because the sample font differs. Use them to compare screens, not to predict one app exactly.</p>
+  </section>
+
+  <section class="panel" id="video" aria-labelledby="video-h">
+    <h2 id="video-h">Video</h2>
+    <p>The video is shown as large as possible without cropping. When its shape differs from the screen's, black bars fill the rest: top and bottom (letterboxing) or left and right (pillarboxing). With a screen of width W, height H and a video aspect ratio A (width ÷ height):</p>
+    <div class="f"><div>picture width = the smaller of W and (H × A)</div><div>picture height = picture width ÷ A</div><div>picture diagonal = √(picture width² + picture height²)</div><div>picture area = picture width × picture height</div><div>picture uses = picture area ÷ screen area</div></div>
+    <p>The picture diagonal and area exclude the black bars, so they tell you how big the video itself looks. Turning the screen changes them: 16:9 video on an upright phone is much smaller than on the same phone turned sideways.</p>
+    <p><strong>Picture pixels</strong> are the screen pixels the picture covers (picture size × PPI). That's what the screen can show, not the resolution of the video file: a 4K video on a screen with 1920 × 1080 picture pixels is shown at 1920 × 1080, and a low-resolution video on a sharp screen is enlarged. The site doesn't model "zoom to fill" (which crops instead of adding bars), player controls, or notches.</p>
+  </section>
+
+  <section class="panel" id="websites" aria-labelledby="websites-h">
+    <h2 id="websites-h">Websites</h2>
+    <p>Websites are laid out in CSS pixels, and each device decides how many screen pixels make one CSS pixel, its display scaling. The site estimates the usual default for each device and works out the browser's size:</p>
+    <div class="f"><div>browser width (CSS px) = screen width px ÷ display scaling</div><div>16 px text looks like = 16 × display scaling ÷ PPI × 72 pt</div></div>
+    <ul>
+      <li>Estimated scaling: iPhones 3× (2× for SE, XR and 11), iPads 2×, MacBooks about 127 points per inch, other phones about 412 CSS pixels wide, other tablets PPI ÷ 160, monitors PPI ÷ 110, and other laptops and tablet PCs PPI ÷ 130, rounded to common steps.</li>
+      <li>Auto layout follows the browser width: under 600 CSS px is a mobile layout, 600 to 1023 a tablet layout, and 1024 or more a desktop layout. A forced desktop layout on a narrow screen is a 980 px page shrunk to fit, as phone browsers do.</li>
+      <li>The full screen is used, without address bars, toolbars or system bars.</li>
+    </ul>
+    <p class="note">The previews are generic, made-up pages, not real sites. Real sites pick their own breakpoints and text sizes, browsers add their own toolbars, and you may have changed your device's scaling or text size, so actual pages can look different.</p>
+  </section>
+
+  <section class="panel" id="reference" aria-labelledby="reference-h">
+    <h2 id="reference-h">Reference comparisons</h2>
+    <p>Press "Set as reference" on one card and a table compares every screen with it, using the same numbers as the cards:</p>
+    <div class="f"><div>difference = (value ÷ reference value − 1) × 100%</div></div>
+    <p>Results are rounded to whole percentages: +50% is one and a half times the reference, −50% is half. A missing value, such as PPI for a screen entered by aspect ratio, shows a dash instead of a percentage. The columns follow what you're showing (screen size, pages, video, e-book or website).</p>
+    <p>These percentages describe size, not quality. A bigger number isn't always better: more PPI means sharper but smaller pixels, and a larger screen is also heavier to carry.</p>
+  </section>
+
+  <section class="panel" id="privacy" aria-labelledby="privacy-h">
+    <h2 id="privacy-h">Privacy and offline use</h2>
+    <ul>
+      <li><strong>PDFs stay on your device.</strong> They're opened in your browser by pdf.js, a PDF reader from Mozilla that's included with the site. The file is never uploaded.</li>
+      <li><strong>Your settings and your own screens</strong> are saved in your browser's local storage on this device, and nowhere else. "Reset to start" brings back the first-visit layout but keeps your own screens and calibration; clearing this site's data in your browser's settings removes everything.</li>
+      <li><strong>Share links</strong> carry the comparison, including any screens you entered, inside the link after "#". Browsers don't send that part to the web server, but anyone you give the link to can see it.</li>
+      <li><strong>Offline:</strong> after your first visit, the site, the device list and this page work without a connection. The PDF reader is saved the first time you open a PDF. You can add the site to your Home Screen, where it opens like an app.</li>
+      <li><strong>Visit counts:</strong> the main page counts visits with <a href="https://www.goatcounter.com/help/privacy">GoatCounter</a>. According to its privacy policy it records the page address, the referring site, your browser and system name, screen width, language and country (worked out from your IP address). It stores no IP addresses, no full browser details and no cookies, and doesn't track you across sites. This page doesn't count visits.</li>
+      <li><strong>Fonts</strong> are loaded from Google Fonts, so your browser asks Google's servers for them.</li>
+    </ul>
+  </section>
+
+  <section class="panel" id="limits" aria-labelledby="limits-h">
+    <h2 id="limits-h">What it doesn't show</h2>
+    <p>True Size Screens compares the physical geometry of screens and approximate content layouts. It doesn't try to reproduce brightness, contrast, color accuracy, viewing angles, refresh rates, how text is smoothed (antialiasing), reflections, or the look of different display technologies such as OLED, LCD or e-ink. The preview on your own screen is always limited by your screen's sharpness and color. For those qualities, read reviews or see the device in person.</p>
+  </section>
+  </main>
+
+  <footer>
+    <p><a href="./">Back to True Size Screens</a> · © 2026 DidymusMonk · <a href="https://github.com/didymusmonk/screen-compare/blob/main/LICENSE">MIT License</a> · <a href="https://github.com/didymusmonk/screen-compare">Source on GitHub</a></p>
+    <p>Product names are trademarks of their owners. This site isn't affiliated with or endorsed by any of them.</p>
+  </footer>
+</div>
+</body>
+</html>

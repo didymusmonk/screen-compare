@@ -233,6 +233,23 @@ async function run(browser, base, label, ctxOptions) {
     check("no accessibility problems (axe-core)", bad.length === 0, bad.join(", "));
   } else console.log("  - accessibility scan skipped (run npm install in tests/ to add axe-core)");
 
+  // Methodology page: a footer link opens it, it reads well on a phone, and it links back
+  const methLink = p.locator('.site-foot a[href="methodology.html"]');
+  check("the footer has a Methodology link", (await methLink.count()) === 1 && (await methLink.textContent()) === "Methodology");
+  const cardsBefore = await cardCount(p);
+  await methLink.click();
+  await p.waitForSelector("h1");
+  const meth = await p.evaluate(() => ({ h1: document.querySelector("h1").textContent, sections: [...document.querySelectorAll("main section h2")].map(h => h.textContent), over: document.documentElement.scrollWidth - innerWidth, font: parseFloat(getComputedStyle(document.body).fontSize), bg: getComputedStyle(document.body).backgroundColor }));
+  check("the methodology page opens with all ten topics, no sideways scrolling, 16 px text", meth.h1 === "How True Size Screens works" && meth.sections.length === 10 && meth.over <= 0 && meth.font >= 16, JSON.stringify(meth));
+  if (axeSource) {
+    await p.addScriptTag({ content: axeSource });
+    const bad = await p.evaluate(async () => (await axe.run(document, { runOnly: ["wcag2a", "wcag2aa"] })).violations.map(v => `${v.id} (${v.nodes.length})`));
+    check("methodology page: no accessibility problems (axe-core)", bad.length === 0, bad.join(", "));
+  }
+  await p.click('.back a');
+  await p.waitForSelector("#cards .card");
+  check("its back link returns to the comparison, as it was", await refShown() && (await cardCount(p)) === cardsBefore, `${p.url()} ${await refShown()} ${await cardCount(p)} cards`);
+
   // Offline: after one visit, the site opens with no connection
   const hasSw = await p.evaluate(() => [...document.scripts].some(s => s.textContent.includes("serviceWorker")));
   if (hasSw) {
@@ -245,6 +262,8 @@ async function run(browser, base, label, ctxOptions) {
     await p.setInputFiles("#pdf-file", { name: "offline.pdf", mimeType: "application/pdf", buffer: tinyPdf() });
     const offPdf = await p.waitForFunction(() => /^offline: .*5\.00 × 7\.00 in/.test(document.querySelector("#pdf-status").textContent), null, { timeout: 15000 }).then(() => true, () => false);
     check("PDFs open offline after one was opened online", offPdf, await p.textContent("#pdf-status"));
+    const offMeth = await p.goto(base + "methodology.html").then(r => r && r.ok(), () => false);
+    check("the methodology page opens offline too", offMeth && (await p.textContent("h1")) === "How True Size Screens works");
     await ctx.setOffline(false);
   }
 

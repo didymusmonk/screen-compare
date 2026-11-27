@@ -4,8 +4,8 @@ These files check that True Size Screens works and that its numbers are right. T
 
 | File | What it checks | Needs a browser? | Time |
 |---|---|---|---|
-| `unit.js` | The math and the data, against values worked out by hand: screen size, PPI and area; rotation; video bars; e-book line and word counts; page fit; margin cropping; website scaling; `devices.csv`; the offline rules in `sw.js` | No | 2 s |
-| `smoke.js` | Every feature works at all, on a desktop and an iPhone 13: devices, search, modes, share link, PDF and crop, phone layout, accessibility (axe-core), offline | Yes | 10 s |
+| `unit.js` | The math and the data, against values worked out by hand: screen size, PPI, area and megapixels; rotation; video bars, picture diagonal and area; e-book line and word counts; page fit; margin cropping; website scaling; `devices.csv`; the offline rules in `sw.js` | No | 2 s |
+| `smoke.js` | Every feature works at all, on a desktop and an iPhone 13: devices, search, modes, share link, PDF and crop, phone layout, the methodology page, accessibility (axe-core), offline | Yes | 10 s |
 | `browser.js` | What visitors see: card numbers and the drawing for hand-checked screens, zoom and calibration, your own screen form, page and PDF fit, quick page turns and PDF swaps, video, e-book, website, saving, share links (including old ones), broken saved settings, a missing device list, an offline update | Yes | 1–2 min |
 | `run-all.js` | Runs all three and prints a summary | | |
 

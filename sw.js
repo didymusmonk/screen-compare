@@ -1,7 +1,7 @@
 // Service worker: lets True Size Screens open without a connection.
 //
 // How saved files are kept up to date:
-// - The page and the device list are fetched fresh when online (checked with the server every time),
+// - The page, the methodology page and the device list are fetched fresh when online (checked with the server every time),
 //   so updates show right away. If the network fails or takes more than 3 seconds, the saved copy is used.
 // - Icons and the manifest are saved when this worker installs, and used from the save after that.
 // - The PDF reader (pdf.js) lives in a folder named after its version, such as pdfjs/6.5.438/, and is
@@ -13,12 +13,12 @@
 // - After upgrading pdf.js: set PDFJS_VERSION to the new folder name (the same one as PDFJS in index.html).
 // - After changing an icon, the manifest or this file's logic: bump VERSION.
 // - After changing only index.html or devices.csv: nothing.
-const VERSION = "v2";
+const VERSION = "v3";
 const PDFJS_VERSION = "6.5.438";
 const CORE_CACHE = "tss-core-" + VERSION;
 const PDF_CACHE = "tss-pdfjs-" + PDFJS_VERSION;
 const PDFJS_DIR = new URL("pdfjs/" + PDFJS_VERSION + "/", self.registration.scope).pathname;
-const CORE = ["./", "devices.csv", "manifest.webmanifest", "favicon.svg", "icon-192.png", "apple-touch-icon.png"];
+const CORE = ["./", "methodology.html", "devices.csv", "manifest.webmanifest", "favicon.svg", "icon-192.png", "apple-touch-icon.png"];
 // The whole PDF reader, saved together the first time a PDF is opened (so scans also work offline later)
 const PDF_FILES = ["pdf.min.mjs", "pdf.worker.min.mjs", "wasm/jbig2.wasm", "wasm/openjpeg.wasm", "wasm/qcms_bg.wasm"];
 const FRESH_WAIT_MS = 3000; // how long to wait for the network before using the saved copy
@@ -102,8 +102,9 @@ self.addEventListener("fetch", e => {
   const scope = new URL(self.registration.scope).pathname;
   const path = url.pathname;
   if (req.mode === "navigate") {
-    // Only the app itself is saved as the page; other pages (a license file, say) load normally
+    // Only the app and its methodology page are saved; other pages (a license file, say) load normally
     if (path === scope || path === scope + "index.html") return e.respondWith(networkFirst(url.href.split("#")[0], "./"));
+    if (path === scope + "methodology.html") return e.respondWith(networkFirst(url.href.split("#")[0], "methodology.html"));
     return;
   }
   if (path === scope + "devices.csv") return e.respondWith(networkFirst(req.url, "devices.csv"));

@@ -409,6 +409,7 @@ async function serviceWorker() {
   const req = (u, mode = "no-cors", method = "GET") => ({ request: { url: new URL(u, SCOPE).href, mode, method } });
   const handled = async (u, mode, method) => !!(await w.fire("fetch", req(u, mode, method))).responded;
   check("the app page and device list are handled offline", await handled(SCOPE, "navigate") && await handled(SCOPE + "index.html", "navigate") && await handled(SCOPE + "devices.csv"));
+  check("the methodology page is saved on install and handled offline", CORE.includes("methodology.html") && await handled(SCOPE + "methodology.html", "navigate") && await handled(SCOPE + "methodology.html#video", "navigate"));
   check("the current pdf.js files are handled; another version's files never are", await handled(SCOPE + `pdfjs/${PV}/pdf.min.mjs`) && !(await handled(SCOPE + "pdfjs/3.11.174/pdf.min.mjs")));
   check("other pages, other sites (analytics) and form posts are left alone", !(await handled(SCOPE + "LICENSE", "navigate")) && !(await handled("https://gc.zgo.at/count.js")) && !(await handled(SCOPE, "navigate", "POST")));
 }
@@ -434,7 +435,36 @@ section("Reference comparison");
   const pg = st(FOUR3, { orient: "landscape", content: "page", fit: "page" }, { w: 8.5, h: 11 });
   check("page stats: Letter on an 8 × 6 in screen is shown at 6/11, so 12 pt looks like 6.55 pt, 136 pixels per page inch, all of it visible", near(pg.page.pt, 72 / 11) && near(pg.page.eff, 250 * 6 / 11) && near(pg.page.shown, 1));
   const sheet = st({ n: "Letter", c: "paper", d: Math.hypot(11, 8.5), w: 11, h: 8.5, aspectOnly: true, sheet: true }, { orient: "landscape", content: "video", video: "16:9" });
-  check("a paper sheet has a size but no content stats or diagonal", near(sheet.area, 93.5) && sheet.diag === null && !sheet.video && !sheet.page);
+  check("a paper sheet has a size but no content stats, diagonal or megapixels", near(sheet.area, 93.5) && sheet.diag === null && sheet.mp === null && !sheet.video && !sheet.page);
+
+  // Video picture diagonal and area (black bars left out), reusing videoFit's picture size
+  const vp = st(HD, { orient: "portrait", content: "video", video: "4:3" });
+  check("4:3 video on the same screen upright (9 × 16 in): 9 × 6.75 in picture, 11.25 in diagonal, 60.75 sq in", near(vp.video.v.vw, 9) && near(vp.video.v.vh, 6.75) && near(vp.video.diag, 11.25) && near(vp.video.area, 60.75), JSON.stringify(vp.video));
+  const vf = st(HD, { orient: "landscape", content: "video", video: "4:3" }, null, { flip: true });
+  check("one screen turned on its own gives the same picture diagonal and area", near(vf.video.diag, 11.25) && near(vf.video.area, 60.75));
+  check("the picture diagonal is never longer than the screen's, and the area never bigger", [["16:9", "portrait"], ["2.39:1", "landscape"], ["9:16", "landscape"], ["1:1", "portrait"]].every(([video, orient]) => { const x = st(IPAD13, { orient, content: "video", video }); return x.video.diag <= 13 + 1e-9 && x.video.area <= x.area + 1e-9 && near(x.video.area / x.area, x.video.v.used, 1e-12); }));
+  check("reference: 15 in vs 11.25 in picture diagonal is +33%, 108 vs 60.75 sq in is +78%", r.fmtPct(r.refPct(v.video.diag, vp.video.diag)) === "+33%" && r.fmtPct(r.refPct(v.video.area, vp.video.area)) === "+78%");
+  const vcm = st(HD, { orient: "landscape", content: "video", video: "4:3", units: "cm" });
+  check("centimeters don't change the stored numbers (they're converted only for display)", JSON.stringify(vcm) === JSON.stringify(v));
+  const fmt = load(["fmtLen", "areaTxt"], { S });
+  check("picture diagonal 15 in shows as 15.00″ or 38.1 cm; 108 sq in as 108.0 sq in or 697 cm²", withS({ units: "in" }, () => fmt.fmtLen(15) + fmt.areaTxt(108)) === "15.00″108.0 sq in" && withS({ units: "cm" }, () => fmt.fmtLen(15) + fmt.areaTxt(108)) === "38.1 cm697 cm²", withS({ units: "cm" }, () => fmt.fmtLen(15) + fmt.areaTxt(108)));
+  const calA = st(HD, { orient: "landscape", content: "video", video: "4:3", scale: "fit", zoom: 50 });
+  const calB = st(HD, { orient: "landscape", content: "video", video: "4:3", scale: "actual", zoom: 200 });
+  check("zoom and actual-size settings don't change any stats", JSON.stringify(calA) === JSON.stringify(calB));
+  check("statsOf never reads the calibration or zoom", !/ppiCal|zoom|S\.scale/.test(require("./lib/app").source("statsOf").replace(/\/\/.*$/gm, "")));
+
+  // Megapixels: native width × height ÷ 1,000,000, shown to two decimals
+  const m = load(["mpTxt"], {});
+  const mpOf = (w, h, patch = {}, sel = {}) => st({ n: "mp test", c: "custom", d: 10, w, h }, { orient: "landscape", content: "none", ...patch }, null, sel).mp;
+  check("1920 × 1080 = 2.07 MP, 2560 × 1600 = 4.10 MP, 3840 × 2160 = 8.29 MP", m.mpTxt(mpOf(1920, 1080)) === "2.07 MP" && m.mpTxt(mpOf(2560, 1600)) === "4.10 MP" && m.mpTxt(mpOf(3840, 2160)) === "8.29 MP", [mpOf(1920, 1080), mpOf(2560, 1600), mpOf(3840, 2160)].join(" "));
+  check("exact value before rounding: 2,073,600 pixels is 2.0736 MP", mpOf(1920, 1080) === 2.0736);
+  check("megapixels don't change when the screen is turned, on its own or all together", mpOf(2560, 1600, { orient: "portrait" }) === 4.096 && mpOf(2560, 1600, {}, { flip: true }) === 4.096);
+  check("…or with units, zoom, actual size or the content shown", ["page", "video", "site"].every(content => mpOf(2560, 1600, { content, units: "cm", scale: "actual", zoom: 200 }) === 4.096));
+  check("a screen entered as an aspect ratio has no megapixels", st({ ...TRI, aspectOnly: true }, { orient: "landscape", content: "none" }).mp === null);
+  check("reference: 3840 × 2160 vs 1920 × 1080 is +300% megapixels", r.fmtPct(r.refPct(mpOf(3840, 2160), mpOf(1920, 1080))) === "+300%");
+  const csvRows = app.parseCsv(fs.readFileSync(path.join(ROOT, "devices.csv"), "utf8")).slice(1).filter(x => x[1] !== "paper");
+  const badMp = csvRows.filter(x => { const d = { n: x[0], c: x[1], d: +x[2], w: Math.max(+x[3], +x[4]), h: Math.min(+x[3], +x[4]) }; const v = st(d, { orient: "portrait", content: "none" }).mp; return !(v === +x[3] * +x[4] / 1e6 && v > 0); });
+  check(`every built-in screen's megapixels are its pixel count ÷ 1,000,000 (${csvRows.length} screens)`, badMp.length === 0, badMp.slice(0, 3).map(x => x[0]).join(", "));
 }
 
 (async () => {

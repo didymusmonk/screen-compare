@@ -85,6 +85,7 @@ To change a decision, describe the conflict to Thomas first (`AGENTS.md`, rule 1
 
 **Facts**
 - Aspect ratio comes from the pixel counts; the loader stores the larger count as width, so row orientation in the CSV doesn't matter. Orientation is a stage setting, with per-card rotation.
+- On touch devices, "Compare with my screen" can suggest phones, tablets and tablet PCs. The matcher uses the loader's internal category `tabletpc`.
 
 **Decisions**
 - Website previews use an estimated display scaling per device (`dprOf()`): Apple devices by name (iPhone 3× or 2×, iPad 2×, MacBook PPI ÷ 127, iMac and Apple displays 2×), a few Surface models by Microsoft's defaults (RT, Laptop Go, Laptop SE 1×; Studio 2×), then by category (phones about 412 CSS px wide, tablets and e-readers PPI ÷ 160, monitors PPI ÷ 110, laptops and tablet PCs PPI ÷ 130).
@@ -94,9 +95,6 @@ To change a decision, describe the conflict to Thomas first (`AGENTS.md`, rule 1
 **Estimates**
 - All `dprOf()` values are approximations of default settings; visitors can change scaling, so previews show roughly what fits.
 - "Compare with my screen" is a best guess from `screen.width × devicePixelRatio`, which scaling and zoom change. On a Mac it matches by aspect ratio only, then filters to Apple models.
-
-**Open questions**
-- Known bug: on touch devices, "Compare with my screen" tests `d.c === "tablet pc"`, but the loader stores `tabletpc`, so tablet PCs are never offered (see `HANDOVER.md`).
 
 ## 5. PDF rendering, cropping and compatibility
 

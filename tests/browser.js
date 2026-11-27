@@ -73,6 +73,46 @@ const diff = (a, b, at = "") => { if (JSON.stringify(a) === JSON.stringify(b)) r
 const noErrors = (p, what) => check(`${what}: no JavaScript errors`, p.errors.length === 0, p.errors.slice(0, 2).join(" | "));
 
 // ---------------------------------------------------------------------------------------------------------
+async function myScreenMatching() {
+  section("Compare with my screen");
+  // Use the same resolution across categories to check filtering and exact-match order.
+  const csv = [
+    "name,type,diagonal,width,height",
+    "Test phone,phone,6,1200,800",
+    "Test tablet,tablet,10,1200,800",
+    "Test tablet PC,tablet pc,12,1200,800",
+    "Test laptop,laptop,14,1200,800",
+    "Test monitor,monitor,24,1200,800",
+  ].join("\n");
+  override = pth => pth.endsWith("/devices.csv") ? { body: csv } : null;
+  try {
+    for (const { label, hasTouch, screen, expected } of [
+      { label: "touch exact match", hasTouch: true, screen: { width: 1200, height: 800 }, expected: ["test-phone", "test-tablet", "test-tablet-pc"] },
+      { label: "touch shape match", hasTouch: true, screen: { width: 1500, height: 1000 }, expected: ["test-phone", "test-tablet", "test-tablet-pc"] },
+      { label: "desktop exact match", hasTouch: false, screen: { width: 1200, height: 800 }, expected: ["test-laptop", "test-monitor", "test-tablet-pc"] },
+    ]) {
+      const { ctx, p } = await open({
+        state: { sel: sel("c-tri"), content: "none" },
+        ctxOptions: { viewport: { width: 1000, height: 700 }, screen, hasTouch },
+      });
+      try {
+        await p.getByRole("button", { name: "Compare with my screen", exact: true }).click();
+        const choices = p.locator("#myphone-pick button[data-id]");
+        const ids = await choices.evaluateAll(buttons => buttons.map(b => b.dataset.id));
+        check(`${label}: suggests the expected models in order`, ids.join() === expected.join(), ids.join(", "));
+        if (label === "touch exact match") {
+          if (ids.includes("test-tablet-pc")) await choices.filter({ hasText: "Test tablet PC" }).click();
+          check("choosing the suggested tablet PC adds it to the comparison", (await cards(p)).some(c => c.name === "Test tablet PC"));
+        }
+      } finally {
+        await ctx.close();
+      }
+    }
+  } finally {
+    override = () => null;
+  }
+}
+
 async function geometry() {
   section("Screens and their numbers");
   const { ctx, p } = await open({ state: { sel: sel("c-tri", "c-twin", "c-low") } });
@@ -785,7 +825,7 @@ async function reference() {
   const server = await serve(ROOT, pth => override(pth));
   base = `http://127.0.0.1:${server.address().port}/`;
   browser = await chromium.launch();
-  const ALL = [geometry, customForm, pages, pdfs, video, () => ebook({ viewport: { width: 1280, height: 800 } }, ""), () => ebook({ ...devices["iPhone 13"] }, " (iPhone 13)"), website, persistence, reference, calibration, malformed, devicesById, failures, serviceWorkerUpdate];
+  const ALL = [geometry, customForm, myScreenMatching, pages, pdfs, video, () => ebook({ viewport: { width: 1280, height: 800 } }, ""), () => ebook({ ...devices["iPhone 13"] }, " (iPhone 13)"), website, persistence, reference, calibration, malformed, devicesById, failures, serviceWorkerUpdate];
   const only = (process.env.ONLY || "").split(",").filter(Boolean);
   const steps = only.length ? ALL.filter(f => only.some(o => (f.name || "").includes(o) || f.toString().includes(o))) : ALL;
   for (const step of steps) {

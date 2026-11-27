@@ -366,6 +366,7 @@ Use the exact headers in the batch file and in `templates/missing_devices_header
 - **Good:** the maker's tech-spec pages, support/spec pages, manuals, press releases, regulatory filings, and the panel maker's datasheet.
 - **Acceptable secondary:** measured reviews (Notebookcheck, DisplayMate, RTINGS, AnandTech archives), and established spec databases (GSMArena, PhoneArena, Panelook, DisplaySpecifications) when cross-checked.
 - **Not a source:** another AI's answer, Wikipedia alone (follow its citation instead), rumor or leak sites for anything claimed as released, aggregator pages without their own sourcing, search snippets, and your own memory.
+- **Never mark a product RUMORED just because you haven't heard of it.** Your own knowledge may be out of date. Before saying a product doesn't exist, search the maker's newsroom and spec pages for it, and cite the pages you searched. (In B02 a model called four real October 2026 Apple products rumored.)
 - If you can't open a page (paywall, region block, robot check), don't cite it as checked. Write `SOURCE_UNAVAILABLE` in an issue row instead.
 
 ## B5. Missing devices

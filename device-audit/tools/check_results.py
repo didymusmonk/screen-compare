@@ -140,7 +140,8 @@ def main(argv):
     args = argv[1:]
     if not args or any(a in ("-h", "--help") for a in args): print(__doc__); return 0
     coverage = "--coverage" in args
-    files = [a for a in args if a != "--coverage"] or (sorted(glob.glob(os.path.join(AUDIT, "results", "**", "*.csv"), recursive=True)) if coverage else [])
+    files = [a for a in args if a != "--coverage"] or (sorted(p for p in glob.glob(os.path.join(AUDIT, "results", "**", "*.csv"), recursive=True)
+                    if "as_returned" not in p and not p.endswith(("_selection.csv", "_to_check.csv", "_comparison.csv"))) if coverage else [])
     if not files: print(__doc__); return 1
     bad, answered = 0, set()
     for p in files:

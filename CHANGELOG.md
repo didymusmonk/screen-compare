@@ -4,6 +4,8 @@ Significant changes to True Size Screens, newest first. The full detail is in th
 
 ## Unreleased
 
+- Put each preview mode’s options directly below a single mode picker and above the drawing.
+
 - Moved page controls above the drawing, added direct PDF page navigation, and reserved space for all five modes in the phone controls.
 
 - Reference cards confirm the selection and link to the comparison. Wide tables show a sideways scrolling hint.

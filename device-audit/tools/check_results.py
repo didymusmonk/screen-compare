@@ -76,6 +76,9 @@ def check(path):
     for i, r in enumerate(rows, start=2):
         rid = r.get("original_id") or r.get("new_id") or r.get("issue_id") or "?"
         at = f"line {i} ({rid})"
+        if r.get("researcher") and r["researcher"] != r["researcher"].lower() and r["researcher"].lower() in COMMON["researcher"]:
+            warns.append(f"{at}: researcher {r['researcher']!r} should be lower case; read as {r['researcher'].lower()!r}")
+            r["researcher"] = r["researcher"].lower()
         for k, ok in CHOICES[kind].items():
             if k in r and r[k] not in ok: errs.append(f"{at}: {k} = {r[k]!r} is not one of {sorted(x for x in ok if x)}")
         for k in NUMERIC & r.keys():

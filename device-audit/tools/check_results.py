@@ -72,10 +72,17 @@ def check(path):
         rd = csv.reader(fh); head = next(rd, [])
         kind, e = kind_of(head); errs += e
         if e and set(SCHEMA[kind]) - set(head): return kind, errs, warns, []
-        rows = [dict(zip(head, r)) for r in rd if any(c.strip() for c in r)]
+        rows = []
+        for n, r in enumerate(rd, start=2):
+            if not any(c.strip() for c in r): continue
+            if len(r) != len(head):
+                errs.append(f"line {n} ({r[0] if r else '?'}): has {len(r)} cells but the header has {len(head)}, so later values sit in the wrong columns")
+                rows.append(dict(zip(head, (r + [""] * len(head))[:len(head)]), _misaligned=True)); continue
+            rows.append(dict(zip(head, r)))
     for i, r in enumerate(rows, start=2):
         rid = r.get("original_id") or r.get("new_id") or r.get("issue_id") or "?"
         at = f"line {i} ({rid})"
+        if r.pop("_misaligned", False): continue  # already reported; its cells can't be trusted
         if r.get("researcher") and r["researcher"] != r["researcher"].lower() and r["researcher"].lower() in COMMON["researcher"]:
             warns.append(f"{at}: researcher {r['researcher']!r} should be lower case; read as {r['researcher'].lower()!r}")
             r["researcher"] = r["researcher"].lower()

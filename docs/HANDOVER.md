@@ -14,10 +14,9 @@ A snapshot for a new developer or AI agent (written 27 Nov 2026, when Codex join
 
 Bugs (not fixed yet):
 
-1. **"Compare with my screen" never offers tablet PCs on touch devices.** `myScreenMatches()` in `index.html` checks `d.c === "tablet pc"` (twice), but the loader stores the category as `tabletpc`. A one-word fix plus a regression test.
-2. **iPhone SE: the calibration panel scrolls by about 3 px.** Cosmetic.
-3. **`index.html` has two `<meta name="description">` tags**: the live-site one near the top and an older, shorter one after `<title>`. Search engines normally use the first. Harmless, left as is (removing it is a visitor-facing change for a separate task).
-4. **The "PDF reader didn't load" message says Safari 18**, while testing shows 17.4+ works. Conservative wording, not wrong for visitors.
+1. **iPhone SE: the calibration panel scrolls by about 3 px.** Cosmetic.
+2. **`index.html` has two `<meta name="description">` tags**: the live-site one near the top and an older, shorter one after `<title>`. Search engines normally use the first. Harmless, left as is (removing it is a visitor-facing change for a separate task).
+3. **The "PDF reader didn't load" message says Safari 18**, while testing shows 17.4+ works. Conservative wording, not wrong for visitors.
 
 Limitations (accepted; details in `DECISIONS.md`):
 
@@ -77,7 +76,6 @@ Review only (no file changes, findings in a pull request comment or a report):
 
 Small, self-contained changes (one at a time, with Thomas's go-ahead):
 
-- Fix the tablet PC bug in "Compare with my screen" (known bug 1), with a regression test.
 - Add regression tests that only touch `tests/`, for example `parseCsv` edge cases (quoted commas, doubled quotes, blank and `#` lines) or more hostile share links.
 - Check `docs/` and `methodology.html` against the code and fix wording that's out of date.
 

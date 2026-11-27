@@ -4,6 +4,7 @@ Significant changes to True Size Screens, newest first. The full detail is in th
 
 ## Unreleased
 
+- Fixed "Compare with my screen" so it can suggest matching tablet PCs on touch devices.
 - Docs: shared instructions for all AI coding agents (`AGENTS.md`), plus `docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/HANDOVER.md` and this changelog. New development protocol: a branch and pull request per task, and Thomas approves every merge (replaces committing straight to `main`). No change to the website.
 - The repo's `index.html` is now the only source; Claude's old project-folder copy and its `wrap.sh` build script are retired, and Claude's Artifact preview is generated from the repo file.
 

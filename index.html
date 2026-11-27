@@ -704,8 +704,8 @@ function myScreenMatches() {
   const touch = window.matchMedia && matchMedia("(pointer: coarse)").matches;
   const isMac = /Mac/.test(navigator.userAgent) && !touch;
   const pool = BUILTIN.filter(d => d.c !== "paper" && d.c !== "ereader" && !d.aspectOnly)
-    .filter(d => touch ? (d.c === "phone" || d.c === "tablet" || d.c === "tablet pc") : (d.c !== "phone" && d.c !== "tablet"));
-  const rank = d => ({ phone: 0, tablet: 1, laptop: 2, monitor: 3, "tablet pc": 4 })[d.c] ?? 5;
+    .filter(d => touch ? (d.c === "phone" || d.c === "tablet" || d.c === "tabletpc") : (d.c !== "phone" && d.c !== "tablet"));
+  const rank = d => ({ phone: 0, tablet: 1, laptop: 2, monitor: 3, tabletpc: 4 })[d.c] ?? 5;
   let hits = pool.filter(d => Math.abs(d.w - a) <= 2 && Math.abs(d.h - b) <= 2).sort((x, y) => rank(x) - rank(y) || x.d - y.d), exact = true;
   if (!hits.length) {
     exact = false;

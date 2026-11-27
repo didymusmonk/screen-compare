@@ -1,0 +1,78 @@
+{
+ "batches": [
+  [
+   "B01",
+   "chatgpt",
+   "iPhone",
+   37
+  ],
+  [
+   "B02",
+   "chatgpt",
+   "iPad, Mac and Apple displays",
+   27
+  ],
+  [
+   "B03",
+   "chatgpt",
+   "Microsoft Surface",
+   32
+  ],
+  [
+   "B04",
+   "chatgpt",
+   "Other Windows 2-in-1s and laptops",
+   21
+  ],
+  [
+   "B05",
+   "chatgpt",
+   "Kindle, Kobo, reMarkable and other non-Boox e-readers",
+   14
+  ],
+  [
+   "B06",
+   "chatgpt",
+   "Generic monitors and typical laptops",
+   21
+  ],
+  [
+   "B07",
+   "gemini",
+   "Samsung Galaxy phones (not foldable)",
+   31
+  ],
+  [
+   "B08",
+   "gemini",
+   "Samsung foldable phones",
+   21
+  ],
+  [
+   "B09",
+   "gemini",
+   "Google, OnePlus, Oppo and Xiaomi phones, plus Apple's foldable",
+   23
+  ],
+  [
+   "B10",
+   "gemini",
+   "Android tablets (Samsung, Lenovo, Google, Amazon, OnePlus)",
+   36
+  ],
+  [
+   "B11",
+   "gemini",
+   "Boox e-readers",
+   22
+  ],
+  [
+   "B12",
+   "claude",
+   "Paper, book and card sizes (published standards)",
+   30
+  ]
+ ],
+ "total": 315,
+ "baseline_sha256": "befed945f367b6c47d5425eb92b485a3df431f62506bbef752f278ec7918f8cb"
+}

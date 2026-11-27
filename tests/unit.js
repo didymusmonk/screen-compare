@@ -277,6 +277,8 @@ section("Website previews");
   check("and switches to the tablet layout at 852 px wide", v.natural === "tablet");
   check("iPhone SE, XR and 11 use 2×; 11 Pro uses 3×", dprOf({ n: "iPhone SE (3rd generation)", c: "phone", d: 4.7, w: 1334, h: 750 }) === 2 && dprOf({ n: "iPhone 11", c: "phone", d: 6.1, w: 1792, h: 828 }) === 2
     && dprOf({ n: "iPhone XR", c: "phone", d: 6.1, w: 1792, h: 828 }) === 2 && dprOf({ n: "iPhone 11 Pro", c: "phone", d: 5.8, w: 2436, h: 1125 }) === 3);
+  check("iPhone 4 and 4s use 2× (regression: device audit added them)", dprOf({ n: "iPhone 4s / iPhone 4", c: "phone", d: 3.5, w: 960, h: 640 }) === 2
+    && dprOf({ n: "iPhone 14", c: "phone", d: 6.1, w: 2532, h: 1170 }) === 3 && dprOf({ n: "iPhone 8 Plus / 7 Plus", c: "phone", d: 5.5, w: 1920, h: 1080 }) === 3);
   // MacBooks: within 3% of Apple's default "looks like" sizes
   const mba = site({ n: "MacBook Air 13-inch", c: "laptop", d: 13.6, w: 2560, h: 1664 }, "landscape").v, mbp = site({ n: "MacBook Pro 14-inch", c: "laptop", d: 14.2, w: 3024, h: 1964 }, "landscape").v;
   check("MacBook Air 13.6: within 3% of Apple's 1470 × 956 default", Math.abs(mba.vw / 1470 - 1) < 0.03 && Math.abs(mba.vh / 956 - 1) < 0.03, `${mba.vw}×${mba.vh}`);

@@ -1138,7 +1138,7 @@ function drawEbook(x, r, s, i) {
 const SITES = [["news", "News article"], ["search", "Search results"], ["social", "Social feed"], ["shop", "Shopping product page"], ["wiki", "Encyclopedia article"]];
 function dprOf(dev) {
   const ppi = Math.hypot(dev.w, dev.h) / dev.d, q = (v, st = 4) => Math.max(1, Math.round(v * st) / st);
-  if (/^iPhone/.test(dev.n)) return /\b(SE|XR|11)$|\b(SE|XR)\b/.test(dev.n) ? 2 : 3;
+  if (/^iPhone/.test(dev.n)) return /\b(SE|XR|11|4s?)$|\b(SE|XR)\b/.test(dev.n) ? 2 : 3; // iPhone 4/4s, SE, XR and 11 are 2x
   if (/^iPad/.test(dev.n)) return 2;
   if (/^MacBook/.test(dev.n)) return +(ppi / 127).toFixed(2); // macOS default "looks like" setting, about 127 points per inch
   if (/^(iMac|.*Apple Studio|.*Pro Display XDR)/.test(dev.n)) return 2;
@@ -1839,7 +1839,7 @@ loadDevices().catch(err => {
   listError = "The built-in device list didn't load. Reload the page, or enter a screen yourself below.";
 }).finally(() => {
   // devices renamed in the list keep working in saved layouts
-  const RENAMED = { "macbook-air-13-m2-m3-m4": "macbook-air-13-m2-to-m5", "macbook-air-15-m2-m3-m4": "macbook-air-15-m2-to-m5", "macbook-pro-16-m1-to-m4": "macbook-pro-16-m1-to-m5", "ipad-air-13-inch-m2-m3-m4": "ipad-air-13-inch-m2-to-m4", "ipad-air-11-inch-m2-m3-m4": "ipad-air-11-inch-m2-to-m4", "15-6-portable-monitor-monitor": "15-6-portable-monitor", "surface-book-1st-gen": "surface-book-1st-gen-book-with-performance-base", "surface-laptop-3-4-5-13-5": "surface-laptop-3-4-5-6-13-5", "surface-laptop-3-4-5-15": "surface-laptop-3-4-5-6-15", "surface-studio-2-studio-2": "surface-studio-2-plus-studio-2-studio", "surface-studio-2-studio-2-studio": "surface-studio-2-plus-studio-2-studio", "galaxy-tab-s10": "galaxy-tab-s10-plus", "surface-pro-7-7": "surface-pro-7-7-plus" };
+  const RENAMED = { "macbook-air-13-m2-m3-m4": "macbook-air-13-m2-to-m5", "macbook-air-15-m2-m3-m4": "macbook-air-15-m2-to-m5", "macbook-pro-16-m1-to-m4": "macbook-pro-16-m1-to-m5", "ipad-air-13-inch-m2-m3-m4": "ipad-air-13-inch-m2-to-m4", "ipad-air-11-inch-m2-m3-m4": "ipad-air-11-inch-m2-to-m4", "15-6-portable-monitor-monitor": "15-6-portable-monitor", "surface-book-1st-gen": "surface-book-1st-gen-book-with-performance-base", "surface-laptop-3-4-5-13-5": "surface-laptop-3-4-5-6-13-5", "surface-laptop-3-4-5-15": "surface-laptop-3-4-5-6-15", "surface-studio-2-studio-2": "surface-studio-2-plus-studio-2-studio", "surface-studio-2-studio-2-studio": "surface-studio-2-plus-studio-2-studio", "galaxy-tab-s10": "galaxy-tab-s10-plus", "surface-pro-7-7": "surface-pro-7-7-plus", "galaxy-z-fold3-inner": "galaxy-z-fold3-fold2-inner", "galaxy-z-flip7-fe-flip6-flip5-flip4": "galaxy-z-flip7-fe-flip6-flip5-flip4-flip3", "galaxy-z-flip4-cover": "galaxy-z-flip4-flip3-cover", "kindle-colorsoft-colorsoft-2": "kindle-colorsoft-2024-2026", "macbook-air-13-m1": "macbook-air-13-retina-2018-to-2020-m1", "macbook-pro-13-m2": "macbook-pro-13-2016-to-2020-m1-m2" };
   S.sel.forEach(s => { if (RENAMED[s.id]) s.id = RENAMED[s.id]; });
   S.sel = S.sel.filter(s => byId(s.id));
   S.sel.forEach(s => { if (!s.uid) s.uid = newUid(); });

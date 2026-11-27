@@ -54,6 +54,7 @@ Inside `index.html`, all state lives in one object, `S`, and is saved to `localS
 - **The default first visit shows only two screens:** iPad mini (A20 Pro) and iPad Pro 11" (M5), both portrait, with a Letter page fit. A short page suits phone visitors.
 - **Lorem text is drawn as real SVG `<text>`, ragged right.** `textLength` justification made redraws about 10× slower. `PROSE_EM` measures the browser's real serif width so that lines wrap correctly. Below 3.5 px, the text turns into gray bars (in e-book mode, bars the length of the real lines).
 - **E-book auto columns aim for 45–75 characters per line.** Auto lays the text out in one and two columns and picks the one whose real line length is closer to that range, so it reacts to font size and screen width. The passage repeats from the start if a huge screen at a tiny size runs out. The letter heights on the cards use the font's real cap height and x-height where the browser reports them (0.7 and 0.47 em otherwise).
+- **Device audit (Nov 2026).** All 315 rows were checked (Gemini research, script checks, Claude reviewed exceptions); no figures changed, 58 devices were added, 6 grouped names gained models (with `RENAMED` entries) and Surface Duo moved to Phones. Records and tools (`validate_db.py` checks any list) are on the `device-database-audit` branch, folder `device-audit/`. Lesson: AI researchers call real recent products "rumored"; check the maker's newsroom before believing them.
 - **Unreleased devices are left out** (for example, the iPad 12th gen as of Nov 2026).
 - **The device list is sorted** by category (Tablets, Phones, E-readers, Tablet PCs, Laptops, Monitors, Paper), then by brand (Apple, Samsung, Microsoft, Lenovo, Google, then others, then generic), with product families kept together and the newest models first.
 
@@ -75,7 +76,7 @@ The working copies sit outside the repo, in a Claude project folder (`/mnt/proje
 
 - `index.html` there is the **Artifact preview source**. It has no `<!doctype>`/`<head>` wrapper. Preview: https://claude.ai/artifact/WhqeFfcgT7a4HBnUySpaFa (publish it with `devices.csv` as an extra file).
 - `wrap.sh` builds the repo's `index.html` from that source. It adds the doctype, meta description, Open Graph and Twitter tags, favicon, canonical link, manifest and Apple tags, theme color, and the service worker registration and the GoatCounter script (both in the GitHub copy only). Always rebuild with it. Don't hand-edit the two copies separately.
-- `gen_csv.py` + `raw.json` generate and sort `devices.csv`.
+- Since the Nov 2026 device audit, `devices.csv` itself is the source. `gen_csv.py <in.csv> <out.csv>` only sorts it (the old `gen_csv_legacy.py` + `raw.json` are stale; never use them, they would undo the audit).
 - Run `node tests/run-all.js` after every change (it serves the repo itself). Add a quick check to `smoke.js` when a new feature ships, exact numbers to `browser.js` or `unit.js`, and a regression check for every bug fixed. `unit.js` relies on top-level declarations in the script starting at column 0 and multi-line ones ending with a line that starts with `}` or `]`. One-off Playwright scripts are still fine for deeper checks such as touch drag.
 
 ## Known issues and limits

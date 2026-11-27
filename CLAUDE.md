@@ -21,6 +21,7 @@ The site is static, with no build step, no framework, no backend and no npm depe
 | `sw.js` | Service worker for offline use. The page and `devices.csv` load fresh when online (3-second limit, then the saved copy). Everything else is saved on first load. Registered only in the GitHub copy, by `wrap.sh` |
 | `favicon.svg`, `og-image.png` | Tab icon and link-preview image |
 | `pdfjs/` | pdf.js 3.11.174 (`pdf.min.js`, `pdf.worker.min.js`, Apache-2.0 `LICENSE`), copied unchanged from the `pdfjs-dist` npm package |
+| `tests/smoke.js` | Saved Playwright smoke test (desktop + iPhone 13): devices, search, modes, share link, PDF, phone layout, axe-core, offline, JS errors. Run `node tests/smoke.js`; setup in `tests/README.md`. Not part of the site |
 | `README.md`, `LICENSE` | Public description and the MIT license (© 2026 DidymusMonk) |
 
 Inside `index.html`, all state lives in one object, `S`, and is saved to `localStorage` under the `tss:` prefix. Every change calls `save()` and then `renderAll()`, which redraws the category list, search results, the SVG stage and the cards. Main functions:
@@ -65,7 +66,7 @@ The working copies sit outside the repo, in a Claude project folder (`/mnt/proje
 - `index.html` there is the **Artifact preview source**. It has no `<!doctype>`/`<head>` wrapper. Preview: https://claude.ai/artifact/WhqeFfcgT7a4HBnUySpaFa (publish it with `devices.csv` as an extra file).
 - `wrap.sh` builds the repo's `index.html` from that source. It adds the doctype, meta description, Open Graph and Twitter tags, favicon, canonical link, manifest and Apple tags, theme color, and the service worker registration and the GoatCounter script (both in the GitHub copy only). Always rebuild with it. Don't hand-edit the two copies separately.
 - `gen_csv.py` + `raw.json` generate and sort `devices.csv`.
-- Tests are throwaway Playwright scripts (phone emulation, touch drag, axe scans, share-link round trips), run against `python3 -m http.server`.
+- Run `node tests/smoke.js` after every change (it serves the repo itself). Add a check there when a new feature ships. One-off Playwright scripts are still fine for deeper checks such as touch drag.
 
 ## Known issues and limits
 
@@ -81,4 +82,3 @@ The working copies sit outside the repo, in a Claude project folder (`/mnt/proje
 
 - Add new devices as they ship (iPad 12th gen when it's released, 2027 phones).
 - A search for "devices similar in size to X".
-- Keep a small saved Playwright smoke test in the repo, so checks don't have to be rewritten each time.

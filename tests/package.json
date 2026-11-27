@@ -1,0 +1,10 @@
+{
+  "name": "true-size-screens-tests",
+  "private": true,
+  "description": "Smoke test for the site. Not used by the site itself.",
+  "scripts": { "test": "node smoke.js" },
+  "devDependencies": {
+    "axe-core": "^4.10.2",
+    "playwright": "^1.50.0"
+  }
+}

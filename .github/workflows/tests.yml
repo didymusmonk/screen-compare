@@ -1,0 +1,30 @@
+# Runs the tests on GitHub whenever something is pushed to main or a pull request is opened.
+# Results show as a green tick or red cross next to each commit. It doesn't affect the live site.
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install the test tools (Playwright and axe-core)
+        working-directory: tests
+        run: npm install --no-audit --no-fund
+      - name: Install the test browser
+        working-directory: tests
+        run: npx playwright install --with-deps chromium
+      - name: Run all tests
+        run: node tests/run-all.js

@@ -394,8 +394,10 @@ const CATS = { phone: "Phones", tablet: "Tablets", ereader: "E-readers", tabletp
 const sizeTag = dev => dev.sheet ? `${+(dev.h).toFixed(2)}×${+(dev.w).toFixed(2)}″` : `${dev.d}″`;
 // The built-in device list lives in devices.csv next to this page.
 const catKey = c => c === "tablet pc" ? "tabletpc" : c;
-const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+// "+" counts as "plus", so "Galaxy S26+" and "Galaxy S26" get different IDs
+const slug = s => s.toLowerCase().replace(/\+/g, " plus ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 let BUILTIN = [];
+let listError = ""; // shown in the device list if devices.csv didn't load
 function parseCsv(text) {
   const rows = [];
   for (const line of text.split(/\r?\n/)) {
@@ -494,7 +496,11 @@ const defaults = () => ({
   mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
   paper: "us-letter-paper", paperOrient: "portrait", fit: "page", content: "page", video: "16:9", ebookPt: 12, ebookCols: "1", site: "news", siteLayout: "auto", crop: false, cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
 });
+// Saved settings and share links come from outside this code, so anything malformed is dropped instead of breaking the page
+const isObj = v => !!v && typeof v === "object" && !Array.isArray(v);
+const okScreen = c => isObj(c) && typeof c.id === "string" && typeof c.n === "string" && [c.d, c.w, c.h].every(v => typeof v === "number" && v > 0 && Number.isFinite(v));
 let custom = store.get("custom", []);
+custom = Array.isArray(custom) ? custom.filter(okScreen) : [];
 // A shared link carries the comparison in the address after #s=. It replaces the saved layout once, then the address is cleaned up.
 const SHARE_KEYS = ["mode", "orient", "anchor", "units", "paper", "paperOrient", "fit", "content", "video", "ebookPt", "ebookCols", "site", "siteLayout", "order"];
 const fromShare = (() => {
@@ -503,7 +509,7 @@ const fromShare = (() => {
     const j = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/")))));
     const st = {};
     for (const k of SHARE_KEYS) if (j[k] != null) st[k] = j[k];
-    for (const c of j.cu || []) if (c && c.id && !custom.some(x => x.id === c.id)) custom.push({ ...c, c: "custom" });
+    for (const c of j.cu || []) if (okScreen(c) && !custom.some(x => x.id === c.id)) custom.push({ ...c, c: "custom" });
     store.set("custom", custom);
     st.sel = (j.sel || []).slice(0, 12).map((x, k) => { const o = { id: String(x.i), uid: "s" + k }; if (x.f) o.flip = true; if (x.s) o.spread = true; if (x.t) o.fit = x.t; if (x.c) o.cols = x.c; return o; });
     st.pos = {}; (j.pos || []).forEach((q, k) => { if (q && st.sel[k]) st.pos[st.sel[k].uid] = { x: q[0], y: q[1] }; });
@@ -512,8 +518,15 @@ const fromShare = (() => {
     return st;
   } catch { return null; }
 })();
-const S = Object.assign(defaults(), fromShare || store.get("state", {}));
+const saved = store.get("state", {});
+const S = Object.assign(defaults(), fromShare || (isObj(saved) ? saved : {}));
+S.sel = (Array.isArray(S.sel) ? S.sel : []).filter(x => isObj(x) && typeof x.id === "string");
+if (!isObj(S.pos)) S.pos = {};
+for (const k of Object.keys(S.pos)) if (!isObj(S.pos[k]) || !Number.isFinite(S.pos[k].x) || !Number.isFinite(S.pos[k].y)) delete S.pos[k];
+if (!Array.isArray(S.zo)) S.zo = [];
+if (!EBOOK_PTS.some(p => p[0] === S.ebookPt)) S.ebookPt = 12;
 let ppiCal = store.get("ppiCal", 96);
+if (!(typeof ppiCal === "number" && ppiCal >= 50 && ppiCal <= 260)) ppiCal = 96; // the calibration slider's range
 let pdf = { doc: null, page: 1, pages: 0, img: null, img2: null, w: 0, h: 0, name: "", ink: new Map(), typ: null, scan: null, crops: null };
 const COLORS = ["--c1", "--c2", "--c3", "--c4", "--c5", "--c6", "--c7", "--c8", "--c9", "--c10", "--c11", "--c12"];
 const MAX = 12;
@@ -592,7 +605,7 @@ function renderResults() {
       return `<button class="res" data-id="${esc(d.id)}" aria-pressed="${on}" title="${on ? "Added. Click to remove" : "Click to add"}"><span>${on ? `<span aria-hidden="true">✓ </span>` : ""}${esc(d.n)}</span><small>${spec}</small></button>`;
     }).join("");
   }
-  $("#results").innerHTML = html || `<div class="empty">No match. Try fewer words, or enter the screen yourself below.</div>`;
+  $("#results").innerHTML = (listError ? `<div class="empty">${listError}</div>` : "") + (html || (listError ? "" : `<div class="empty">No match. Try fewer words, or enter the screen yourself below.</div>`));
 }
 // each screen keeps its color when cards are reordered
 function colIdx(sel) {
@@ -698,8 +711,9 @@ function ensurePos(items, maxH) {
   for (const x of items) {
     if (!S.pos[x.s.uid]) { S.pos[x.s.uid] = { x: x0, y: Math.max(0, maxH - x.g.h) }; x0 += x.g.w + GAP; }
   }
-  for (const id of Object.keys(S.pos)) if (!items.some(x => x.s.uid === id)) delete S.pos[id];
-  S.zo = S.zo.filter(id => items.some(x => x.s.uid === id));
+  // forget removed screens only (built-in screens aren't drawn until the device list has loaded, but keep their place)
+  for (const id of Object.keys(S.pos)) if (!S.sel.some(x => x.uid === id)) delete S.pos[id];
+  S.zo = S.zo.filter(id => S.sel.some(x => x.uid === id));
   for (const x of items) if (!S.zo.includes(x.s.uid)) S.zo.push(x.s.uid);
 }
 function renderStage() {
@@ -1573,11 +1587,14 @@ function loadPdfjs() {
   }).catch(e => { pdfjsReady = null; throw e; });
   return pdfjsReady;
 }
+let pdfOpens = 0; // counts PDFs chosen, so a slow earlier one can never replace a newer one
 async function openPdf(file) {
+  const ticket = ++pdfOpens, stale = () => ticket !== pdfOpens;
   const status = $("#pdf-status");
   status.textContent = "Reading " + file.name + "…";
   let lib;
   try { lib = await loadPdfjs(); } catch (err) {
+    if (stale()) return;
     console.error(err);
     status.textContent = navigator.onLine === false ? "The PDF reader didn't load. Connect to the internet once, then try again."
       : "The PDF reader didn't load. Reload the page and try again. PDF previews need Safari 18, or a recent Chrome, Edge or Firefox.";
@@ -1585,24 +1602,29 @@ async function openPdf(file) {
   }
   try {
     const data = new Uint8Array(await file.arrayBuffer());
+    if (stale()) return;
     // wasmUrl: decoders for scanned (JBIG2) and JPEG 2000 images, and color profiles.
     // pdf.js 6 never turns PDF content into JavaScript, so the old isEvalSupported: false safeguard is now built in.
-    const doc = await lib.getDocument({ data, wasmUrl: PDFJS + "wasm/" }).promise;
+    const task = lib.getDocument({ data, wasmUrl: PDFJS + "wasm/" });
+    const doc = await task.promise;
+    if (stale()) { task.destroy(); return; } // another PDF was chosen while this one loaded
     const old = pdf.doc;
     pdf.doc = doc;
     if (old) old.loadingTask.destroy(); // free the previous PDF and its worker
     pdf.ink = new Map(); pdf.typ = null; pdf.crops = null; pdf.scan = null;
     pdf.pages = pdf.doc.numPages; pdf.page = 1; pdf.name = file.name.replace(/\.pdf$/i, "");
     await renderPdfPage();
+    if (stale()) return;
     S.paper = "upload"; $("#paper").value = "upload"; save();
     renderAll();
   } catch (err) {
+    if (stale()) return; // replaced by a newer PDF while loading: nothing went wrong
     console.error(err);
     status.textContent = "Couldn't open that file. Make sure it's a PDF that isn't password protected.";
   }
 }
-async function pageImage(n) {
-  const page = await pdf.doc.getPage(n);
+async function pageImage(n, doc = pdf.doc) {
+  const page = await doc.getPage(n);
   const vp1 = page.getViewport({ scale: 1 });
   const scale = Math.min(3, 1600 / Math.max(vp1.width, vp1.height));
   const vp = page.getViewport({ scale });
@@ -1612,12 +1634,18 @@ async function pageImage(n) {
   await page.render({ canvasContext: ctx, viewport: vp }).promise;
   return { img: c.toDataURL("image/jpeg", 0.85), w: vp1.width / 72, h: vp1.height / 72 };
 }
+// Draws the current page (and the next one, for two-page views). If the page is turned again or another PDF is
+// opened before it finishes, it stops without showing anything, so a slow older page never replaces a newer one.
 async function renderPdfPage() {
-  const first = await pageImage(pdf.page);
-  pdf.img = first.img; pdf.w = first.w; pdf.h = first.h;
+  const doc = pdf.doc, n = pdf.page, stale = () => pdf.doc !== doc || pdf.page !== n;
+  const first = await pageImage(n, doc);
+  if (stale()) return;
   // the next page fills the right side of two-page views
-  pdf.img2 = pdf.page < pdf.pages ? (await pageImage(pdf.page + 1)).img : null;
+  const second = n < pdf.pages ? (await pageImage(n + 1, doc)).img : null;
+  if (stale()) return;
+  pdf.img = first.img; pdf.w = first.w; pdf.h = first.h; pdf.img2 = second;
   if (S.crop) await prepareCrop();
+  if (stale()) return;
   pdfStatus();
   $("#pdf-pager").hidden = pdf.pages < 2;
   $("#pg-label").textContent = `${pdf.page} / ${pdf.pages}`;
@@ -1768,10 +1796,10 @@ let rz; new ResizeObserver(() => { cancelAnimationFrame(rz); rz = requestAnimati
 $("#results").innerHTML = `<div class="empty">Loading devices…</div>`;
 loadDevices().catch(err => {
   console.error(err);
-  $("#scale-note").textContent = "The built-in device list didn't load. Reload the page, or enter a screen yourself.";
+  listError = "The built-in device list didn't load. Reload the page, or enter a screen yourself below.";
 }).finally(() => {
   // devices renamed in the list keep working in saved layouts
-  const RENAMED = { "macbook-air-13-m2-m3-m4": "macbook-air-13-m2-to-m5", "macbook-air-15-m2-m3-m4": "macbook-air-15-m2-to-m5", "macbook-pro-16-m1-to-m4": "macbook-pro-16-m1-to-m5", "ipad-air-13-inch-m2-m3-m4": "ipad-air-13-inch-m2-to-m4", "ipad-air-11-inch-m2-m3-m4": "ipad-air-11-inch-m2-to-m4", "15-6-portable-monitor-monitor": "15-6-portable-monitor", "surface-book-1st-gen": "surface-book-1st-gen-book-with-performance-base", "surface-laptop-3-4-5-13-5": "surface-laptop-3-4-5-6-13-5", "surface-laptop-3-4-5-15": "surface-laptop-3-4-5-6-15", "surface-studio-2-studio-2": "surface-studio-2-studio-2-studio" };
+  const RENAMED = { "macbook-air-13-m2-m3-m4": "macbook-air-13-m2-to-m5", "macbook-air-15-m2-m3-m4": "macbook-air-15-m2-to-m5", "macbook-pro-16-m1-to-m4": "macbook-pro-16-m1-to-m5", "ipad-air-13-inch-m2-m3-m4": "ipad-air-13-inch-m2-to-m4", "ipad-air-11-inch-m2-m3-m4": "ipad-air-11-inch-m2-to-m4", "15-6-portable-monitor-monitor": "15-6-portable-monitor", "surface-book-1st-gen": "surface-book-1st-gen-book-with-performance-base", "surface-laptop-3-4-5-13-5": "surface-laptop-3-4-5-6-13-5", "surface-laptop-3-4-5-15": "surface-laptop-3-4-5-6-15", "surface-studio-2-studio-2": "surface-studio-2-plus-studio-2-studio", "surface-studio-2-studio-2-studio": "surface-studio-2-plus-studio-2-studio", "galaxy-tab-s10": "galaxy-tab-s10-plus", "surface-pro-7-7": "surface-pro-7-7-plus" };
   S.sel.forEach(s => { if (RENAMED[s.id]) s.id = RENAMED[s.id]; });
   S.sel = S.sel.filter(s => byId(s.id));
   S.sel.forEach(s => { if (!s.uid) s.uid = newUid(); });

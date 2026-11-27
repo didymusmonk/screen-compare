@@ -5,6 +5,7 @@ Compare phone, tablet, laptop, tablet PC (including Surface Pro) and monitor scr
 - Search 343 built-in screens plus 30 paper, book and card sizes, or enter your own screen (diagonal plus resolution or aspect ratio)
 - See each screen's pixel density (PPI), resolution, aspect ratio and physical size
 - Preview how Letter, A4, Legal and other page sizes, or your own PDF, fit on each screen
+- Set one screen as the reference to see how the others compare, in percent: size, pages, video, e-book or websites
 - Side by side, overlay, or free arrange with drag, snapping guides and rotation
 - Calibrate "Actual size" with a bank card to see screens at real size on your monitor
 - Works offline after your first visit, including from your Home Screen

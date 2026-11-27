@@ -413,6 +413,30 @@ async function serviceWorker() {
   check("other pages, other sites (analytics) and form posts are left alone", !(await handled(SCOPE + "LICENSE", "navigate")) && !(await handled("https://gc.zgo.at/count.js")) && !(await handled(SCOPE, "navigate", "POST")));
 }
 
+// ---------------------------------------------------------------------------------------------------------
+section("Reference comparison");
+{
+  const r = load(["refPct", "fmtPct", "statsOf", "geom", "pageFit", "spreadOf", "fitOf", "videoFit", "VIDEOS", "siteView", "dprOf"], { S });
+  check("((value ÷ reference) − 1) × 100: 150 vs 100 is +50, 50 vs 100 is −50, equal is 0", r.refPct(150, 100) === 50 && r.refPct(50, 100) === -50 && r.refPct(7, 7) === 0);
+  check("four times the area is +300%", r.refPct(240, 60) === 300);
+  check("a zero, missing, negative or broken reference gives no percentage", [[5, 0], [5, null], [5, undefined], [5, -1], [5, NaN], [5, Infinity], [null, 5], [NaN, 5], [-1, 5]].every(([v, b]) => r.refPct(v, b) === null));
+  check("a value of zero against a real reference is −100%", r.refPct(0, 40) === -100);
+  check("whole numbers with a sign: +12%, −8% (a real minus sign), +1,234%", r.fmtPct(12.4) === "+12%" && r.fmtPct(-7.6) === "−8%" && r.fmtPct(1234.4) === "+1,234%", [r.fmtPct(12.4), r.fmtPct(-7.6), r.fmtPct(1234.4)].join(" "));
+  check("differences that round to nothing show 0%, never +0% or −0%", r.fmtPct(0) === "0%" && r.fmtPct(0.49) === "0%" && r.fmtPct(-0.49) === "0%" && r.fmtPct(-0.5) === "0%");
+  check("no percentage shows a dash", r.fmtPct(null) === "–");
+  const st = (dev, patch, paper, sel = {}) => withS(patch, () => r.statsOf(sel, dev, paper));
+  const a = st(TRI, { orient: "landscape", content: "none" });
+  check("screen stats for the 5-12-13 screen: 12 × 5 in, 13 in diagonal, 60 sq in, 100 ppi", near(a.g.w, 12) && near(a.g.h, 5) && a.diag === 13 && near(a.area, 60) && near(a.ppi, 100));
+  const v = st(HD, { orient: "landscape", content: "video", video: "4:3" });
+  check("video stats: 4:3 on a 16 × 9 in screen is a 15 in picture of 108 sq in, 1440 × 1080 pixels", near(v.video.diag, 15) && near(v.video.area, 108) && v.video.pxW === 1440 && v.video.pxH === 1080 && v.video.px === 1440 * 1080);
+  const shape = st({ ...TRI, aspectOnly: true }, { orient: "landscape", content: "video", video: "16:9" });
+  check("a screen without a pixel count has picture size but no picture pixels", shape.video.diag > 0 && shape.video.px === null && shape.ppi === null);
+  const pg = st(FOUR3, { orient: "landscape", content: "page", fit: "page" }, { w: 8.5, h: 11 });
+  check("page stats: Letter on an 8 × 6 in screen is shown at 6/11, so 12 pt looks like 6.55 pt, 136 pixels per page inch, all of it visible", near(pg.page.pt, 72 / 11) && near(pg.page.eff, 250 * 6 / 11) && near(pg.page.shown, 1));
+  const sheet = st({ n: "Letter", c: "paper", d: Math.hypot(11, 8.5), w: 11, h: 8.5, aspectOnly: true, sheet: true }, { orient: "landscape", content: "video", video: "16:9" });
+  check("a paper sheet has a size but no content stats or diagonal", near(sheet.area, 93.5) && sheet.diag === null && !sheet.video && !sheet.page);
+}
+
 (async () => {
   try { await deviceList(); await serviceWorker(); }
   catch (e) { check("test crashed: " + e.message, false, e.stack.split("\n")[1]); }

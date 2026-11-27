@@ -213,6 +213,13 @@ async function run(browser, base, label, ctxOptions) {
   const w1 = await calW();
   check("calibration card shows and + makes it bigger", await p.isVisible("#cal-card") && w1 > w0 && /upright/.test(await p.textContent("#cal-card")) === phone, `${w0} → ${w1}`);
 
+  // Reference screen: off until chosen, then a table below the cards (left on for the layout and accessibility checks)
+  const refShown = () => p.$eval("#ref-panel", e => !e.hidden);
+  const noRef = !(await refShown()) && (await p.locator("#cards .card.is-ref").count()) === 0;
+  await p.locator('#cards [data-act="ref"][data-i="0"]').click();
+  const rows = await p.locator("#ref-panel tbody tr").count();
+  check("no reference until chosen; Set as reference shows the comparison table", noRef && await refShown() && rows === await cardCount(p) && (await p.locator("#cards .card.is-ref").count()) === 1, `${noRef}, ${rows} rows`);
+
   if (phone) {
     const overflow = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     check("no sideways scrolling on a phone", overflow <= 0, overflow + " px too wide");

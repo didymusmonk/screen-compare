@@ -610,11 +610,166 @@ async function serviceWorkerUpdate() {
   await ctx.close();
 }
 
+// ---------------------------------------------------------------------------------------------------------
+async function reference() {
+  section("Reference screen");
+  // Big 26 is Test 13 doubled: 10 × 24 in upright, also 100 PPI
+  const BIG = { id: "c-big", n: "Big 26", c: "custom", d: 26, w: 2400, h: 1000 };
+  const custom = [...CUSTOM, BIG];
+  const { ctx, p } = await open({ custom, state: { sel: sel("c-tri", "c-big", "c-low", "c-shape"), content: "none" } });
+  const panel = () => p.$eval("#ref-panel", e => !e.hidden);
+  const refCards = () => p.$$eval("#cards .card.is-ref h3", hs => hs.map(h => h.firstChild.textContent));
+  // The table as shown: { head: [...], rows: [{ name, color, ref, cells: [[value, difference], ...] }] }
+  const table = () => p.$eval("#ref-panel", box => box.hidden ? null : {
+    title: box.querySelector("h2").textContent,
+    head: [...box.querySelectorAll("thead th")].slice(1).map(t => t.textContent),
+    rows: [...box.querySelectorAll("tbody tr")].map(tr => ({
+      name: tr.querySelector(".rn").firstChild.textContent, ref: tr.classList.contains("is-ref"),
+      color: getComputedStyle(tr.querySelector(".swatch")).color,
+      cells: [...tr.querySelectorAll("td")].map(td => [td.querySelector(".rv").textContent, (td.querySelector(".rd") || { textContent: "" }).textContent]),
+    })),
+  });
+  const col = (t, name) => t.rows.map(r => r.cells[t.head.indexOf(name)]);
+  check("no reference by default: no table, no marked card", !(await panel()) && (await refCards()).length === 0);
+  check("every card has a Set as reference button", (await p.locator('#cards [data-act="ref"]').count()) === 4 && (await p.textContent('#cards [data-act="ref"][data-i="0"]')) === "Set as reference");
+
+  await cardBtn(p, 0, "ref");
+  let t = await table();
+  check("setting Test 13 as the reference marks its card and shows the table", (await refCards()).join() === "Test 13" && t && t.title === "Compared with Test 13" && (await p.textContent('#cards [data-act="ref"][data-i="0"]')) === "Clear reference");
+  check("screen mode columns: width, height, diagonal, area, PPI", t.head.join("|") === "Width|Height|Diagonal|Area|PPI", t.head.join("|"));
+  check("rows follow the card order and the reference row says so", t.rows.map(r => r.name).join() === "Test 13,Big 26,Low 13,Shape only" && t.rows[0].ref && t.rows.filter(r => r.ref).length === 1);
+  const cardColors = await p.$$eval("#cards .card", cs => cs.map(c => getComputedStyle(c).color));
+  check("each row uses its screen's color", t.rows.every((r, k) => r.color === cardColors[k]) && new Set(cardColors).size === 4, JSON.stringify(t.rows.map(r => r.color)));
+  check("the reference row is the baseline", t.rows[0].cells.every(c => c[1] === "baseline") && t.rows[0].cells[0][0] === "5.00″");
+  check("twice the size: +100% width, height and diagonal, +300% area, same PPI (0%)", JSON.stringify(t.rows[1].cells) === JSON.stringify([["10.00″", "+100%"], ["24.00″", "+100%"], ["26″", "+100%"], ["240.0 sq in", "+300%"], ["100", "0%"]]), JSON.stringify(t.rows[1].cells));
+  check("half the pixels: same size (0%), −50% PPI with a real minus sign", JSON.stringify(t.rows[2].cells.map(c => c[1])) === JSON.stringify(["0%", "0%", "0%", "0%", "−50%"]));
+  check("a screen with no pixel count shows a dash for PPI, not 0 or −100%", JSON.stringify(t.rows[3].cells[4]) === JSON.stringify(["–", ""]) && t.rows[3].cells[0][1] === "0%");
+  const c = await cards(p);
+  check("table values match the cards", t.rows.every((r, k) => r.cells[0][0] + " × " + r.cells[1][0] === c[k]["Screen size"] && r.cells[2][0] === c[k]["Diagonal"] && r.cells[3][0] === c[k]["Area"]));
+
+  // One reference at a time; clear it, choose another
+  await cardBtn(p, 1, "ref");
+  t = await table();
+  check("choosing another screen moves the reference (only one at a time)", (await refCards()).join() === "Big 26" && t.title === "Compared with Big 26" && t.rows.filter(r => r.ref).map(r => r.name).join() === "Big 26" && col(t, "Area")[0][1] === "−75%", JSON.stringify(col(t, "Area")));
+  await cardBtn(p, 1, "ref");
+  check("Clear reference hides the table", !(await panel()) && (await refCards()).length === 0);
+  // Keyboard: the button works with Enter and keeps focus
+  await p.focus('#cards [data-act="ref"][data-i="0"]'); await p.keyboard.press("Enter");
+  const foc = await p.evaluate(() => { const a = document.activeElement; return a && a.dataset.act + a.dataset.i + a.textContent; });
+  check("keyboard: Enter sets the reference, focus stays on the button, and it's announced", (await refCards()).join() === "Test 13" && foc === "ref0Clear reference" && /Test 13 is now the reference/.test(await p.textContent("#sr-live")), foc);
+
+  // The table follows every change at once
+  await cardBtn(p, 1, "orient", "landscape");
+  t = await table();
+  check("turning a screen updates its row (Big 26 landscape: 24.00″ wide, +380%)", JSON.stringify(t.rows[1].cells[0]) === JSON.stringify(["24.00″", "+380%"]), JSON.stringify(t.rows[1].cells[0]));
+  await cardBtn(p, 1, "orient", "portrait");
+  await click(p, '#units button[data-v="cm"]');
+  t = await table();
+  check("centimeters: 12.7 cm wide, 387 cm², percentages unchanged", t.rows[0].cells[0][0] === "12.7 cm" && t.rows[0].cells[3][0] === "387 cm²" && t.rows[1].cells[3][1] === "+300%");
+  await click(p, '#units button[data-v="in"]');
+  const modes = {
+    page: "12 pt text looks like|Pixels per page inch|Page visible at once",
+    video: "Picture diagonal|Picture area|Picture pixels",
+    ebook: "Words per screen|Characters per line|Lines per screen",
+    site: "Browser width (CSS px)|Browser height (CSS px)|Browser area (CSS px²)",
+  };
+  for (const [m, head] of Object.entries(modes)) {
+    await click(p, `#content button[data-v="${m}"]`);
+    t = await table();
+    const cs = await cards(p);
+    let same;
+    if (m === "page") same = t.rows.every((r, k) => r.cells[0][0] === cs[k]["12 pt text looks like"] && (r.cells[1][0] === (cs[k]["Pixels per page inch"] || "–")) && r.cells[2][0] === cs[k]["Page visible at once"]);
+    if (m === "video") same = t.rows.every((r, k) => r.cells[2][0] === (cs[k]["Picture pixels"] || "–"));
+    if (m === "ebook") same = t.rows.every((r, k) => "about " + r.cells[0][0] === cs[k]["Words per screen"] && "about " + r.cells[1][0] === cs[k]["Characters per line"] && r.cells[2][0] === cs[k]["Lines per screen"]);
+    if (m === "site") same = t.rows.every((r, k) => cs[k]["Browser width"] ? `${r.cells[0][0]} × ${r.cells[1][0]} CSS px` === cs[k]["Browser width"] : r.cells[0][0] === "–");
+    check(`${m} mode: its own columns, same numbers as the cards`, t.head.join("|") === head && same, t.head.join("|") + " " + JSON.stringify(t.rows.map(r => r.cells)));
+  }
+  await click(p, '#content button[data-v="video"]');
+  t = await table();
+  // 16:9 on 5 × 12 in: 5 × 2.8125 in picture, 500 × 281 pixels; on 10 × 24 in: 1000 × 563 (4.007× as many)
+  check("video: twice the picture diagonal (+100%), four times the area (+300%), +301% pixels; Low 13 −75%; no pixel count gives a dash", JSON.stringify(t.rows[1].cells.map(c => c[1])) === JSON.stringify(["+100%", "+300%", "+301%"]) && t.rows[2].cells[2][1] === "−75%" && t.rows[3].cells[2][0] === "–", JSON.stringify(t.rows.map(r => r.cells)));
+  await click(p, '#content button[data-v="ebook"]');
+  await cardBtn(p, 1, "cols", "2");
+  t = await table();
+  const ebk = (await cards(p))[1];
+  check("e-book: two columns count lines in both, and the note says so", t.rows[1].cells[2][0] === String(2 * +ebk["Lines per column"]) && /count every column/.test(await p.textContent("#ref-panel .hint")), t.rows[1].cells[2][0] + " vs " + ebk["Lines per column"]);
+  await p.selectOption("#ebookPt", "20");
+  const t2 = await table();
+  check("changing the text size updates the table", t2.rows[0].cells[0][0] !== t.rows[0].cells[0][0]);
+  await click(p, '#content button[data-v="page"]');
+  await p.selectOption("#paper", "none");
+  check("Pages with no page chosen falls back to screen size", (await table()).head[0] === "Width");
+  await p.selectOption("#paper", "us-letter-paper");
+
+  // A paper sheet in the comparison has no screen numbers to compare
+  await p.fill("#q", "US Letter"); await p.locator("#results .res").first().click(); await p.fill("#q", "");
+  t = await table();
+  check("a paper sheet's row shows dashes in Pages mode", t.rows[4].cells.every(c => c[0] === "–"), JSON.stringify(t.rows[4]));
+
+  // Saving, share links, duplicating and removing
+  await p.reload(); await p.waitForSelector("#cards .card");
+  check("the reference is remembered after a reload", (await refCards()).join() === "Test 13" && await panel());
+  await ctx.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await p.locator("[data-share]").filter({ visible: true }).first().click();
+  const link = await p.evaluate(() => navigator.clipboard.readText());
+  const other = await open({ custom: [], hash: link.slice(link.indexOf("#")) });
+  check("a share link carries the reference", (await other.p.$$eval("#cards .card.is-ref h3", hs => hs.map(h => h.firstChild.textContent))).join() === "Test 13" && await other.p.$eval("#ref-panel", e => !e.hidden));
+  noErrors(other.p, "reference share link");
+  await other.ctx.close();
+  await cardBtn(p, 0, "dup");
+  check("duplicating the reference screen doesn't make a second reference", (await refCards()).length === 1 && (await p.locator("#cards .card").count()) === 6);
+  await cardBtn(p, 1, "remove");
+  await cardBtn(p, 0, "remove");
+  check("removing the reference screen clears the reference and hides the table", (await refCards()).length === 0 && !(await panel()));
+  await p.reload(); await p.waitForSelector("#cards .card");
+  check("…and it stays cleared after a reload", (await refCards()).length === 0 && !(await panel()));
+  // Taking it off through the device list works the same way
+  await cardBtn(p, 0, "ref");
+  const first = (await cards(p))[0].name;
+  await p.fill("#q", first); await p.locator(`#results .res[aria-pressed="true"]`).first().click(); await p.fill("#q", "");
+  check("removing the reference from the device list clears it too", (await refCards()).length === 0 && !(await panel()) && !(await cards(p)).some(x => x.name === first));
+  // With one screen left the table hides, but the choice is kept
+  while ((await p.locator("#cards .card").count()) > 2) await cardBtn(p, 2, "remove");
+  await cardBtn(p, 0, "ref");
+  await cardBtn(p, 1, "remove");
+  check("with only the reference left, the card stays marked and the table hides", (await refCards()).length === 1 && !(await panel()));
+  await p.fill("#q", "Twin 13"); await p.locator("#results .res").first().click(); await p.fill("#q", "");
+  check("adding another screen brings the table back", await panel() && (await table()).rows.length === 2);
+  await click(p, "#reset-btn");
+  check("Reset to start clears the reference", (await refCards()).length === 0 && !(await panel()));
+  await p.reload(); await p.waitForSelector("#cards .card");
+  check("…and after a reload", (await refCards()).length === 0);
+  noErrors(p, "reference");
+  await ctx.close();
+
+  // Older links and saved settings have no reference: they open without one
+  const b64 = o => "#s=" + Buffer.from(JSON.stringify(o)).toString("base64url");
+  const old = await open({ custom: [], hash: b64({ content: "none", sel: [{ i: "ipad-mini-a20-pro-2026" }, { i: "ipad-pro-11-inch-m4-m5" }] }) });
+  check("a share link from before this feature opens with no reference", (await old.p.locator("#cards .card.is-ref").count()) === 0 && await old.p.$eval("#ref-panel", e => e.hidden));
+  noErrors(old.p, "old link");
+  await old.ctx.close();
+  const two = await open({ custom: [], hash: b64({ sel: [{ i: "ipad-mini-a20-pro-2026", r: 1 }, { i: "ipad-pro-11-inch-m4-m5", r: 1 }] }) });
+  check("a link marking two references keeps only the first", (await two.p.$$eval("#cards .card.is-ref", cs => cs.map(c => c.dataset.i))).join() === "0");
+  await two.ctx.close();
+  for (const [what, state] of [["a reference to a screen that isn't there", { sel: sel("c-tri", "c-low"), ref: "nope" }], ["a reference that isn't text", { sel: sel("c-tri", "c-low"), ref: { x: 1 } }]]) {
+    const o = await open({ state });
+    check(`saved settings with ${what}: no reference, no errors`, (await o.p.locator("#cards .card.is-ref").count()) === 0 && await o.p.$eval("#ref-panel", e => e.hidden) && o.p.errors.length === 0, o.p.errors.join(" | "));
+    await o.ctx.close();
+  }
+  // On an iPhone: the table scrolls inside its box, never the page
+  const ph = await open({ custom, state: { sel: sel("c-tri", "c-big", "c-low", "c-shape"), content: "none", ref: "t0" }, ctxOptions: { ...devices["iPhone 13"] } });
+  const over = await ph.p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+  const btnH = await ph.p.$eval('#cards [data-act="ref"]', b => b.getBoundingClientRect().height);
+  check("iPhone 13: saved reference shows, the table doesn't widen the page, and the button is finger-sized", await ph.p.$eval("#ref-panel", e => !e.hidden) && over <= 0 && btnH >= 38, `${over} px too wide, button ${btnH} px`);
+  noErrors(ph.p, "reference on iPhone");
+  await ph.ctx.close();
+}
+
 (async () => {
   const server = await serve(ROOT, pth => override(pth));
   base = `http://127.0.0.1:${server.address().port}/`;
   browser = await chromium.launch();
-  const ALL = [geometry, customForm, pages, pdfs, video, () => ebook({ viewport: { width: 1280, height: 800 } }, ""), () => ebook({ ...devices["iPhone 13"] }, " (iPhone 13)"), website, persistence, calibration, malformed, devicesById, failures, serviceWorkerUpdate];
+  const ALL = [geometry, customForm, pages, pdfs, video, () => ebook({ viewport: { width: 1280, height: 800 } }, ""), () => ebook({ ...devices["iPhone 13"] }, " (iPhone 13)"), website, persistence, reference, calibration, malformed, devicesById, failures, serviceWorkerUpdate];
   const only = (process.env.ONLY || "").split(",").filter(Boolean);
   const steps = only.length ? ALL.filter(f => only.some(o => (f.name || "").includes(o) || f.toString().includes(o))) : ALL;
   for (const step of steps) {

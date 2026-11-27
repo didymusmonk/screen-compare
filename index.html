@@ -105,6 +105,7 @@ h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin
   .stage-panel { order: 1; }
   #cards-bar { order: 2; }
   #cards { order: 3; }
+  #ref-panel { order: 3; }
   .rail > section:nth-child(1) { order: 4; }
   .rail > section:nth-child(3) { order: 5; }
   .more-btn { display: inline-block; padding: 6px 10px; font-size: 13px; }
@@ -204,7 +205,34 @@ dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-num
 .pdfbox strong { font-weight: 600; }
 .pdf-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; justify-content: space-between; }
 .seg.mini button { padding: 3px 8px; font-size: 12px; }
-.card-ctrl { display: flex; flex-wrap: wrap; gap: 6px; }
+.card-ctrl { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+/* Reference screen: a quiet button on each card, a colored edge and tag on the chosen one, and a table below the cards */
+.ref-btn { margin-left: auto; border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 6px; padding: 3px 8px; font-size: 12px; }
+.ref-btn:hover { color: var(--fg); border-color: var(--fg); }
+.card.is-ref { box-shadow: inset 4px 0 0 currentColor; }
+.card.is-ref.lit { box-shadow: inset 4px 0 0 currentColor, 0 0 0 2px currentColor; }
+.ref-tag { color: var(--fg); font-weight: 600; }
+.ref-panel { gap: 8px; }
+.ref-scroll { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
+.ref-table { border-collapse: collapse; font-size: 13px; }
+.ref-table th, .ref-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
+.ref-table thead th { font-size: 12px; font-weight: 500; color: var(--muted); vertical-align: bottom; max-width: 120px; }
+.ref-table thead th:first-child { text-align: left; }
+.ref-table tbody th { text-align: left; font-weight: 600; color: var(--fg); min-width: 120px; white-space: nowrap; position: sticky; left: 0; background: var(--surface); }
+.ref-table tbody th .swatch { display: inline-block; vertical-align: top; margin: 2px 6px 0 0; }
+.ref-table .rn { display: inline-block; white-space: normal; max-width: 160px; }
+.ref-table .rn small { display: block; font-size: 11.5px; font-weight: 500; color: var(--muted); }
+.ref-table .rv, .ref-table .rd { display: block; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--fg); }
+.ref-table .rd { font-size: 12px; color: var(--muted); }
+.ref-table tr.is-ref th, .ref-table tr.is-ref td { background: var(--sunk); }
+@media (max-width: 700px) {
+  .ref-table th, .ref-table td { padding: 6px 5px; }
+  .ref-table thead th { max-width: 84px; }
+  .ref-table tbody th { min-width: 0; }
+  .ref-table .rn { max-width: 96px; font-size: 12.5px; }
+  .ref-table .rv { font-size: 12px; }
+  .ref-table .rd { font-size: 11.5px; }
+}
 .grid-stack { display: grid; gap: 14px; }
 .pct { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .bar { height: 6px; border-radius: 3px; background: var(--sunk); overflow: hidden; }
@@ -229,6 +257,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   .seg.mini button { min-height: 34px; padding: 6px 10px; }
   .chip { min-height: 36px; padding: 6px 12px; }
   .icon-btn { width: 38px; height: 38px; }
+  .ref-btn { min-height: 38px; padding: 6px 10px; }
   .btn { min-height: 40px; }
   .check { min-height: 44px; }
   .res { min-height: 40px; }
@@ -366,6 +395,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <span class="row-mini">Sort by screen height <span class="seg mini" role="group" aria-label="Sort cards"><button type="button" data-sort="asc">Shortest first</button><button type="button" data-sort="desc">Tallest first</button></span></span>
       </div>
       <section class="cards" id="cards" aria-label="Screen details"></section>
+      <section class="panel ref-panel" id="ref-panel" aria-labelledby="ref-title" hidden></section>
 
       <section class="panel">
         <details id="gloss-details" open>
@@ -375,6 +405,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
           <div><b>Crop white margins</b>Trims the empty border of your PDF so its text fills more of each screen. Each page is cut around its own text, so books with different inner and outer margins crop well, and every page keeps the same cropped size. Sizes stay true: at 100% the text is still its printed size. Your file isn't changed.</div>
           <div><b>Size vs. printed page</b>How big a PDF page looks on that screen compared with the same page printed on paper. At 80%, 12 pt text looks like 9.6 pt text.</div>
           <div><b>Pixels per page inch</b>How many screen pixels each inch of the page gets. It's the effective resolution of the page on that screen, like a scanner's DPI. Around 150 or more looks crisp.</div>
+          <div><b>Reference screen</b>Press "Set as reference" on a card to compare the other screens with one you know. A table below the cards shows each value and how much higher or lower it is, in percent. +50% means one and a half times the reference. The percentages describe size, not which screen is better.</div>
           <div><b>Sizes are screen only</b>Rectangles show the visible display area from the diagonal and pixel count, not bezels or the case. Diagonals are the maker's figures, which round a little and ignore rounded corners.</div>
         </div>
         </details>
@@ -498,7 +529,7 @@ const defaults = () => ({
     { id: "ipad-pro-11-inch-m4-m5", uid: "d3" },
   ],
   mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
-  paper: "us-letter-paper", paperOrient: "portrait", fit: "page", content: "page", video: "16:9", ebookPt: 12, ebookCols: "1", site: "news", siteLayout: "auto", crop: false, cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
+  paper: "us-letter-paper", paperOrient: "portrait", fit: "page", content: "page", video: "16:9", ebookPt: 12, ebookCols: "1", site: "news", siteLayout: "auto", crop: false, cat: "all", order: "added", zoom: 50, pos: {}, zo: [], ref: null,
 });
 // Saved settings and share links come from outside this code, so anything malformed is dropped instead of breaking the page
 const isObj = v => !!v && typeof v === "object" && !Array.isArray(v);
@@ -515,7 +546,7 @@ const fromShare = (() => {
     for (const k of SHARE_KEYS) if (j[k] != null) st[k] = j[k];
     for (const c of j.cu || []) if (okScreen(c) && !custom.some(x => x.id === c.id)) custom.push({ ...c, c: "custom" });
     store.set("custom", custom);
-    st.sel = (j.sel || []).slice(0, 12).map((x, k) => { const o = { id: String(x.i), uid: "s" + k }; if (x.f) o.flip = true; if (x.s) o.spread = true; if (x.t) o.fit = x.t; if (x.c) o.cols = x.c; return o; });
+    st.sel = (j.sel || []).slice(0, 12).map((x, k) => { const o = { id: String(x.i), uid: "s" + k }; if (x.f) o.flip = true; if (x.s) o.spread = true; if (x.t) o.fit = x.t; if (x.c) o.cols = x.c; if (x.r && !st.ref) st.ref = o.uid; return o; });
     st.pos = {}; (j.pos || []).forEach((q, k) => { if (q && st.sel[k]) st.pos[st.sel[k].uid] = { x: q[0], y: q[1] }; });
     st.zo = [];
     history.replaceState(null, "", location.pathname + location.search);
@@ -528,6 +559,7 @@ S.sel = (Array.isArray(S.sel) ? S.sel : []).filter(x => isObj(x) && typeof x.id 
 if (!isObj(S.pos)) S.pos = {};
 for (const k of Object.keys(S.pos)) if (!isObj(S.pos[k]) || !Number.isFinite(S.pos[k].x) || !Number.isFinite(S.pos[k].y)) delete S.pos[k];
 if (!Array.isArray(S.zo)) S.zo = [];
+if (typeof S.ref !== "string" || !S.sel.some(x => x.uid === S.ref)) S.ref = null; // the reference screen, by its uid
 if (!EBOOK_PTS.some(p => p[0] === S.ebookPt)) S.ebookPt = 12;
 // The drawing scale, in screen (CSS) pixels per inch. "Fit" picks it, the zoom slider sets it ("manual"),
 // and "Actual size" uses the calibration. A saved zoom that isn't a usable number goes back to the default.
@@ -549,7 +581,8 @@ const calStale = () => !!calDpr && Math.abs((window.devicePixelRatio || 1) / cal
 let pdf = { doc: null, page: 1, pages: 0, img: null, img2: null, w: 0, h: 0, name: "", ink: new Map(), typ: null, scan: null, crops: null };
 const COLORS = ["--c1", "--c2", "--c3", "--c4", "--c5", "--c6", "--c7", "--c8", "--c9", "--c10", "--c11", "--c12"];
 const MAX = 12;
-const save = () => store.set("state", { ...S });
+// saving also forgets a reference screen that was taken out of the comparison
+const save = () => { if (S.ref && !S.sel.some(x => x.uid === S.ref)) S.ref = null; store.set("state", { ...S }); };
 const newUid = () => "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
 const all = () => BUILTIN.concat(custom);
@@ -638,7 +671,7 @@ function shareUrl() {
   const o = {};
   for (const k of SHARE_KEYS) o[k] = S[k];
   if (o.paper === "upload") o.paper = "us-letter-paper"; // your own PDF stays on your device
-  o.sel = S.sel.map(x => { const e = { i: x.id }; if (x.flip) e.f = 1; if (x.spread) e.s = 1; if (x.fit) e.t = x.fit; if (x.cols) e.c = x.cols; return e; });
+  o.sel = S.sel.map(x => { const e = { i: x.id }; if (x.flip) e.f = 1; if (x.spread) e.s = 1; if (x.fit) e.t = x.fit; if (x.cols) e.c = x.cols; if (x.uid === S.ref) e.r = 1; return e; });
   if (S.mode === "arrange") o.pos = S.sel.map(x => S.pos[x.uid] ? [+S.pos[x.uid].x.toFixed(2), +S.pos[x.uid].y.toFixed(2)] : null);
   const cu = custom.filter(c => S.sel.some(x => x.id === c.id)).map(({ id, n, d, w, h, aspectOnly }) => ({ id, n, d, w, h, aspectOnly }));
   if (cu.length) o.cu = cu;
@@ -1317,20 +1350,39 @@ function ruler(x, y, totalIn, s) {
 const trunc = (t, n) => t.length > n ? t.slice(0, n - 1) + "…" : t;
 
 // ---------- Cards ----------
+// The numbers behind one card, for the content shown now. The reference table reads the same numbers,
+// so the two can never disagree. Paper sheets get only their size.
+function statsOf(s, dev, paper) {
+  const g = geom(dev, s.flip), ppi = g.ppi;
+  const st = { g, ppi, area: g.area, diag: dev.sheet ? null : dev.d };
+  if (dev.sheet) return st;
+  if (paper) {
+    const fit = fitOf(s), f = pageFit(g, spreadOf(s, paper), fit);
+    st.page = { fit, f, pt: 12 * f.k, eff: ppi ? ppi * f.k : null, shown: f.shown };
+  } else if (S.content === "video") {
+    const v = videoFit(g), pxW = ppi ? Math.round(v.vw * ppi) : null, pxH = ppi ? Math.round(v.vh * ppi) : null;
+    st.video = { v, diag: Math.hypot(v.vw, v.vh), area: v.vw * v.vh, pxW, pxH, px: ppi ? pxW * pxH : null };
+  } else if (S.content === "ebook") {
+    const cm = colsOf(s), e = ebookFit(g, cm);
+    st.ebook = { cm, e, lines: e.lines * e.cols };
+  } else if (S.content === "site") st.site = siteView(dev, g);
+  return st;
+}
+const areaTxt = a => S.units === "cm" ? `${(a * 6.4516).toFixed(0)} cm²` : `${a.toFixed(1)} sq in`;
+const diagTxt = d => S.units === "cm" ? (d * 2.54).toFixed(1) + " cm" : d + "″";
 function renderCards() {
   const items = S.sel.map((s, i) => ({ s, dev: byId(s.id), color: COLORS[colIdx(s)], i })).filter(x => x.dev);
   const paper = paperDims();
-  const maxArea = Math.max(...items.map(x => geom(x.dev, false).area), 0);
+  items.forEach(x => x.st = statsOf(x.s, x.dev, paper));
+  const maxArea = Math.max(...items.map(x => x.st.area), 0);
   $("#cards-bar").hidden = items.length < 2;
   $("#cards").innerHTML = items.map(x => {
-    const g = geom(x.dev, x.s.flip);
-    const ppi = g.ppi;
+    const st = x.st, g = st.g;
+    const ppi = g.ppi, isRef = x.s.uid === S.ref;
     let pdfHtml = "";
-    if (paper && !x.dev.sheet) {
-      const fit = fitOf(x.s);
-      const f = pageFit(g, spreadOf(x.s, paper), fit);
+    if (st.page) {
+      const { fit, f, eff } = st.page;
       const pct = f.k * 100;
-      const eff = ppi ? ppi * f.k : null;
       pdfHtml = `<div class="pdfbox">
         <div><strong>${esc(paper.name)}</strong></div>
         <div class="pdf-head">
@@ -1339,23 +1391,23 @@ function renderCards() {
         </div>
         <dl>
           <dt>Size vs. printed page</dt><dd>${pct.toFixed(0)}%</dd>
-          <dt>12 pt text looks like</dt><dd>${(12 * f.k).toFixed(1)} pt</dd>
+          <dt>12 pt text looks like</dt><dd>${st.page.pt.toFixed(1)} pt</dd>
           ${eff ? `<dt>Pixels per page inch</dt><dd>${Math.round(eff)}</dd>` : ""}
           <dt${paper.crop ? ` title="Share of the cropped ${x.s.spread ? "spread" : "page"} (white margins removed) that fits on the screen at once"` : ""}>${paper.crop ? "Cropped " + (x.s.spread ? "spread" : "page") : x.s.spread ? "Spread" : "Page"} visible at once</dt><dd>${Math.round(f.shown * 100)}%</dd>
         </dl>
       </div>`;
     }
-    if (!x.dev.sheet && S.content === "video") {
-      const v = videoFit(g);
+    if (st.video) {
+      const v = st.video.v;
       const bars = v.barsTB > 0.005 ? `top and bottom, ${fmtLen(v.barsTB)} each` : v.barsLR > 0.005 ? `left and right, ${fmtLen(v.barsLR)} each` : "none";
       pdfHtml = `<div class="pdfbox"><div><strong>${esc(S.video)} video</strong></div><dl>
         <dt>Picture uses</dt><dd>${Math.round(v.used * 100)}% of screen</dd>
         <dt>Black bars</dt><dd>${bars}</dd>
         <dt>Picture size</dt><dd>${fmtLen(v.vw)} × ${fmtLen(v.vh)}</dd>
-        ${ppi ? `<dt>Picture pixels</dt><dd>${Math.round(v.vw * ppi)} × ${Math.round(v.vh * ppi)}</dd>` : ""}
+        ${ppi ? `<dt>Picture pixels</dt><dd>${st.video.pxW} × ${st.video.pxH}</dd>` : ""}
       </dl></div>`;
-    } else if (!x.dev.sheet && S.content === "ebook") {
-      const cm = colsOf(x.s), e = ebookFit(g, cm);
+    } else if (st.ebook) {
+      const { cm, e } = st.ebook;
       pdfHtml = `<div class="pdfbox"><div><strong>E-book at ${S.ebookPt} pt</strong></div>
         <div class="pdf-head"><span class="seg mini" role="group" aria-label="Columns">${[["1", "1 column"], ["2", "2 columns"], ["auto", "Auto"]].map(([v, t]) => `<button data-act="cols" data-v="${v}" data-i="${x.i}" aria-pressed="${cm === v}">${t}</button>`).join("")}</span></div><dl>
         <dt>Words per screen</dt><dd>about ${e.words.toLocaleString()}</dd>
@@ -1367,7 +1419,7 @@ function renderCards() {
       </dl></div>`;
     }
     else if (!x.dev.sheet && S.content === "site") {
-      const v = siteView(x.dev, g), NM = { mobile: "Mobile", tablet: "Tablet", desktop: "Desktop" };
+      const v = st.site, NM = { mobile: "Mobile", tablet: "Tablet", desktop: "Desktop" };
       pdfHtml = v ? `<div class="pdfbox"><div><strong>${esc(SITES.find(t => t[0] === S.site)[1])}</strong></div><dl>
         <dt>Layout</dt><dd>${NM[v.mode]}${v.mode !== v.natural ? ` (forced, would be ${NM[v.natural].toLowerCase()})` : ""}</dd>
         <dt>Browser width</dt><dd>${v.vw} × ${v.vh} CSS px</dd>
@@ -1377,29 +1429,103 @@ function renderCards() {
         : `<div class="pdfbox"><div><strong>Website</strong></div><p class="hint">Add the pixel count to preview websites.</p></div>`;
     }
     const dims = `${fmtLen(g.w)} × ${fmtLen(g.h)}`;
-    const areaIn = geom(x.dev, false).area;
-    const areaTxt = S.units === "cm" ? `${(areaIn * 6.4516).toFixed(0)} cm²` : `${areaIn.toFixed(1)} sq in`;
-    return `<article class="card" data-i="${x.i}" style="color:var(${x.color})">
+    const areaIn = st.area;
+    return `<article class="card${isRef ? " is-ref" : ""}" data-i="${x.i}" style="color:var(${x.color})">
       <div class="card-head">
         <button class="icon-btn grip" data-grip="${x.i}" title="Drag to reorder (or use the arrow keys)" aria-label="Move ${esc(x.dev.n)}. Drag, or press the left and right arrow keys">⠿</button>
         <span class="swatch" aria-hidden="true"></span>
-        <h3 style="color:var(--fg)">${esc(x.dev.n)}<span class="cat">${CATS[x.dev.c]}</span></h3>
+        <h3 style="color:var(--fg)">${esc(x.dev.n)}<span class="cat">${CATS[x.dev.c]}${isRef ? ` · <span class="ref-tag">Reference</span>` : ""}</span></h3>
         <button class="icon-btn" data-act="dup" data-i="${x.i}" title="Duplicate in the other orientation" aria-label="Duplicate ${esc(x.dev.n)}">⧉</button>
         <button class="icon-btn" data-act="remove" data-i="${x.i}" title="Remove" aria-label="Remove ${esc(x.dev.n)}">✕</button>
       </div>
-      <div class="card-ctrl"><span class="seg mini" role="group" aria-label="Orientation"><button data-act="orient" data-v="portrait" data-i="${x.i}" aria-pressed="${isPortrait(x.s)}">Portrait</button><button data-act="orient" data-v="landscape" data-i="${x.i}" aria-pressed="${!isPortrait(x.s)}">Landscape</button></span></div>
+      <div class="card-ctrl"><span class="seg mini" role="group" aria-label="Orientation"><button data-act="orient" data-v="portrait" data-i="${x.i}" aria-pressed="${isPortrait(x.s)}">Portrait</button><button data-act="orient" data-v="landscape" data-i="${x.i}" aria-pressed="${!isPortrait(x.s)}">Landscape</button></span><button class="ref-btn" data-act="ref" data-i="${x.i}" aria-label="${isRef ? `Clear ${esc(x.dev.n)} as the reference` : `Set ${esc(x.dev.n)} as the reference`}">${isRef ? "Clear reference" : "Set as reference"}</button></div>
       <div class="ppi-big" style="color:var(--fg)">${x.dev.sheet ? `<b>${fmtLen(g.w)} × ${fmtLen(g.h)}</b>` : ppi ? `<b>${Math.round(ppi)}</b><span>pixels per inch (PPI)</span>` : `<b>–</b><span>PPI unknown, add the pixel count</span>`}</div>
       <dl style="color:var(--fg)">
-        ${x.dev.sheet ? "" : `<dt>Diagonal</dt>`}<dd ${x.dev.sheet ? "hidden" : ""}>${S.units === "cm" ? (x.dev.d * 2.54).toFixed(1) + " cm" : x.dev.d + "″"}</dd>
+        ${x.dev.sheet ? "" : `<dt>Diagonal</dt>`}<dd ${x.dev.sheet ? "hidden" : ""}>${diagTxt(x.dev.d)}</dd>
         ${x.dev.aspectOnly ? "" : `<dt>Resolution</dt><dd>${g.pxW} × ${g.pxH}</dd>`}
         <dt>Aspect ratio</dt><dd>${aspectLabel(x.dev.w, x.dev.h)}</dd>
         ${x.dev.sheet ? "" : `<dt>Screen size</dt><dd>${dims}</dd>`}
-        <dt>Area</dt><dd>${areaTxt}</dd>
+        <dt>Area</dt><dd>${areaTxt(areaIn)}</dd>
       </dl>
       <div class="bar" title="Area compared with the largest screen here"><i style="width:${(areaIn / maxArea * 100).toFixed(1)}%"></i></div>
       ${pdfHtml ? `<div style="color:var(--fg)">${pdfHtml}</div>` : ""}
     </article>`;
   }).join("");
+  renderRef(items);
+}
+
+// ---------- Reference table ----------
+// Pick one card as the reference and every other screen is shown as a percentage of it. Each column reads a number
+// that statsOf() already worked out for the cards; "v" gives the number compared, "t" the text shown.
+const REF_COLS = {
+  screen: ["Screen size", [
+    ["Width", st => st.g.w, st => fmtLen(st.g.w)],
+    ["Height", st => st.g.h, st => fmtLen(st.g.h)],
+    ["Diagonal", st => st.diag, st => diagTxt(st.diag)],
+    ["Area", st => st.area, st => areaTxt(st.area)],
+    ["PPI", st => st.ppi, st => String(Math.round(st.ppi))],
+  ]],
+  page: ["Pages", [
+    ["12 pt text looks like", st => st.page && st.page.pt, st => st.page.pt.toFixed(1) + " pt"],
+    ["Pixels per page inch", st => st.page && st.page.eff, st => String(Math.round(st.page.eff))],
+    ["Page visible at once", st => st.page && st.page.shown, st => Math.round(st.page.shown * 100) + "%"],
+  ]],
+  video: ["Video", [
+    ["Picture diagonal", st => st.video && st.video.diag, st => fmtLen(st.video.diag)],
+    ["Picture area", st => st.video && st.video.area, st => areaTxt(st.video.area)],
+    ["Picture pixels", st => st.video && st.video.px, st => `${st.video.pxW} × ${st.video.pxH}`],
+  ]],
+  ebook: ["E-book", [
+    ["Words per screen", st => st.ebook && st.ebook.e.words, st => st.ebook.e.words.toLocaleString()],
+    ["Characters per line", st => st.ebook && st.ebook.e.cpl, st => String(st.ebook.e.cpl)],
+    ["Lines per screen", st => st.ebook && st.ebook.lines, st => String(st.ebook.lines)],
+  ]],
+  site: ["Website", [
+    ["Browser width (CSS px)", st => st.site && st.site.vw, st => String(st.site.vw)],
+    ["Browser height (CSS px)", st => st.site && st.site.vh, st => String(st.site.vh)],
+    ["Browser area (CSS px²)", st => st.site && st.site.vw * st.site.vh, st => (st.site.vw * st.site.vh).toLocaleString()],
+  ]],
+};
+// ((value / reference) − 1) × 100, or null when there is nothing fair to compare (a missing, zero or broken number)
+function refPct(v, r) {
+  if (typeof v !== "number" || typeof r !== "number" || !Number.isFinite(v) || !Number.isFinite(r) || r <= 0 || v < 0) return null;
+  return (v / r - 1) * 100;
+}
+// whole percent with a sign: +12%, −8% (a real minus sign), 0% for no difference
+function fmtPct(p) {
+  if (p == null) return "–";
+  const n = Math.round(p);
+  return n === 0 ? "0%" : (n > 0 ? "+" : "−") + Math.abs(n).toLocaleString() + "%";
+}
+function refMode() {
+  if (S.content === "page") return paperDims() ? "page" : "screen";
+  return REF_COLS[S.content] ? S.content : "screen";
+}
+function renderRef(items) {
+  const box = $("#ref-panel"), ref = items.find(x => x.s.uid === S.ref);
+  box.hidden = !ref || items.length < 2;
+  if (box.hidden) { box.innerHTML = ""; return; }
+  const [title, cols] = REF_COLS[refMode()];
+  const val = (c, st) => { const v = c[1](st); return typeof v === "number" && Number.isFinite(v) ? v : null; };
+  const head = cols.map(c => `<th scope="col">${c[0]}</th>`).join("");
+  const rows = items.map(x => {
+    const me = x === ref;
+    const cells = cols.map(c => {
+      const v = val(c, x.st), r = val(c, ref.st);
+      if (v == null) return `<td><span class="rv">–</span><span class="sr-only">not available</span></td>`;
+      const p = refPct(v, r);
+      const d = me ? `<span class="rd">baseline</span>` : p == null ? `<span class="rd" title="No reference value to compare with">–</span>` : `<span class="rd">${fmtPct(p)}</span>`;
+      return `<td><span class="rv">${c[2](x.st)}</span>${d}</td>`;
+    }).join("");
+    return `<tr${me ? ` class="is-ref"` : ""}><th scope="row"><span class="swatch" style="color:var(${x.color})" aria-hidden="true"></span><span class="rn">${esc(x.dev.n)}${me ? `<small>Reference</small>` : ""}</span></th>${cells}</tr>`;
+  }).join("");
+  const twoCol = refMode() === "ebook" && items.some(x => x.st.ebook && x.st.ebook.e.cols > 1);
+  box.innerHTML = `<span class="eyebrow">Reference comparison · ${title}</span><h2 id="ref-title">Compared with ${esc(ref.dev.n)}</h2>
+    <p class="hint">Each percentage shows how much higher or lower a value is than on the reference screen. They describe size, not which is better.${twoCol ? " Lines per screen count every column." : ""}</p>
+    <div class="ref-scroll" role="region" aria-labelledby="ref-title" tabindex="0"><table class="ref-table">
+      <caption class="sr-only">${title} of each screen, with the difference from ${esc(ref.dev.n)} in percent</caption>
+      <thead><tr><th scope="col">Screen</th>${head}</tr></thead><tbody>${rows}</tbody>
+    </table></div>`;
 }
 
 // ---------- Controls ----------
@@ -1478,6 +1604,11 @@ $("#cards").addEventListener("click", e => {
   else if (act === "single" || act === "spread") S.sel[i].spread = act === "spread";
   else if (act === "fit") S.sel[i].fit = b.dataset.v;
   else if (act === "cols") S.sel[i].cols = b.dataset.v;
+  else if (act === "ref") {
+    const d = byId(S.sel[i].id), on = S.ref !== S.sel[i].uid;
+    S.ref = on ? S.sel[i].uid : null;
+    $("#sr-live").textContent = on ? `${d ? d.n : "This screen"} is now the reference. The comparison table is below the cards.` : "Reference cleared.";
+  }
   else if (act === "orient") {
     if (isPortrait(S.sel[i]) !== (b.dataset.v === "portrait")) rotateItem(i);
     const o = document.querySelector(`#cards [data-act="orient"][data-i="${i}"][data-v="${b.dataset.v}"]`); if (o) o.focus({ preventScroll: true });
@@ -1843,6 +1974,7 @@ loadDevices().catch(err => {
   S.sel.forEach(s => { if (RENAMED[s.id]) s.id = RENAMED[s.id]; });
   S.sel = S.sel.filter(s => byId(s.id));
   S.sel.forEach(s => { if (!s.uid) s.uid = newUid(); });
+  if (S.ref && !S.sel.some(x => x.uid === S.ref)) S.ref = null;
   if (fromShare) save();
   buildPaperMenu();
   renderAll();

@@ -875,35 +875,37 @@ const PROSE_EM = (() => {
     return v > 0.3 && v < 0.8 ? v * 1.03 : 0.53;
   } catch { return 0.53; }
 })();
-function lorem(seed) {
-  let k = seed, words = 0, cap = true, buf = null;
+// Every preview reads the same text from the same start, so you can compare screens by where the text runs out.
+// Paragraph breaks belong to the text (every few sentences), not to the screen, so they fall in the same places too.
+function lorem() {
+  let k = 0, words = 0, sentences = 0, para = 0, cap = true, buf = null;
+  const PARA = [4, 3, 5, 4, 3]; // sentences per paragraph
   const make = () => {
-    let w = LOREM[k++ % LOREM.length];
+    let w = LOREM[k++ % LOREM.length], end = false;
     if (cap) { w = w[0].toUpperCase() + w.slice(1); cap = false; }
     words++;
-    if ((words > 7 && k % 5 === 0) || words > 15) { w += "."; words = 0; cap = true; }
-    else if (words > 3 && k % 11 === 0) w += ",";
-    return w;
+    if ((words > 7 && k % 5 === 0) || words > 15) {
+      w += "."; words = 0; cap = true;
+      if (++sentences >= PARA[para % PARA.length]) { sentences = 0; para++; end = true; }
+    } else if (words > 3 && k % 11 === 0) w += ",";
+    return { w, end };
   };
   return {
-    line(cpl) { // as many words as fit in about cpl characters
-      const out = []; let len = 0;
+    // as many words as fit in about cpl characters; end is true when the line finishes a paragraph
+    line(cpl) {
+      const out = []; let len = 0, end = false;
       for (;;) {
         if (!buf) buf = make();
-        const add = buf.length + (out.length ? 1 : 0);
+        const add = buf.w.length + (out.length ? 1 : 0);
         if (out.length && len + add > cpl) break;
-        out.push(buf); len += add; buf = null;
-        if (len >= cpl) break;
+        out.push(buf.w); len += add; end = buf.end; buf = null;
+        if (end || len >= cpl) break;
       }
-      return { text: out.join(" "), len };
+      return { text: out.join(" "), end };
     },
-    newPara() { if (buf) buf = buf[0].toUpperCase() + buf.slice(1); else cap = true; words = 0; },
   };
 }
-// one line of text, left-aligned. (Stretching lines to full width with textLength looked nicer but made redraws ten times slower.)
-function textLine(x, y, w, fontPx, src, cpl, justify) {
-  let { text, len } = src.line(cpl);
-  if (!justify && text && !text.endsWith(".")) text = text.replace(/,$/, "") + "."; // a paragraph ends with a full stop
+function textLine(x, y, fontPx, text) {
   return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="${fontPx.toFixed(2)}">${text}</text>`;
 }
 
@@ -919,6 +921,7 @@ function drawPage(x, r, s, paper0, i, col) {
   const py = fit === "actual" || (fit === "width" && ph > r.h) ? r.y : r.y + (r.h - ph) / 2;
   const one = spread ? pw / 2 : pw;
   let g = `<g clip-path="url(#clip${i})">`;
+  const src = lorem(); let gap = false; // page 2 carries on where page 1 stops
   for (let n = 0; n < (spread ? 2 : 1); n++) {
     const qx = px + n * one;
     g += `<rect x="${qx}" y="${py}" width="${one}" height="${ph}" fill="var(--paper)" stroke="var(--paper-edge)" stroke-width="0.75"/>`;
@@ -931,13 +934,13 @@ function drawPage(x, r, s, paper0, i, col) {
       const lines = Math.floor((ph - 2 * m) / lh);
       const fpx = (12 / 72) * k * s, tw = one - 2 * m;
       if (fpx >= TEXT_MIN_PX && tw > fpx * 8) {
-        const cpl = Math.floor(tw / (fpx * PROSE_EM)), src = lorem(i * 31 + n * 97);
+        const cpl = Math.floor(tw / (fpx * PROSE_EM));
         g += `<g class="prose" fill="var(--paper-ink)">`;
         if (n === 0) g += `<text x="${(qx + m).toFixed(1)}" y="${(py + m + fpx * 1.6).toFixed(1)}" font-size="${(fpx * 1.6).toFixed(2)}" font-weight="700">Lorem ipsum dolor sit amet</text>`;
         for (let l = n === 0 ? 2 : 0; l < lines; l++) {
-          const q = (l + n * 4) % 9;
-          if (q === 1) { src.newPara(); continue; } // paragraph break
-          g += textLine(qx + m, py + m + l * lh + lh * 0.78, tw, fpx, src, q === 0 ? Math.round(cpl * 0.62) : cpl, q !== 0);
+          if (gap) { gap = false; if (l > 0) continue; } // blank line between paragraphs
+          const t = src.line(cpl); gap = t.end;
+          g += textLine(qx + m, py + m + l * lh + lh * 0.78, fpx, t.text);
         }
         g += `</g>`;
       } else if (lh > 1.2) {
@@ -969,14 +972,14 @@ function drawEbook(x, r, s, i) {
   let g = `<g clip-path="url(#clip${i})"><rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="var(--paper)"/>`;
   const fpx = e.em * s;
   if (fpx >= TEXT_MIN_PX) {
-    const src = lorem(i * 37);
+    const src = lorem(); let start = true;
     g += `<g class="prose" fill="var(--paper-ink)">`;
     for (let c = 0; c < e.cols; c++) {
       const cx = r.x + m + c * (tw + EBOOK_GAP * s);
       for (let l = 0; l < e.lines; l++) {
-        const L = l + c * e.lines, para = L % 8, indent = para === 0 ? fpx * 1.5 : 0;
-        if (para === 0) src.newPara();
-        g += textLine(cx + indent, r.y + m + l * lh + lh * 0.72, tw - indent, fpx, src, Math.floor((tw - indent) / (fpx * PROSE_EM)) - (para === 7 ? Math.floor(e.cpl * 0.5) : 0), para !== 7);
+        const indent = start ? fpx * 1.5 : 0; // each paragraph starts indented, like a book
+        const t = src.line(Math.floor((tw - indent) / (fpx * PROSE_EM))); start = t.end;
+        g += textLine(cx + indent, r.y + m + l * lh + lh * 0.72, fpx, t.text);
       }
     }
     g += `</g>`;

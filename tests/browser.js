@@ -325,15 +325,35 @@ async function pdfs() {
       const controls = [...toolbar.querySelectorAll("button, input")].filter(el => el.getClientRects().length);
       return toolbar.getBoundingClientRect().bottom <= drawing.top && controls.every(el => el.getBoundingClientRect().right <= innerWidth) && document.documentElement.scrollWidth <= innerWidth;
     }));
-    const switcher = tablet.locator(width <= 700 ? "#content2" : "#content");
-    const modeNames = width <= 700 ? ["Video", "E-book", "Web", "None", "Pages"] : ["Video", "E-book", "Website", "Nothing", "Pages"];
-    let switched = true;
-    for (const mode of modeNames) {
+    const switcher = tablet.locator("#content");
+    const modeNames = ["Video", "E-book", "Web", "None", "Pages"];
+    const options = ["#video-ctrls", "#ebook-ctrls", "#site-ctrls", null, "#pdf-toolbar"];
+    for (const [i, mode] of modeNames.entries()) {
       const button = switcher.getByRole("button", { name: mode, exact: true });
       await button.click();
-      switched = switched && await button.getAttribute("aria-pressed") === "true" && await tablet.locator("#pdf-toolbar").isVisible() === (mode === "Pages");
+      const layout = await tablet.locator("#content-options").evaluate(panel => {
+        const bar = document.querySelector("#quickbar");
+        const stage = document.querySelector("#stage");
+        const visible = [...panel.children].filter(el => el.getClientRects().length);
+        return {
+          visible: visible.map(el => "#" + el.id),
+          directlyBelow: bar.nextElementSibling === panel && panel.getBoundingClientRect().top >= bar.getBoundingClientRect().bottom && panel.getBoundingClientRect().bottom <= stage.getBoundingClientRect().top,
+          pickerCount: document.querySelectorAll('#content, #content2').length,
+          openPdfCount: document.querySelectorAll('#open-pdf').length,
+        };
+      });
+      check(`${width} × ${height}: ${mode} shows one set of options below the mode picker`, await button.getAttribute("aria-pressed") === "true" && layout.pickerCount === 1 && layout.openPdfCount === 1 &&
+        (options[i] ? layout.visible.join() === options[i] && layout.directlyBelow : layout.visible.length === 0), JSON.stringify(layout));
     }
-    check(`${width} × ${height}: all five modes work with a PDF loaded`, switched && await tablet.locator("#pg-number").isVisible());
+    check(`${width} × ${height}: returning to Pages keeps the PDF and one visible Share control`, await tablet.locator("#pg-number").isVisible() && await tablet.locator("[data-share]:visible").count() === 1);
+    if (width <= 768) {
+      await tablet.locator("#cards").scrollIntoViewIfNeeded();
+      await switcher.getByRole("button", { name: "Video", exact: true }).click();
+      check(`${width} px: switching modes from the cards reveals the options below the sticky bar`, await tablet.locator("#content-options").evaluate(panel => {
+        const bounds = panel.getBoundingClientRect(), bar = document.querySelector("#quickbar").getBoundingClientRect();
+        return bounds.top >= bar.bottom && bounds.top < innerHeight;
+      }));
+    }
     noErrors(tablet, `PDF at ${width} × ${height}`);
     await mobile.close();
   }

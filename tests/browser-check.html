@@ -120,7 +120,7 @@ async function run() {
     env.webAssembly = !gone;
     check("WebAssembly removed for pdf.js (simulated)", gone);
   }
-  const contentBtn = [...d.querySelectorAll('#content button[data-v="page"], #content2 button[data-v="page"]')].find(b => b.offsetParent);
+  const contentBtn = [...d.querySelectorAll('#content button[data-v="page"]')].find(b => b.offsetParent);
   if (contentBtn) contentBtn.click();
   const status = () => $("#pdf-status").textContent;
   async function open(bytes, name, ms = 40000) {

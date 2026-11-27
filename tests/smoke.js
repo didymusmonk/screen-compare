@@ -118,7 +118,7 @@ async function run(browser, base, label, ctxOptions) {
   await p.fill("#q", "");
 
   // Content and layout modes (on phones the quickbar holds the content buttons)
-  const content = phone ? "#content2" : "#content";
+  const content = "#content";
   for (const v of ["video", "ebook", "site", "none", "page"]) {
     await p.click(`${content} button[data-v="${v}"]`);
     check(`content mode "${v}" draws`, (await shapeCount(p)) > 5);
@@ -185,7 +185,7 @@ async function run(browser, base, label, ctxOptions) {
   if (phone) {
     check("all five quick modes and Share fit beside each other with a PDF loaded", await p.locator("#quickbar").evaluate(bar => {
       const shareBounds = bar.querySelector("[data-share]").getBoundingClientRect();
-      const modes = [...bar.querySelectorAll("#content2 button")];
+      const modes = [...bar.querySelectorAll("#content button")];
       const note = bar.querySelector(".pdf-share-note");
       return modes.length === 5 && modes.every(button => {
         const bounds = button.getBoundingClientRect();

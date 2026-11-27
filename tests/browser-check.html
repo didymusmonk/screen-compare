@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>PDF browser check</title>
+<style>
+  :root { --bg: #fff; --fg: #1b1f24; --muted: #555; --ok: #126b2f; --bad: #a3141d; --line: #ccd; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #111418; --fg: #e8eaed; --muted: #aab; --ok: #6fd18d; --bad: #ff8a8f; --line: #334; } }
+  body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg); font: 16px/1.45 system-ui, -apple-system, sans-serif; }
+  h1 { font-size: 1.25rem; margin: 0 0 4px; }
+  p { margin: 4px 0 12px; color: var(--muted); }
+  button { font: inherit; padding: 10px 16px; min-height: 44px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--fg); }
+  #summary { font-weight: 600; margin: 12px 0; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { padding: 6px 0; border-bottom: 1px solid var(--line); word-break: break-word; }
+  .ok::before { content: "✓ "; color: var(--ok); font-weight: 700; }
+  .bad::before { content: "✗ "; color: var(--bad); font-weight: 700; }
+  .info::before { content: "• "; color: var(--muted); }
+  small { color: var(--muted); }
+  iframe { width: 100%; height: 420px; border: 1px solid var(--line); margin: 8px 0 16px; }
+</style>
+</head>
+<body>
+<h1>PDF browser check</h1>
+<p>Keep this page scrolled to the top while it runs. Tests the PDF preview of True Size Screens in this browser: opening PDFs, scanned pages, image decoders, cropping, page turns, fit modes and two-page view. It downloads sample PDFs from Mozilla's pdf.js project on GitHub. Nothing is uploaded. It's for testing only and isn't part of the site.</p>
+<button id="run" type="button">Run the check</button>
+<div id="summary" role="status" aria-live="polite"></div>
+<!-- The app must stay on screen while the check runs: browsers slow down hidden or scrolled-away frames -->
+<iframe id="app" title="True Size Screens under test" hidden></iframe>
+<ul id="out"></ul>
+<script>
+"use strict";
+// Results are also left in window.__check for automated runners (tests/webkit.js).
+window.__check = { done: false, passed: 0, failed: 0, results: [], env: {} };
+const out = document.getElementById("out");
+function line(kind, text, detail) {
+  const li = document.createElement("li"); li.className = kind;
+  li.textContent = text; if (detail) { const s = document.createElement("small"); s.textContent = "  " + detail; li.appendChild(s); }
+  out.appendChild(li);
+  window.__check.results.push({ kind, text, detail: detail || "" });
+}
+function check(name, ok, detail) { ok ? window.__check.passed++ : window.__check.failed++; line(ok ? "ok" : "bad", name, detail); }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function until(fn, ms = 30000) { const t = Date.now(); while (Date.now() - t < ms) { try { if (fn()) return true; } catch (e) {} await sleep(100); } return false; }
+
+// Sample PDFs from the pdf.js project at the same version we ship. The reference ink (share of dark pixels
+// in the first page) was measured with pdf.js 3.11.174 in Chromium, so a big difference means a rendering problem.
+const SAMPLES_BASE = "https://raw.githubusercontent.com/mozilla/pdf.js/v6.5.438/test/pdfs/";
+const SAMPLES = [
+  ["tracemonkey", "digital paper with embedded fonts", 0.0801],
+  ["perf_codecs_jbig2", "scan, JBIG2", 0.2798],
+  ["jbig2_symbol_offset", "scan, JBIG2 symbols", 0.0097],
+  ["perf_codecs_jpx", "JPEG 2000 image", 1.0],
+  ["perf_codecs_ccitt", "fax-style scan, CCITT", 0.2874],
+  ["perf_images_scan_gray", "grayscale scan", 0.2837],
+  ["perf_images_scan_bilevel", "black-and-white scan", 0.2809],
+  ["scan-bad", "pale JPEG scan", 0.0005],
+];
+// Hand-built PDFs (same as tests/smoke.js): pages of { w, h } points plus drawing commands
+function makePdf(pages) {
+  const objs = ["<< /Type /Catalog /Pages 2 0 R >>", ""], kids = [];
+  for (const pg of pages) {
+    const page = objs.length + 1; kids.push(page + " 0 R");
+    objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pg.w} ${pg.h}] /Contents ${page + 1} 0 R >>`);
+    objs.push(`<< /Length ${pg.draw.length} >>\nstream\n${pg.draw}\nendstream`);
+  }
+  objs[1] = `<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${pages.length} >>`;
+  let s = "%PDF-1.4\n";
+  const offs = objs.map((o, i) => { const at = s.length; s += `${i + 1} 0 obj\n${o}\nendobj\n`; return at; });
+  const xref = s.length;
+  s += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offs.map(o => String(o).padStart(10, "0") + " 00000 n \n").join("");
+  s += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return new TextEncoder().encode(s);
+}
+const scanPdf = () => makePdf([{ w: 360, h: 504, draw: "0.95 0.94 0.89 rg 0 0 360 504 re f 0.1 0.1 0.1 rg 72 108 216 324 re f 166 36 28 10 re f 29 475 1 1 re f" }]);
+const bookPdf = () => makePdf([{ w: 360, h: 504, draw: "0 0 0 rg 108 72 180 360 re f" }, { w: 360, h: 504, draw: "0 0 0 rg 72 72 180 360 re f" }]);
+
+async function run() {
+  document.getElementById("run").disabled = true;
+  out.textContent = ""; Object.assign(window.__check, { done: false, passed: 0, failed: 0, results: [] });
+  const sum = document.getElementById("summary"); sum.textContent = "Running…";
+  const env = window.__check.env = {
+    userAgent: navigator.userAgent,
+    webAssembly: (() => { try { return typeof WebAssembly === "object" && WebAssembly.validate(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0])); } catch (e) { return false; } })(),
+    offscreenCanvas: typeof OffscreenCanvas === "function",
+    moduleWorker: await (async () => { try { const u = URL.createObjectURL(new Blob(["export const x = 1; postMessage(1);"], { type: "text/javascript" })); const w = new Worker(u, { type: "module" }); const ok = await Promise.race([new Promise(r => w.onmessage = () => r(true)), sleep(3000).then(() => false)]); w.terminate(); return ok; } catch (e) { return false; } })(),
+    responseBytes: typeof Response.prototype.bytes === "function",
+    serviceWorker: "serviceWorker" in navigator,
+  };
+  line("info", "Browser: " + env.userAgent);
+  line("info", `WebAssembly ${env.webAssembly ? "on" : "off"}, module workers ${env.moduleWorker ? "yes" : "no"}, OffscreenCanvas ${env.offscreenCanvas ? "yes" : "no"}, Response.bytes ${env.responseBytes ? "native" : "missing (the page adds it)"}`);
+
+  const frame = document.getElementById("app"); frame.hidden = false;
+  const errors = [];
+  frame.src = "../index.html?check=" + Date.now();
+  await new Promise(r => frame.onload = r);
+  const w = frame.contentWindow, d = frame.contentDocument, $ = s => d.querySelector(s);
+  w.addEventListener("error", e => errors.push(String(e.message)));
+  w.addEventListener("unhandledrejection", e => errors.push("Unhandled: " + (e.reason && e.reason.message || e.reason)));
+  const origErr = w.console.error; w.console.error = (...a) => { errors.push(a.map(String).join(" ")); origErr.apply(w.console, a); };
+
+  check("the app loads its device list", await until(() => d.querySelectorAll("#results .res").length > 200, 20000));
+  if (/[?&]nowasm\b/.test(location.search)) {
+    // Simulate a browser without WebAssembly (as in iOS Lockdown Mode): every pdf.js worker the app starts
+    // first removes WebAssembly, then loads the real worker, so pdf.js must use its JavaScript decoders.
+    const prelude = "delete globalThis.WebAssembly;";
+    const blobUrl = code => URL.createObjectURL(new Blob([code], { type: "text/javascript" }));
+    const RealWorker = w.Worker;
+    w.Worker = function (url, opts) {
+      const u = new URL(url, w.location.href).href;
+      return /pdf\.worker/.test(u) ? new RealWorker(blobUrl(prelude + `await import(${JSON.stringify(u)});`), { type: "module" }) : new RealWorker(url, opts);
+    };
+    // confirm with a separate worker that the same first line really removes WebAssembly
+    const probe = new Worker(blobUrl(prelude + "postMessage(typeof WebAssembly === 'undefined');"), { type: "module" });
+    const gone = await new Promise(r => { probe.onmessage = e => r(e.data === true); setTimeout(() => r(false), 5000); });
+    probe.terminate();
+    delete w.WebAssembly;
+    env.webAssembly = !gone;
+    check("WebAssembly removed for pdf.js (simulated)", gone);
+  }
+  const contentBtn = [...d.querySelectorAll('#content button[data-v="page"], #content2 button[data-v="page"]')].find(b => b.offsetParent);
+  if (contentBtn) contentBtn.click();
+  const status = () => $("#pdf-status").textContent;
+  async function open(bytes, name, ms = 40000) {
+    const t0 = performance.now();
+    const dt = new w.DataTransfer(); dt.items.add(new w.File([bytes], name + ".pdf", { type: "application/pdf" }));
+    const input = $("#pdf-file"); input.files = dt.files; input.dispatchEvent(new w.Event("change", { bubbles: true }));
+    const ok = await until(() => status().startsWith(name + ":") || /Couldn't|didn't load/.test(status()), ms);
+    return { ok: ok && status().startsWith(name + ":"), ms: Math.round(performance.now() - t0), st: status() };
+  }
+  async function ink() {
+    const im = $("#stage image"); if (!im) return -1;
+    const img = new Image(); img.src = im.getAttribute("href") || im.getAttribute("xlink:href"); await img.decode();
+    const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext("2d"); x.drawImage(img, 0, 0); const px = x.getImageData(0, 0, c.width, c.height).data;
+    let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] + px[i + 1] + px[i + 2] < 600) n++;
+    return n / (px.length / 4);
+  }
+  const near = (a, b, t) => Math.abs(a - b) <= t;
+
+  // 1. Hand-built PDFs: size, cropping a scan-like page, cropping facing book pages
+  let r = await open(makePdf([{ w: 360, h: 504, draw: "" }]), "tiny");
+  check("a PDF opens and its page size is read (5 × 7 in)", r.ok && /5\.00 × 7\.00 in/.test(r.st), r.st.slice(0, 70));
+  const cropped = async () => { await until(() => /Cropped to|No white margins/.test(status())); const m = /Cropped to ([\d.]+) × ([\d.]+) in/.exec(status()); return m ? [+m[1], +m[2]] : null; };
+  const crop = on => { const c = $("#crop"); if (c.checked !== on) c.click(); };
+  r = await open(scanPdf(), "scanlike");
+  crop(true);
+  let box = await cropped();
+  check("margin crop finds the content of an off-white scan, ignoring dust", box && near(box[0], 3.24, 0.08) && near(box[1], 5.74, 0.08), box ? box.join(" × ") + " in" : status());
+  crop(false);
+  r = await open(bookPdf(), "book");
+  const spread = d.querySelector('#spreadAll button[data-v="spread"]'), single = d.querySelector('#spreadAll button[data-v="single"]');
+  spread.click(); crop(true);
+  box = await cropped();
+  const halves = [...d.querySelectorAll("#stage svg.pdf-crop")].map(e => ({ w: +e.getAttribute("width"), x: +e.getAttribute("viewBox").split(" ")[0] }));
+  check("facing book pages each crop around their own text", box && near(box[0], 2.74, 0.08) && halves.length >= 2 && halves[0].x > halves[1].x + 20, box ? box.join(" × ") + " in" : status());
+  crop(false); single.click();
+
+  // 2. Real sample PDFs, digital and scanned
+  for (const [f, what, ref] of SAMPLES) {
+    let bytes;
+    try { bytes = new Uint8Array(await (await fetch(SAMPLES_BASE + f + ".pdf")).arrayBuffer()); } catch (e) { check(`${f} (${what})`, false, "couldn't download the sample"); continue; }
+    r = await open(bytes, f);
+    const k = r.ok ? await ink() : -1;
+    check(`${f} (${what}) opens and draws`, r.ok && k >= 0 && Math.abs(k - ref) <= Math.max(0.002, 0.1 * ref), `${r.ms} ms, ${(k * 100).toFixed(2)}% ink, expected about ${(ref * 100).toFixed(2)}%`);
+    if (f === "tracemonkey") {
+      const label = () => $("#pg-label").textContent;
+      $("#pg-next").click(); await until(() => label().startsWith("2 /"));
+      $("#pg-next").click(); await until(() => label().startsWith("3 /"));
+      $("#pg-prev").click(); await until(() => label().startsWith("2 /"));
+      check("page turning (next, next, back)", label() === "2 / 14", label());
+      spread.click(); const n2 = d.querySelectorAll("#stage image").length;
+      single.click(); const n1 = d.querySelectorAll("#stage image").length;
+      check("two-page view shows two pages per screen", n1 > 0 && n2 === 2 * n1, `${n1} vs ${n2} images`);
+      for (const v of ["page", "width", "actual"]) {
+        d.querySelector(`#fit button[data-v="${v}"]`).click(); await sleep(50);
+        const pct = [...d.querySelectorAll("#cards dt")].filter(x => x.textContent.endsWith("Size vs. printed page")).map(x => parseFloat(x.nextElementSibling.textContent));
+        check(`fit "${v}" gives sensible sizes`, pct.length > 0 && pct.every(x => x > 5 && x < 1000) && (v !== "actual" || pct.every(x => x === 100)), pct.join(", ") + "%");
+      }
+      d.querySelector('#fit button[data-v="page"]').click();
+      crop(true); box = await cropped();
+      check("margin crop works on a real paper", !!box || /No white margins/.test(status()), status().replace(/.*?in \(.*?\)\. /, "").slice(0, 60));
+      crop(false);
+    }
+    if (f === "perf_images_scan_bilevel") { crop(true); box = await cropped(); check("margin crop works on a real scan", !!box, box ? box.join(" × ") + " in" : status()); crop(false); }
+  }
+  const real = errors.filter(e => !/Failed to load resource/.test(e));
+  check("no JavaScript errors", real.length === 0, real.slice(0, 3).join(" | "));
+  sum.textContent = `${window.__check.passed} passed, ${window.__check.failed} failed`;
+  window.__check.done = true;
+  document.getElementById("run").disabled = false;
+}
+document.getElementById("run").addEventListener("click", () => run().catch(e => { check("the check crashed", false, String(e && e.message || e)); window.__check.done = true; }));
+if (/[?&]auto\b/.test(location.search)) run().catch(e => { check("the check crashed", false, String(e && e.message || e)); window.__check.done = true; });
+</script>
+</body>
+</html>

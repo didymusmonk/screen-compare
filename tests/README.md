@@ -34,3 +34,18 @@ node tests/smoke.js
 ```
 
 Each check prints ✓ or ✗, and the last line says how many passed. It takes about 10 seconds.
+
+## WebKit (the engine inside Safari)
+
+Playwright's own WebKit can't be downloaded in every environment, so `webkit.js` uses WebKitGTK's MiniBrowser instead. On Ubuntu or Debian:
+
+```
+sudo apt install webkit2gtk-driver xvfb
+xvfb-run -a node tests/webkit.js
+```
+
+It runs `browser-check.html` at desktop and phone width and with WebAssembly removed from pdf.js (like iOS Lockdown Mode), then checks offline use. WebKitGTK shares Safari's engine but not Apple's graphics or iOS, so a pass is strong evidence, not proof.
+
+## On a real iPhone or iPad
+
+Open `https://didymusmonk.github.io/screen-compare/tests/browser-check.html`, tap **Run the check** and keep the page scrolled to the top until it finishes (about a minute). Add `?nowasm` to the address to test without WebAssembly. It downloads sample PDFs from Mozilla's pdf.js project on GitHub.

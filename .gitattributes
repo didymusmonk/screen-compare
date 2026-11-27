@@ -1,0 +1,4 @@
+# Tells GitHub's language bar to skip the PDF reader (pdf.js, third-party code
+# copied unchanged from the pdfjs-dist package). The site still uses it; this
+# only changes the repo's language stats.
+pdfjs/** linguist-vendored

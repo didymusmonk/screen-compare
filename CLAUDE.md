@@ -21,7 +21,8 @@ The site is static, with no build step, no framework, no backend and no npm depe
 | `sw.js` | Service worker for offline use. The page and `devices.csv` load fresh when online (revalidated every time, 3-second limit, then the saved copy). Icons and manifest are saved on install (cache `tss-core-<VERSION>`). The PDF reader is saved in its own cache, `tss-pdfjs-<PDFJS_VERSION>`, the first time a PDF is opened, decoders included. Each new version deletes older `tss-` caches. Registered only in the GitHub copy, by `wrap.sh` |
 | `favicon.svg`, `og-image.png` | Tab icon and link-preview image |
 | `pdfjs/6.5.438/` | pdf.js 6.5.438, the **legacy** build (`pdf.min.mjs`, `pdf.worker.min.mjs`, Apache-2.0 `LICENSE`) plus `wasm/` (JBIG2, JPEG 2000 and color-profile decoders, their no-wasm JavaScript fallbacks and licenses), copied unchanged from the `pdfjs-dist` npm package. The folder is named after the version |
-| `tests/smoke.js` | Saved Playwright smoke test (pdf.js version consistency, then desktop + iPhone 13): devices, search, modes, share link, PDF, PDF crop, phone layout, axe-core, offline page and PDF, JS errors. Run `node tests/smoke.js`; setup in `tests/README.md`. Not part of the site |
+| `tests/` | Not part of the site. `unit.js`: math and data checked in Node against hand-worked values (geometry, video, e-book, page fit, crop detection, website scaling, `devices.csv`, `sw.js` rules); `lib/app.js` copies named functions out of `index.html` for it. `smoke.js`: every feature works, desktop + iPhone 13, axe-core, offline. `browser.js`: card numbers and drawing for hand-checked custom screens, zoom/calibration, custom form validation, PDF fit, quick page turns and PDF swaps, saving, share links (incl. a frozen old link), broken saved settings, missing device list, service worker update. `run-all.js` runs all three. Setup in `tests/README.md` |
+| `.github/workflows/tests.yml` | Runs `node tests/run-all.js` on pushes to `main` and on pull requests |
 | `README.md`, `LICENSE` | Public description and the MIT license (© 2026 DidymusMonk) |
 
 Inside `index.html`, all state lives in one object, `S`, and is saved to `localStorage` under the `tss:` prefix. Every change calls `save()` and then `renderAll()`, which redraws the category list, search results, the SVG stage and the cards. Main functions:
@@ -33,7 +34,7 @@ Inside `index.html`, all state lives in one object, `S`, and is saved to `localS
 - `ebookText` / `layoutEbook` / `ebookFit`: the e-book mode. `AUSTEN` holds the sample passage (Pride and Prejudice, ch. 42 to the start of ch. 43). `ebookText()` measures each word once with canvas `measureText()` (in ems), and `layoutEbook()` wraps it into lines and columns. The preview draws exactly those lines, and the card's words, lines and characters per line come from the same layout, so they always agree and don't change with zoom.
 - `dprOf(dev)`: estimates each device's display scaling (CSS pixels) for the website previews.
 - `renderCards`: the info card for each selected screen.
-- `shareUrl` / `fromShare`: share links in the form `#s=<base64url JSON>`.
+- `shareUrl` / `fromShare`: share links in the form `#s=<base64url JSON>`. Saved settings and share links are sanitized after loading (`isObj`, `okScreen`): a malformed screen list, positions, custom screens, e-book size or calibration is dropped, not trusted.
 - `myScreenMatches` / `setupMyPhone`: the "Compare with my screen" feature.
 - `loadPdfjs` / `openPdf`: the PDF preview. `PDFJS` holds the versioned folder. `pdf.min.mjs` loads with `import()` only when a PDF is opened, and the parsing runs in a background module Web Worker (`pdf.worker.min.mjs`). `getDocument()` gets `wasmUrl` so scans (JBIG2) and JPEG 2000 images decode. Opening a new PDF destroys the previous one's loading task (and its worker).
 - `inkBox` / `pageInk` / `scanDoc` / `prepareCrop` / `cropOf`: the "Crop white margins" checkbox (`S.crop`). `pageInk()` renders a page at 800 px, finds the content box and caches it per page in `pdf.ink`. `scanDoc()` samples up to 12 pages for a typical crop size and odd/even position. `prepareCrop()` sets `pdf.crops` for the two pages on screen, and `paperDims()` then returns the cropped page.
@@ -62,6 +63,7 @@ Inside `index.html`, all state lives in one object, `S`, and is saved to `localS
 - Accessibility is required. Text contrast must be at least 4.5:1 in both themes, every control must work by keyboard, and the SVG stage has an `aria-label`. Arrange mode announces changes through `#sr-live`, and focus is restored after redraws. Check changes with axe-core.
 - Phone layout (≤700 px): sticky `#quickbar`, a "More options" toggle, touch targets of at least 44 px, and 16 px inputs so iOS doesn't zoom in.
 - If a change to `sw.js` itself, or to an icon or the manifest, must reach visitors who already have it saved, bump `VERSION` in `sw.js`. A pdf.js upgrade changes `PDFJS_VERSION` instead. Changes to `index.html` and `devices.csv` show up without that.
+- Device IDs come from `slug(name)`, where "+" becomes "plus" (Nov 2026: "Galaxy S26+" and "Galaxy S26" used to share an ID, so one couldn't be picked). Two names must never make the same ID; `unit.js` checks it. When a rename changes an ID, add the old one to `RENAMED`.
 - Device rows in the CSV are `name,type,diagonal,width,height`. Paper rows leave `diagonal` empty and give inches. Keep the README's device count in sync.
 - Commit straight to `main` with a short, plain-English message.
 
@@ -72,7 +74,7 @@ The working copies sit outside the repo, in a Claude project folder (`/mnt/proje
 - `index.html` there is the **Artifact preview source**. It has no `<!doctype>`/`<head>` wrapper. Preview: https://claude.ai/artifact/WhqeFfcgT7a4HBnUySpaFa (publish it with `devices.csv` as an extra file).
 - `wrap.sh` builds the repo's `index.html` from that source. It adds the doctype, meta description, Open Graph and Twitter tags, favicon, canonical link, manifest and Apple tags, theme color, and the service worker registration and the GoatCounter script (both in the GitHub copy only). Always rebuild with it. Don't hand-edit the two copies separately.
 - `gen_csv.py` + `raw.json` generate and sort `devices.csv`.
-- Run `node tests/smoke.js` after every change (it serves the repo itself). Add a check there when a new feature ships. One-off Playwright scripts are still fine for deeper checks such as touch drag.
+- Run `node tests/run-all.js` after every change (it serves the repo itself). Add a quick check to `smoke.js` when a new feature ships, exact numbers to `browser.js` or `unit.js`, and a regression check for every bug fixed. `unit.js` relies on top-level declarations in the script starting at column 0 and multi-line ones ending with a line that starts with `}` or `]`. One-off Playwright scripts are still fine for deeper checks such as touch drag.
 
 ## Known issues and limits
 

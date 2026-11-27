@@ -85,7 +85,7 @@ To change a decision, describe the conflict to Thomas first (`AGENTS.md`, rule 1
 
 **Facts**
 - Aspect ratio comes from the pixel counts; the loader stores the larger count as width, so row orientation in the CSV doesn't matter. Orientation is a stage setting, with per-card rotation.
-- On touch devices, "Compare with my screen" can suggest phones, tablets and tablet PCs. The matcher uses the loader's internal category `tabletpc`.
+- On touch devices, "Compare with my screen" can suggest phones, tablets and tablet PCs. The matcher uses the loader's internal category `tabletpc` and lists touch phone and tablet shape matches before tablet PCs.
 
 **Decisions**
 - Website previews use an estimated display scaling per device (`dprOf()`): Apple devices by name (iPhone 3× or 2×, iPad 2×, MacBook PPI ÷ 127, iMac and Apple displays 2×), a few Surface models by Microsoft's defaults (RT, Laptop Go, Laptop SE 1×; Studio 2×), then by category (phones about 412 CSS px wide, tablets and e-readers PPI ÷ 160, monitors PPI ÷ 110, laptops and tablet PCs PPI ÷ 130).
@@ -178,9 +178,9 @@ To change a decision, describe the conflict to Thomas first (`AGENTS.md`, rule 1
 - Percentage = (value ÷ reference − 1) × 100, whole numbers, `+` or a real minus sign; 0% never shows a sign.
 - A missing, zero or inapplicable value (no pixel count, a paper sheet, a zero reference) shows a dash, never 0% or −100%.
 - Green for positive percentages, red for negative percentages and neutral text for 0%, baseline and unavailable values. Signs convey direction without color. The note explains that the percentages describe how much a value changes.
-- Tables use the same calculation functions as the cards. Calibration, zoom and drawing scale never affect them. Screen size compares native resolution by total pixels and aspect ratio by long edge divided by short edge.
+- Tables use the same calculation functions as the cards. Calibration, zoom and drawing scale never affect them. Screen size shows native resolution, compares total pixels in the Megapixels column, and compares aspect ratio by long edge divided by short edge.
 - All five comparison tabs are available as soon as a reference table is visible. The preview mode selects the initial tab and changing the preview selects its corresponding tab. Selecting a tab only changes the table, calculating that mode with the saved settings and the comparison values below. The tab selection is temporary. Pages prompts for a page size or PDF when needed.
-- Pages compares apparent 12 pt text at both Fit page and Fit width for the selected page or spread. Page visibility uses each screen’s selected fit. Video compares screen coverage at 16:9, 2.39:1, 4:3 and 9:16. E-book uses 12 pt (medium) and the saved column settings. Website layout is shown as a label.
+- Pages compares apparent 12 pt text at both Fit page and Fit width for the selected page or spread. Each Pages row shows the page count and the selected fit used for visibility. Video compares screen coverage at 16:9, 2.39:1, 4:3 and 9:16. E-book uses 12 pt (medium) and the saved column settings. Website layout is shown as a label.
 - Each row shows the screen’s current orientation next to its name.
 - The reference is saved, marked in share links (`r: 1`) and cleared whenever its card is removed.
 

@@ -81,6 +81,7 @@ async function myScreenMatching() {
     "Test phone,phone,6,1200,800",
     "Test tablet,tablet,10,1200,800",
     "Test tablet PC,tablet pc,12,1200,800",
+    "Closer tablet PC,tablet pc,12,1440,960",
     "Test laptop,laptop,14,1200,800",
     "Test monitor,monitor,24,1200,800",
   ].join("\n");
@@ -88,7 +89,7 @@ async function myScreenMatching() {
   try {
     for (const { label, hasTouch, screen, expected } of [
       { label: "touch exact match", hasTouch: true, screen: { width: 1200, height: 800 }, expected: ["test-phone", "test-tablet", "test-tablet-pc"] },
-      { label: "touch shape match", hasTouch: true, screen: { width: 1500, height: 1000 }, expected: ["test-phone", "test-tablet", "test-tablet-pc"] },
+      { label: "touch shape match", hasTouch: true, screen: { width: 1500, height: 1000 }, expected: ["test-phone", "test-tablet", "closer-tablet-pc", "test-tablet-pc"] },
       { label: "desktop exact match", hasTouch: false, screen: { width: 1200, height: 800 }, expected: ["test-laptop", "test-monitor", "test-tablet-pc"] },
     ]) {
       const { ctx, p } = await open({
@@ -693,11 +694,11 @@ async function reference() {
   check("rows follow the card order, show orientation and identify the reference", t.rows.map(r => r.name).join() === "Test 13,Big 26,Low 13,Shape only" && t.rows[0].ref && t.rows.filter(r => r.ref).length === 1 && t.rows.every(r => r.orientation === "Portrait"));
   const cardColors = await p.$$eval("#cards .card", cs => cs.map(c => getComputedStyle(c).color));
   check("each row uses its screen's color", t.rows.every((r, k) => r.color === cardColors[k]) && new Set(cardColors).size === 4, JSON.stringify(t.rows.map(r => r.color)));
-  check("the reference row is the baseline", t.rows[0].cells.every(c => c[1] === "baseline") && t.rows[0].cells[0][0] === "5.00″");
+  check("the reference row is the baseline", t.rows[0].cells.every((c, i) => c[1] === (t.head[i] === "Native resolution" ? "" : "baseline")) && t.rows[0].cells[0][0] === "5.00″");
   check("twice the size: +100% width, height and diagonal, +300% area, same PPI (0%), four times the megapixels (+300%)", JSON.stringify(t.rows[1].cells.slice(0, 6)) === JSON.stringify([["10.00″", "+100%"], ["24.00″", "+100%"], ["26″", "+100%"], ["240.0 sq in", "+300%"], ["100", "0%"], ["2.40", "+300%"]]), JSON.stringify(t.rows[1].cells));
   check("half the pixels: same size (0%), −50% PPI with a real minus sign, a quarter of the megapixels (−75%)", JSON.stringify(t.rows[2].cells.slice(0, 6).map(c => c[1])) === JSON.stringify(["0%", "0%", "0%", "0%", "−50%", "−75%"]), JSON.stringify(t.rows[2].cells));
   check("a screen with no pixel count shows a dash for PPI and megapixels, not 0 or −100%", JSON.stringify(t.rows[3].cells[4]) === JSON.stringify(["–", ""]) && JSON.stringify(t.rows[3].cells[5]) === JSON.stringify(["–", ""]) && t.rows[3].cells[0][1] === "0%");
-  check("native resolution compares total pixels and aspect ratio works without pixels", JSON.stringify(col(t, "Native resolution")) === JSON.stringify([["500 × 1200", "baseline"], ["1000 × 2400", "+300%"], ["250 × 600", "−75%"], ["–", ""]]) && col(t, "Aspect ratio").every(c => c[0] !== "–") && col(t, "Aspect ratio")[1][1] === "0%");
+  check("native resolution shows dimensions without repeating the megapixel difference, and aspect ratio works without pixels", JSON.stringify(col(t, "Native resolution")) === JSON.stringify([["500 × 1200", ""], ["1000 × 2400", ""], ["250 × 600", ""], ["–", ""]]) && col(t, "Aspect ratio").every(c => c[0] !== "–") && col(t, "Aspect ratio")[1][1] === "0%");
   const signsColored = await p.$$eval("#ref-panel .rd", cells => cells.every(cell => {
     const text = cell.textContent;
     return cell.classList.contains("positive") === text.startsWith("+")
@@ -731,7 +732,7 @@ async function reference() {
   check("centimeters: 12.7 cm wide, 387 cm², percentages unchanged", t.rows[0].cells[0][0] === "12.7 cm" && t.rows[0].cells[3][0] === "387 cm²" && t.rows[1].cells[3][1] === "+300%");
   await click(p, '#units button[data-v="in"]');
   const modes = {
-    page: "12 pt text · Fit page|12 pt text · Fit width|Page visible at once",
+    page: "12 pt text · Fit page|12 pt text · Fit width|Page or spread visible at once",
     video: "Screen used · 16:9|Screen used · 2.39:1|Screen used · 4:3|Screen used · 9:16",
     ebook: "Words per screen|Characters per line|Lines per screen|Columns",
     site: "Browser width (CSS px)|Browser height (CSS px)|Estimated display scaling|16 CSS px body text|Layout",
@@ -759,8 +760,15 @@ async function reference() {
     if (m === "site") same = t.rows.every((r, k) => cs[k]["Browser width"] ? `${r.cells[0][0]} × ${r.cells[1][0]} CSS px` === cs[k]["Browser width"] && cs[k]["Display scaling"].startsWith(r.cells[2][0] + " ") && cs[k]["16 px body text"] === "looks like " + r.cells[3][0] + " print" && r.cells[4][0] === cs[k]["Layout"] && r.cells[4][1] === "" : r.cells.every(c => c[0] === "–"));
     check(`${m} mode: its own columns, same numbers as the cards`, t.head.join("|") === head && same && JSON.stringify(t) === JSON.stringify(tabTables[m]), t.head.join("|") + " " + JSON.stringify(t.rows.map(r => r.cells)));
   }
+  await click(p, '#siteLayout button[data-v="desktop"]');
+  const forced = await table();
+  const websiteCards = await cards(p);
+  check("Website reports forced layout and natural layout, as on the cards", /forced, would be/.test(forced.rows[0].cells[4][0]) && forced.rows[0].cells[4][0] === websiteCards[0].Layout);
+  await click(p, '#siteLayout button[data-v="auto"]');
   await click(p, '#content button[data-v="video"]');
   t = await table();
+  const videoHint = await p.textContent("#ref-panel .hint");
+  check("Video explains the coverage value and the signed relative change", /top percentage.*video fills/.test(videoHint) && /\+100% means twice/.test(videoHint));
   check("video coverage compares four fixed ratios on the upright 5 × 12 in screen", JSON.stringify(t.rows[0].cells.map(c => c[0])) === JSON.stringify(["23%", "17%", "31%", "74%"]) && t.rows[1].cells.every(c => c[1] === "0%") && t.rows[3].cells.every(c => c[0] !== "–"));
   const pictureArea = (await cards(p))[0]["Picture area"];
   await p.selectOption("#video", "4:3");
@@ -782,6 +790,12 @@ async function reference() {
   await cardBtn(p, 1, "fit", "width");
   const fitWidth = await table();
   check("changing the selected fit updates visibility and keeps both text sizes", fitWidth.rows[1].cells[2][0] !== bothFits.rows[1].cells[2][0] && JSON.stringify(fitWidth.rows[1].cells.slice(0, 2)) === JSON.stringify(bothFits.rows[1].cells.slice(0, 2)));
+  await cardBtn(p, 1, "spread");
+  const rowDetails = await p.locator("#ref-panel tbody th small").allTextContents();
+  check("Pages identifies each row's page count and selected fit", rowDetails[0].includes("1 page · Fit page") && rowDetails[1].includes("2 pages · Fit width") && /top visibility percentage.*page or spread/.test(await p.textContent("#ref-panel .hint")), rowDetails.join(" | "));
+  await cardBtn(p, 1, "fit", "actual");
+  check("Pages labels actual-size fit as 100%", (await p.locator("#ref-panel tbody th small").nth(1).textContent()).includes("2 pages · 100%"));
+  await cardBtn(p, 1, "single");
   await cardBtn(p, 1, "fit", "page");
   await cardBtn(p, 1, "orient", "portrait");
   await p.selectOption("#paper", "none");
@@ -855,6 +869,31 @@ async function reference() {
   check("iPhone 13: saved reference shows, the table doesn't widen the page, and the button is finger-sized", await ph.p.$eval("#ref-panel", e => !e.hidden) && over <= 0 && btnH >= 38, `${over} px too wide, button ${btnH} px`);
   noErrors(ph.p, "reference on iPhone");
   await ph.ctx.close();
+
+  for (const width of [320, 390]) {
+    const phone = devices["iPhone 13"];
+    const { ctx: mobile, p: page } = await open({
+      custom, state: { sel: sel("c-tri", "c-shape", "us-letter-paper"), content: "none", ref: "t0" },
+      ctxOptions: { ...phone, viewport: { ...phone.viewport, width }, screen: { ...phone.screen, width } },
+    });
+    await mobile.addInitScript(() => { delete Object.hasOwn; });
+    await page.reload();
+    await page.waitForSelector("#ref-tab-screen");
+    for (const tab of ["screen", "site"]) {
+      if (tab === "site") await page.locator("#ref-tab-screen").press("End");
+      const metrics = await page.locator(`#ref-view-${tab} .ref-scroll`).evaluate(box => {
+        box.scrollLeft = box.scrollWidth;
+        return {
+          unavailable: box.querySelectorAll("td .sr-only").length,
+          pageOverflow: document.documentElement.scrollWidth - innerWidth,
+          tableScroll: box.scrollLeft,
+        };
+      });
+      check(`${width} px, ${tab}: missing values stay inside a scrollable table`, metrics.unavailable > 0 && metrics.pageOverflow <= 0 && metrics.tableScroll > 0, JSON.stringify(metrics));
+    }
+    noErrors(page, `${width} px with Object.hasOwn unavailable`);
+    await mobile.close();
+  }
 }
 
 (async () => {

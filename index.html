@@ -44,6 +44,7 @@
   --paper: #ffffff;
   --paper-text: #9aa6b4; --paper-ink: #252c35;
   --paper-edge: #8794a3;
+  --ref-positive: #17653a; --ref-negative: #a32d43;
   --c1: #1f5fd1; --c2: #ba3d28; --c3: #11784f; --c4: #985916;
   --c5: #7b45c7; --c6: #0a7184; --c7: #b6367e; --c8: #59651f;
   --c9: #8c5a3c; --c10: #3b4cc0; --c11: #107667; --c12: #8a6200; /* all at least 4.5:1 against the drawing background */
@@ -56,6 +57,7 @@
   --bg: #0f141a; --surface: #161d25; --sunk: #1c252f; --grid: #1f2a35; --grid-strong: #2b3846;
   --fg: #e6ebf1; --muted: #93a1b2; --line: #2c3845; --accent: #6b9cff; --accent-ink: #0b1220;
   --paper: #eef1f4; --paper-text: #a3adb9; --paper-edge: #5d6b7b;
+  --ref-positive: #72dca0; --ref-negative: #ff9aab;
   --c1: #6b9cff; --c2: #ff7a62; --c3: #3fcf93; --c4: #f0a24c;
   --c5: #b48cff; --c6: #3cc8e0; --c7: #f074b8; --c8: #b6c45a;
   --c9: #d39b76; --c10: #8f9bff; --c11: #4fd6c4; --c12: #ffc94d;
@@ -65,6 +67,7 @@
   --bg: #0f141a; --surface: #161d25; --sunk: #1c252f; --grid: #1f2a35; --grid-strong: #2b3846;
   --fg: #e6ebf1; --muted: #93a1b2; --line: #2c3845; --accent: #6b9cff; --accent-ink: #0b1220;
   --paper: #eef1f4; --paper-text: #a3adb9; --paper-edge: #5d6b7b;
+  --ref-positive: #72dca0; --ref-negative: #ff9aab;
   --c1: #6b9cff; --c2: #ff7a62; --c3: #3fcf93; --c4: #f0a24c;
   --c5: #b48cff; --c6: #3cc8e0; --c7: #f074b8; --c8: #b6c45a;
   --c9: #d39b76; --c10: #8f9bff; --c11: #4fd6c4; --c12: #ffc94d;
@@ -219,7 +222,7 @@ dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-num
 .ref-tabs button:focus-visible { outline-offset: -3px; }
 .ref-tabs button[aria-selected="true"]:focus-visible { outline-color: var(--accent-ink); }
 @media (max-width: 700px) { .ref-tabs.seg button { min-height: 44px; } }
-.ref-scroll { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
+.ref-scroll { position: relative; overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
 .ref-table { border-collapse: collapse; font-size: 13px; }
 .ref-table th, .ref-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
 .ref-table thead th { font-size: 12px; font-weight: 500; color: var(--muted); vertical-align: bottom; max-width: 120px; }
@@ -230,8 +233,8 @@ dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-num
 .ref-table .rn small { display: block; font-size: 11.5px; font-weight: 500; color: var(--muted); }
 .ref-table .rv, .ref-table .rd { display: block; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--fg); }
 .ref-table .rd { font-size: 12px; color: var(--muted); }
-.ref-table .rd.positive { color: var(--c3); }
-.ref-table .rd.negative { color: var(--c2); }
+.ref-table .rd.positive { color: var(--ref-positive); }
+.ref-table .rd.negative { color: var(--ref-negative); }
 .ref-table tr.is-ref th, .ref-table tr.is-ref td { background: var(--sunk); }
 @media (max-width: 700px) {
   .ref-table th, .ref-table td { padding: 6px 5px; }
@@ -720,7 +723,8 @@ function myScreenMatches() {
     const ar = a / b, apple = d => /^(MacBook|iMac|Apple|Pro Display)/.test(d.n);
     hits = pool.filter(d => Math.abs(d.w / d.h - ar) / ar < 0.006 && d.w >= a * 0.6 && d.w <= a * 1.6);
     if (isMac && hits.some(apple)) hits = hits.filter(apple);
-    hits.sort((x, y) => Math.abs(x.w - a) - Math.abs(y.w - a) || x.d - y.d);
+    const tabletPcRank = d => touch && d.c === "tabletpc" ? 1 : 0;
+    hits.sort((x, y) => tabletPcRank(x) - tabletPcRank(y) || Math.abs(x.w - a) - Math.abs(y.w - a) || x.d - y.d);
   }
   return { a, b, exact, isMac, hits: hits.slice(0, 8) };
 }
@@ -1360,6 +1364,10 @@ function ruler(x, y, totalIn, s) {
 }
 const trunc = (t, n) => t.length > n ? t.slice(0, n - 1) + "…" : t;
 
+const PAGE_FIT_NAMES = { page: "Fit page", width: "Fit width", actual: "100%" };
+const siteLayoutLabel = v => SITE_LAYOUT_NAMES[v.mode] + (v.mode !== v.natural
+  ? ` (forced, would be ${SITE_LAYOUT_NAMES[v.natural].toLowerCase()})` : "");
+
 // ---------- Cards ----------
 // Calculates the numbers used by device cards and reference comparisons. Paper sheets get only their size.
 function statsOf(s, dev, paper, content = S.content, ebookPt = S.ebookPt) {
@@ -1399,7 +1407,7 @@ function renderCards() {
         <div><strong>${esc(paper.name)}</strong></div>
         <div class="pdf-head">
           <span class="seg mini" role="group" aria-label="Pages shown"><button data-act="single" data-i="${x.i}" aria-pressed="${!x.s.spread}">1 page</button><button data-act="spread" data-i="${x.i}" aria-pressed="${!!x.s.spread}">2 pages</button></span>
-          <span class="seg mini" role="group" aria-label="Page fit">${[["page", "Fit page"], ["width", "Fit width"], ["actual", "100%"]].map(([v, t]) => `<button data-act="fit" data-v="${v}" data-i="${x.i}" aria-pressed="${fit === v}">${t}</button>`).join("")}</span>
+          <span class="seg mini" role="group" aria-label="Page fit">${Object.entries(PAGE_FIT_NAMES).map(([v, t]) => `<button data-act="fit" data-v="${v}" data-i="${x.i}" aria-pressed="${fit === v}">${t}</button>`).join("")}</span>
         </div>
         <dl>
           <dt>Size vs. printed page</dt><dd>${pct.toFixed(0)}%</dd>
@@ -1435,7 +1443,7 @@ function renderCards() {
     else if (!x.dev.sheet && S.content === "site") {
       const v = st.site;
       pdfHtml = v ? `<div class="pdfbox"><div><strong>${esc(SITES.find(t => t[0] === S.site)[1])}</strong></div><dl>
-        <dt>Layout</dt><dd>${SITE_LAYOUT_NAMES[v.mode]}${v.mode !== v.natural ? ` (forced, would be ${SITE_LAYOUT_NAMES[v.natural].toLowerCase()})` : ""}</dd>
+        <dt>Layout</dt><dd>${siteLayoutLabel(v)}</dd>
         <dt>Browser width</dt><dd>${v.vw} × ${v.vh} CSS px</dd>
         <dt>Display scaling</dt><dd>${v.dpr}× (${Math.round(v.dpr * 100)}%)</dd>
         <dt>16 px body text</dt><dd>looks like ${v.bodyPt.toFixed(1)} pt print</dd>
@@ -1480,7 +1488,7 @@ const REF_COLS = {
     ["Area", st => st.area, st => areaTxt(st.area)],
     ["PPI", st => st.ppi, st => String(Math.round(st.ppi))],
     ["Megapixels", st => st.mp, st => st.mp.toFixed(2)],
-    ["Native resolution", st => st.mp, st => `${st.g.pxW} × ${st.g.pxH}`],
+    ["Native resolution", null, st => st.mp ? `${st.g.pxW} × ${st.g.pxH}` : null],
     ["Aspect ratio", st => Math.max(st.g.pxW, st.g.pxH) / Math.min(st.g.pxW, st.g.pxH), st => aspectLabel(st.g.pxW, st.g.pxH)],
   ]],
   page: ["Pages", [
@@ -1488,7 +1496,7 @@ const REF_COLS = {
       `12 pt text · ${label}`, st => st.page && 12 * pageFit(st.g, st.page.spread, fit).k,
       (_, pt) => pt.toFixed(1) + " pt",
     ]),
-    ["Page visible at once", st => st.page && st.page.shown, st => Math.round(st.page.shown * 100) + "%"],
+    ["Page or spread visible at once", st => st.page && st.page.shown, st => Math.round(st.page.shown * 100) + "%"],
   ]],
   video: ["Video", [
     ...["16:9", "2.39:1", "4:3", "9:16"].map(ratio => [
@@ -1507,7 +1515,7 @@ const REF_COLS = {
     ["Browser height (CSS px)", st => st.site && st.site.vh, st => String(st.site.vh)],
     ["Estimated display scaling", st => st.site && st.site.dpr, st => `${st.site.dpr}×`],
     ["16 CSS px body text", st => st.site && st.site.bodyPt, st => st.site.bodyPt.toFixed(1) + " pt"],
-    ["Layout", null, st => st.site && SITE_LAYOUT_NAMES[st.site.mode]],
+    ["Layout", null, st => st.site && siteLayoutLabel(st.site)],
   ]],
 };
 // ((value / reference) − 1) × 100, or null when there is nothing fair to compare (a missing, zero or broken number)
@@ -1528,7 +1536,7 @@ function renderRef(items, previewPaper) {
   box.hidden = !ref || items.length < 2;
   if (box.hidden) { refTab = null; box.innerHTML = ""; box.onclick = box.onkeydown = null; return; }
   if (refTab?.preview !== S.content || refTab?.reference !== S.ref) refTab = null;
-  const mode = refTab?.mode || (Object.hasOwn(REF_COLS, S.content) ? S.content : "screen");
+  const mode = refTab?.mode || (Object.prototype.hasOwnProperty.call(REF_COLS, S.content) ? S.content : "screen");
   const modes = Object.keys(REF_COLS);
   const focusedTab = box.contains(document.activeElement) && document.activeElement.dataset.refTab;
   const paper = mode === S.content ? previewPaper : paperDims(mode);
@@ -1556,7 +1564,7 @@ function renderRef(items, previewPaper) {
     const index = modes.indexOf(e.target.dataset.refTab);
     if (index < 0) return;
     const next = { ArrowLeft: (index + modes.length - 1) % modes.length, ArrowRight: (index + 1) % modes.length, Home: 0, End: modes.length - 1 };
-    if (!Object.hasOwn(next, e.key)) return;
+    if (!Object.prototype.hasOwnProperty.call(next, e.key)) return;
     e.preventDefault();
     selectTab(modes[next[e.key]]);
   };
@@ -1586,15 +1594,18 @@ function refTable(items, ref, mode, paper) {
       const d = me ? `<span class="rd">baseline</span>` : p == null ? `<span class="rd" title="No reference value to compare with">–</span>` : `<span class="rd${signClass}">${pct}</span>`;
       return `<td><span class="rv">${c[2](x.st, v)}</span>${d}</td>`;
     }).join("");
-    return `<tr${me ? ` class="is-ref"` : ""}><th scope="row"><span class="swatch" style="color:var(${x.color})" aria-hidden="true"></span><span class="rn">${esc(x.dev.n)}<small><span class="ref-orientation">${isPortrait(x.s) ? "Portrait" : "Landscape"}</span>${me ? " · Reference" : ""}</small></span></th>${cells}</tr>`;
+    const pageSetup = mode === "page" && x.st.page
+      ? ` · ${x.st.page.spread.single ? "2 pages" : "1 page"} · ${PAGE_FIT_NAMES[x.st.page.fit]}` : "";
+    return `<tr${me ? ` class="is-ref"` : ""}><th scope="row"><span class="swatch" style="color:var(${x.color})" aria-hidden="true"></span><span class="rn">${esc(x.dev.n)}<small><span class="ref-orientation">${isPortrait(x.s) ? "Portrait" : "Landscape"}</span>${me ? " · Reference" : ""}${pageSetup}</small></span></th>${cells}</tr>`;
   }).join("");
   const twoCol = mode === "ebook" && items.some(x => x.st.ebook && x.st.ebook.e.cols > 1);
   const details = {
-    screen: " Native resolution is compared by total pixel count.",
-    page: " Page visibility uses each screen’s selected fit.",
+    screen: " Megapixels compare total pixel count.",
+    page: " The top visibility percentage shows how much of the page or spread fits at the listed fit.",
+    video: " The top percentage shows how much of the screen the video fills.",
     ebook: ` E-book values use ${REF_EBOOK_PT} pt (medium).${twoCol ? " Lines per screen count every column." : ""}`,
   };
-  return `<p class="hint">Each percentage shows how much higher or lower a value is than on the reference screen. They describe size, not which is better.${details[mode] || ""}</p>
+  return `<p class="hint">Signed percentages show the relative change from the reference screen. For example, +100% means twice the reference value.${details[mode] || ""}</p>
     <div class="ref-scroll" role="region" aria-labelledby="ref-title" tabindex="0"><table class="ref-table">
       <caption class="sr-only">${title} of each screen, with the difference from ${esc(ref.dev.n)} in percent</caption>
       <thead><tr><th scope="col">Screen</th>${head}</tr></thead><tbody>${rows}</tbody>

@@ -30,7 +30,20 @@ Then, after any change:
 node tests/run-all.js
 ```
 
-Or one file at a time: `node tests/unit.js`, `node tests/smoke.js`, `node tests/browser.js`. Each check prints ✓ or ✗ with a short reason, and each file ends with how many passed. The exit code is 0 only when everything passed. To run part of `browser.js`, name the steps: `ONLY=pdfs,video node tests/browser.js`.
+Or one file at a time: `node tests/unit.js`, `node tests/smoke.js`, `node tests/browser.js`. Only failed checks are printed (✗ with the section and a short reason), and each file ends with one line saying how many passed and failed. The exit code is 0 only when everything passed.
+
+### Which test to run while you work
+
+Run the narrowest test that covers your change while you work, then `node tests/run-all.js` once before opening a pull request. GitHub runs the full suite on every pull request anyway.
+
+| You changed | Run | Time |
+|---|---|---|
+| `devices.csv`, a calculation, `sw.js` rules | `node tests/unit.js` | 2 s |
+| Layout, controls, phone view, accessibility, `methodology.html` | `node tests/smoke.js` | 10 s |
+| One area of what visitors see | `ONLY=<steps> node tests/browser.js` | 1–3 s per step; `pdfs` about 30 s |
+| Wording only | proofread in context; nothing extra locally | |
+
+The `browser.js` steps are `geometry`, `customForm`, `myScreenMatching`, `pages`, `pdfs`, `video`, `ebook`, `website`, `persistence`, `reference`, `calibration`, `malformed`, `devicesById`, `failures` and `serviceWorkerUpdate`. Use the exact step names, separated by commas: `ONLY=pdfs,video node tests/browser.js`.
 
 The browser tests start their own local web server and block the analytics script, so test runs aren't counted as visits.
 

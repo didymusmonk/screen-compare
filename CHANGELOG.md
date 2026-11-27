@@ -4,6 +4,8 @@ Significant changes to True Size Screens, newest first. The full detail is in th
 
 ## Unreleased
 
+- Agent docs: a task-to-section reading map and efficiency tips in `AGENTS.md`, a which-test-to-run table in `tests/README.md`, `ONLY=` in `browser.js` matches exact step names, and stale counts removed from the handover.
+
 - Put each preview mode’s options directly below a single mode picker and above the drawing.
 
 - Moved page controls above the drawing, added direct PDF page navigation, and reserved space for all five modes in the phone controls.

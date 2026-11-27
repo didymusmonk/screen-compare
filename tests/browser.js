@@ -989,7 +989,8 @@ async function reference() {
   browser = await chromium.launch();
   const ALL = [geometry, customForm, myScreenMatching, pages, pdfs, video, () => ebook({ viewport: { width: 1280, height: 800 } }, ""), () => ebook({ ...devices["iPhone 13"] }, " (iPhone 13)"), website, persistence, reference, calibration, malformed, devicesById, failures, serviceWorkerUpdate];
   const only = (process.env.ONLY || "").split(",").filter(Boolean);
-  const steps = only.length ? ALL.filter(f => only.some(o => (f.name || "").includes(o) || f.toString().includes(o))) : ALL;
+  // Named steps match by exact name; the two unnamed e-book wrappers match on their text ("ebook")
+  const steps = only.length ? ALL.filter(f => f.name ? only.includes(f.name) : only.some(o => f.toString().includes(o))) : ALL;
   for (const step of steps) {
     try { await step(); }
     catch (e) { check(`${step.name || "step"} crashed: ${e.message.split("\n")[0]}`, false); override = () => null; }

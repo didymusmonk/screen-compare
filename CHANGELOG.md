@@ -4,6 +4,8 @@ Significant changes to True Size Screens, newest first. The full detail is in th
 
 ## Unreleased
 
+- Fixed horizontal page overflow on phones with missing comparison values. Clarified percentage labels, added per-screen page and layout details, and put tablet PCs after tablets in touch shape matches.
+
 - Reference rows show portrait or landscape. The Video table shows only screen coverage for the four ratios.
 - Expanded reference tables with native resolution and aspect ratio, both page fits, video coverage at four ratios, 12 pt e-book columns, and website scaling, text size and layout.
 - Added the Xteink e-readers: S4, X4 Pro, X4 Classic and X4 (one shared 4.3" screen) and X3 (3.7").

@@ -13,6 +13,31 @@ Compare phone, tablet, laptop, tablet PC (including Surface Pro) and monitor scr
 
 It's a single static `index.html` with no build step and no server. PDFs open in your browser and are never uploaded. [`methodology.html`](methodology.html) (linked as "Methodology" in the footer) explains how every number is worked out, how the device list was checked, and what the site can't show.
 
+## Running it locally
+
+There's nothing to build or install. Serve the folder with any local web server (opening `index.html` straight from disk shows no devices, because browsers block loading `devices.csv` from `file://`):
+
+```
+python3 -m http.server 8000
+```
+
+Then open http://localhost:8000/.
+
+## Development and testing
+
+- The tests need [Node.js](https://nodejs.org) 18+ and Playwright; setup is in [`tests/README.md`](tests/README.md). Run everything with `node tests/run-all.js`. GitHub runs the same tests on every pull request.
+- Every change is made on its own branch and submitted as a pull request. Nothing is merged to `main` (which is the live site) without the owner's approval.
+- Rules for AI coding agents (Claude, Codex and others) are in [`AGENTS.md`](AGENTS.md).
+
+| Document | What's in it |
+|---|---|
+| [`AGENTS.md`](AGENTS.md) | Development protocol and project constraints for all contributors |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How the code is organised, data flows, calculations, caching and offline behavior |
+| [`docs/DECISIONS.md`](docs/DECISIONS.md) | Design decisions, their reasons, and what must be respected |
+| [`docs/HANDOVER.md`](docs/HANDOVER.md) | Current status, known bugs, fragile areas, open tasks |
+| [`CHANGELOG.md`](CHANGELOG.md) | History of significant changes |
+| [`methodology.html`](methodology.html) | How every number is worked out, for visitors |
+
 ## Adding or fixing a device
 
 The built-in list is in [`devices.csv`](devices.csv), one screen per line:

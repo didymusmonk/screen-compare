@@ -231,6 +231,14 @@ section("PDF page fit");
 }
 
 // ---------------------------------------------------------------------------------------------------------
+section("Comic and manga pages");
+{
+  const { comicStyle } = load(["comicStyle"], { S });
+  const rows = app.parseCsv(fs.readFileSync(path.join(ROOT, "devices.csv"), "utf8")).filter(r => r[1] === "paper");
+  const styled = rows.map(r => [r[0], comicStyle(r[0])]).filter(r => r[1]).map(r => r.join(": ")).join(", ");
+  check("the existing comic, graphic novel and manga page sizes get drawn panels, and only they do", styled === "US comic book: comic, Manga (tankobon): manga, Graphic novel 6.625 × 10.25: comic", styled);
+}
+
 section("Crop white margins (content detection)");
 {
   const C = load(["inkBox", "padBox", "clampBox", "pageBox", "CELL", "CROP_PAD"], { pdf: { w: 5, h: 7, typ: null } });

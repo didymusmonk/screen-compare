@@ -53,7 +53,7 @@ The script is one IIFE, so its functions and `S` aren't reachable from the brows
 | Device list | `parseCsv`, `loadDevices`, `slug`, `catKey`, `RENAMED`, `OLD_PAPER_IDS` | Columns found by header name. Larger pixel count stored as `w`. `"tablet pc"` becomes internal category `tabletpc`. Broken rows are skipped. `RENAMED` maps old IDs to current IDs in saved selections and share links. |
 | Geometry | `geom(dev, flip)` | Width, height, PPI, pixel size and area (section 5). |
 | Stage | `renderStage` | SVG drawing in three modes: side by side, overlay, free arrange (drag, snapping guides, rotation, keyboard moves, announcements via `#sr-live`). |
-| Content previews | `drawPage`, `drawVideo`, `drawEbook`, `drawSite`, `lorem()` | Lorem ipsum for pages, a Pride and Prejudice passage (`AUSTEN`) for e-books, generic mockups (`SITES`, `buildSite`) for websites. |
+| Content previews | `drawPage`, `comicPage`, `drawVideo`, `drawEbook`, `drawSite`, `lorem()` | Lorem ipsum for pages (drawn comic or manga panels, `COMIC_PAGES`, for those page sizes), a Pride and Prejudice passage (`AUSTEN`) for e-books, generic mockups (`SITES`, `buildSite`) for websites. |
 | E-book | `ebookText`, `layoutEbook`, `ebookFit` | Real text measurement and line wrapping (section 6). |
 | Display scaling | `dprOf(dev)`, `siteView` | Estimated CSS-pixel scaling per device for website previews. |
 | Card numbers | `statsOf(sel, dev, paper, content, ebookPt)` | Every number a card shows for the current content mode (screen size, megapixels `mp`, page fit, video incl. picture `diag` and `area`, e-book, website). Used by both `renderCards` and the reference table. Content mode and e-book text size default to the preview settings. It must never read zoom or calibration (`unit.js` checks). |

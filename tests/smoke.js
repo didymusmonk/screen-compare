@@ -148,6 +148,10 @@ async function run(browser, base, label, ctxOptions) {
   await p.click(`#orient button[data-v="landscape"]`);
   await p.click(`#orient button[data-v="portrait"]`);
 
+  // Comic and manga page sizes draw panels instead of text
+  await p.selectOption("#paper", "us-comic-book");
+  check("the US comic book page size draws comic panels", (await p.locator("#stage svg.comic").count()) > 0 && (await p.locator("#stage .prose").count()) === 0);
+
   // Share link round trip: a new visitor with the link sees the same screens
   await p.fill("#q", "Pixel");
   await p.locator("#results .res").first().click();

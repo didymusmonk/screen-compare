@@ -127,7 +127,9 @@ def check(path):
     return kind, errs, warns, rows
 
 def main(argv):
-    args = argv[1:]; coverage = "--coverage" in args
+    args = argv[1:]
+    if not args or any(a in ("-h", "--help") for a in args): print(__doc__); return 0
+    coverage = "--coverage" in args
     files = [a for a in args if a != "--coverage"] or (sorted(glob.glob(os.path.join(AUDIT, "results", "**", "*.csv"), recursive=True)) if coverage else [])
     if not files: print(__doc__); return 1
     bad, answered = 0, set()

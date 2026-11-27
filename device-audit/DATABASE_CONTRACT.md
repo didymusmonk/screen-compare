@@ -75,6 +75,8 @@ When a saved or shared ID no longer matches any row, the app **quietly drops tha
 - `tests/unit.js` checks that no two names make the same ID, that no name appears twice, that every `RENAMED` target exists, and that no `RENAMED` key is also a current ID.
 - Custom screens that visitors typed in themselves have their own IDs (`c-...`) and are unaffected by the CSV.
 
+**`RENAMED` is a single hop.** It is applied once, to the saved or shared selection IDs, after the list loads; an old ID that points at another old ID is not followed further. So when a row that already has old IDs is renamed again, every existing key that points at its previous ID must be retargeted to the new ID, as well as adding the previous ID itself. Otherwise `tests/unit.js` fails ("renamed devices point to current IDs") and those older links stop working.
+
 The 13 entries in `RENAMED` today (ledger flag `HAS_OLD_IDS` marks their targets):
 
 | Old ID | Current ID |
@@ -195,7 +197,38 @@ The master instructions' columns plus `issue_id`, `batch_id`, `researcher`, `rel
 
 ### Reconciled files for integration
 
-After both passes, the batch files are reconciled into `devices_verified.csv`, `device_changes.csv`, `missing_devices_verified.csv` and `unresolved_issues.csv`, which the integration review checks. `COVERAGE_LEDGER.csv` records each original row's final disposition.
+After both passes and adjudication, the batch files are reconciled into four files, which the integration review checks. Headers are in `templates/`. `COVERAGE_LEDGER.csv` records each original row's final disposition.
+
+**`devices_verified.csv`**: one row per row the site would have after integration.
+
+| Column | Content |
+|---|---|
+| `audit_id` | `DEV-####` for a kept or corrected original row; `NEW-B##-##` for an addition. A split keeps the `DEV-` ID on the row its old app ID maps to, and the other parts use their `NEW-` IDs. |
+| `name`, `type`, `diagonal`, `width`, `height` | Exactly as they would go into `devices.csv` (sections 1–2). |
+| `source_url`, `reported_ppi`, `color_ppi`, `status`, `geometry_note` | The optional columns proposed in section 10. All single-line. |
+
+**`device_changes.csv`**: one row per change to one field.
+
+| Column | Content |
+|---|---|
+| `change_id` | `CHG-####`. |
+| `audit_id` | `DEV-` or `NEW-` ID. |
+| `change_type` | `KEEP`, `CORRECT`, `RENAME`, `SPLIT`, `MERGE`, `ADD`, `REMOVE`, `FLAG`. |
+| `field` | `name`, `type`, `diagonal`, `width`, `height`, or an optional column; blank for `KEEP`, `ADD`, `REMOVE` and `FLAG`. |
+| `old_value`, `new_value` | Values before and after. |
+| `old_app_id`, `new_app_id` | `slug(name)` before and after. |
+| `needs_renamed_entry` | `YES` when the app ID changes, a row is merged, or a row is split. Otherwise `NO`. |
+| `change_class` | `none`, `minor`, `material` (section 9). |
+| `source_url`, `evidence` | The deciding source and its excerpt. |
+| `approved` | Left blank, for Thomas. |
+| `notes` | Plain sentences. |
+
+**`missing_devices_verified.csv`** has the `missing_devices.csv` columns, adjudicated. **`unresolved_issues.csv`** has the same columns as the batch files, merged.
+
+Rules:
+- Every `DEV-` ID appears at least once in `device_changes.csv` (`KEEP` counts).
+- Every `DEV-` ID appears in `devices_verified.csv` unless it was merged or removed.
+- Every `NEW-` ID in `devices_verified.csv` has an `ADD` or `SPLIT` row in `device_changes.csv`.
 
 ## 10. Recommended optional fields for devices.csv (integration stage, not now)
 
@@ -209,6 +242,8 @@ If integration adds fields, add them as **extra columns after the existing five*
 | `status` | Blank for confirmed; `estimated` or `partial` otherwise | Lets the card mark uncertain figures. Rumored devices aren't listed at all. |
 | `geometry_note` | Short note such as "inner screen, unfolded" or "OLED version" | Optional. |
 | `audit_id` | The `DEV-`/`NEW-` ID | Keeps the research traceable after integration; not shown. |
+
+`parseCsv` reads the file line by line, so a quoted cell can't contain a line break. Every text field (`geometry_note`, names, URLs) must be a single line.
 
 Each extra column adds bytes to every visit (the CSV is fetched fresh each time), so URLs should be the shortest stable form. About 315 URLs of 60 characters each would add roughly 19 KB uncompressed, about 5 KB compressed.
 

@@ -202,9 +202,19 @@ ISSUE_COLS = [
     "conflicting_sources", "explanation", "suggested_next_step",
 ]
 SCHEMA = {"verification_results": VERIFY_COLS, "missing_devices": MISSING_COLS, "unresolved_issues": ISSUE_COLS}
+# reconciled files for integration (DATABASE_CONTRACT.md section 9); not batch files, so check_results.py doesn't read them
+RECONCILED = {
+    "devices_verified": ["audit_id", "name", "type", "diagonal", "width", "height", "source_url", "reported_ppi", "color_ppi", "status", "geometry_note"],
+    "device_changes": ["change_id", "audit_id", "change_type", "field", "old_value", "new_value", "old_app_id", "new_app_id",
+                       "needs_renamed_entry", "change_class", "source_url", "evidence", "approved", "notes"],
+    "missing_devices_verified": MISSING_COLS,
+}
 tdir = os.path.join(AUDIT, "templates")
 os.makedirs(tdir, exist_ok=True)
 for name, cols in SCHEMA.items():
+    with open(os.path.join(tdir, f"{name}_header.csv"), "w", newline="", encoding="utf-8") as f:
+        csv.writer(f, lineterminator="\n").writerow(cols)
+for name, cols in RECONCILED.items():
     with open(os.path.join(tdir, f"{name}_header.csv"), "w", newline="", encoding="utf-8") as f:
         csv.writer(f, lineterminator="\n").writerow(cols)
 json.dump(SCHEMA, open(os.path.join(HERE, "schema.json"), "w"), indent=1)

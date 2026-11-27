@@ -8,6 +8,7 @@ Significant changes to True Size Screens, newest first. The full detail is in th
 
 - Reference rows show portrait or landscape. The Video table shows only screen coverage for the four ratios.
 - Expanded reference tables with native resolution and aspect ratio, both page fits, video coverage at four ratios, 12 pt e-book columns, and website scaling, text size and layout.
+- Pages offers an Open a PDF button, and the Share controls explain what a recipient sees when a PDF is open.
 - Added the Xteink e-readers: S4, X4 Pro, X4 Classic and X4 (one shared 4.3" screen) and X3 (3.7").
 - Reference comparison tabs let you compare screen size, pages, video, e-books and websites without changing the preview.
 - Fixed "Compare with my screen" so it can suggest matching tablet PCs on touch devices.

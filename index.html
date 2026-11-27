@@ -94,6 +94,7 @@ h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin
 .myphone-pick:empty { display: none; }
 .myphone-pick { display: grid; gap: 6px; justify-items: start; }
 .more-btn { display: none; }
+.pdf-share-note { max-width: 32rem; }
 .share-btn.ok { color: var(--accent); border-color: var(--accent); }
 /* Phones: the drawing and cards first, with the content switch pinned at the top */
 @media (max-width: 700px) {
@@ -101,6 +102,9 @@ h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin
   .quickbar { order: 0; display: flex; gap: 8px; align-items: center; position: sticky; top: 0; z-index: 20;
     margin: 0 -16px; padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px; background: color-mix(in srgb, var(--bg) 92%, transparent);
     -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .quickbar { flex-wrap: wrap; }
+  #open-pdf { min-height: 44px; }
+  .quickbar .pdf-share-note { flex: 0 0 100%; }
   .quickbar .seg { flex: 1; flex-wrap: nowrap; background: var(--surface); }
   .quickbar .seg button { flex: 1 1 0; padding-inline: 4px; }
   .quickbar .share-btn { flex: none; background: var(--surface); color: var(--fg); }
@@ -291,7 +295,8 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   <div class="layout">
     <div class="quickbar" id="quickbar" role="region" aria-label="Quick controls">
       <div class="seg" id="content2" aria-label="Show on each screen"><button data-v="page">Pages</button><button data-v="video">Video</button><button data-v="ebook">E-book</button><button data-v="site">Web</button><button data-v="none">None</button></div>
-      <button class="icon-btn share-btn" type="button" data-share aria-label="Share this comparison" title="Share this comparison"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
+      <button class="icon-btn share-btn" type="button" data-share aria-describedby="pdf-share-phone" aria-label="Share this comparison" title="Share this comparison"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
+      <p class="hint pdf-share-note" id="pdf-share-phone" hidden></p>
     </div>
     <aside class="rail">
       <section class="panel" aria-labelledby="h-add">
@@ -379,6 +384,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
             <div class="seg" id="orient" aria-label="Orientation"><button data-v="portrait">Portrait</button><button data-v="landscape">Landscape</button></div>
             <div class="seg" id="order" aria-label="Order"><button data-v="added">Card order</button><button data-v="height">Shortest first</button></div>
             <div class="seg" id="anchor" aria-label="Overlay alignment"><button data-v="center">Centered</button><button data-v="corner">Corner</button></div>
+            <button class="btn ghost" id="open-pdf" type="button" hidden>Open a PDF</button>
             <button class="btn ghost more-btn" id="more-btn" type="button" aria-expanded="false" aria-controls="stage-more">More options</button>
           </div>
           <div class="row" id="stage-more">
@@ -391,7 +397,8 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <div class="stage" id="stage"></div>
         <div class="stage-foot">
           <span id="scale-note" aria-live="polite"></span><span id="sr-live" class="sr-only" aria-live="polite"></span>
-          <span class="row"><button class="btn ghost" type="button" data-share style="padding:4px 10px; font-size:12.5px">Share this comparison</button><button class="btn ghost" id="reset-btn" type="button" style="padding:4px 10px; font-size:12.5px">Reset to start</button><button class="btn ghost" id="cal-btn" type="button" style="padding:4px 10px; font-size:12.5px">Calibrate actual size</button></span>
+          <span class="row"><button class="btn ghost" type="button" data-share aria-describedby="pdf-share-stage" style="padding:4px 10px; font-size:12.5px">Share this comparison</button><button class="btn ghost" id="reset-btn" type="button" style="padding:4px 10px; font-size:12.5px">Reset to start</button><button class="btn ghost" id="cal-btn" type="button" style="padding:4px 10px; font-size:12.5px">Calibrate actual size</button></span>
+          <p class="hint pdf-share-note" id="pdf-share-stage" hidden></p>
         </div>
         <div id="cal" class="panel" style="border:0; border-top:1px solid var(--line); border-radius:0" hidden>
           <h2>Calibrate to this screen</h2>
@@ -1628,7 +1635,12 @@ function syncVisibility() {
   $("#paperOrient").parentElement.hidden = S.paper === "upload" || S.paper === "none";
   $("#fit").parentElement.hidden = S.paper === "none";
   $("#spreadAll").parentElement.hidden = S.paper === "none";
-  $("#page-ctrls").hidden = S.content !== "page";
+  $("#page-ctrls").hidden = $("#open-pdf").hidden = S.content !== "page";
+  const pdfActive = S.content === "page" && S.paper === "upload" && !!pdf.img;
+  for (const note of document.querySelectorAll(".pdf-share-note")) {
+    note.hidden = !pdfActive;
+    note.textContent = pdfActive ? "Recipients see a US Letter example. Your PDF stays on your device." : "";
+  }
   $("#crop-ctrls").hidden = !(S.paper === "upload" && pdf.img);
   $("#crop").checked = !!S.crop;
   $("#video").value = S.video; $("#ebookPt").value = String(S.ebookPt);
@@ -2036,6 +2048,7 @@ $("#crop").addEventListener("change", async e => {
   if (S.crop && pdf.doc) await prepareCrop();
   pdfStatus(); renderAll();
 });
+$("#open-pdf").addEventListener("click", () => $("#pdf-file").click());
 $("#pdf-file").addEventListener("change", e => { const f = e.target.files[0]; if (f) openPdf(f); e.target.value = ""; });
 const drop = $("#drop");
 ["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));

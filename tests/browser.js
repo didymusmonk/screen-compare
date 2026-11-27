@@ -697,6 +697,12 @@ async function reference() {
   check("twice the size: +100% width, height and diagonal, +300% area, same PPI (0%), four times the megapixels (+300%)", JSON.stringify(t.rows[1].cells) === JSON.stringify([["10.00″", "+100%"], ["24.00″", "+100%"], ["26″", "+100%"], ["240.0 sq in", "+300%"], ["100", "0%"], ["2.40", "+300%"]]), JSON.stringify(t.rows[1].cells));
   check("half the pixels: same size (0%), −50% PPI with a real minus sign, a quarter of the megapixels (−75%)", JSON.stringify(t.rows[2].cells.map(c => c[1])) === JSON.stringify(["0%", "0%", "0%", "0%", "−50%", "−75%"]), JSON.stringify(t.rows[2].cells));
   check("a screen with no pixel count shows a dash for PPI and megapixels, not 0 or −100%", JSON.stringify(t.rows[3].cells[4]) === JSON.stringify(["–", ""]) && JSON.stringify(t.rows[3].cells[5]) === JSON.stringify(["–", ""]) && t.rows[3].cells[0][1] === "0%");
+  const signsColored = await p.$$eval("#ref-panel .rd", cells => cells.every(cell => {
+    const text = cell.textContent;
+    return cell.classList.contains("positive") === text.startsWith("+")
+      && cell.classList.contains("negative") === text.startsWith("−");
+  }));
+  check("only signed reference percentages get a color class", signsColored);
   const c = await cards(p);
   check("table values match the cards", t.rows.every((r, k) => r.cells[0][0] + " × " + r.cells[1][0] === c[k]["Screen size"] && r.cells[2][0] === c[k]["Diagonal"] && r.cells[3][0] === c[k]["Area"] && (c[k]["Megapixels"] ? r.cells[5][0] + " MP" === c[k]["Megapixels"] : r.cells[5][0] === "–")));
   await cardBtn(p, 1, "orient", "landscape");

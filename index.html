@@ -224,6 +224,8 @@ dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-num
 .ref-table .rn small { display: block; font-size: 11.5px; font-weight: 500; color: var(--muted); }
 .ref-table .rv, .ref-table .rd { display: block; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--fg); }
 .ref-table .rd { font-size: 12px; color: var(--muted); }
+.ref-table .rd.positive { color: var(--c3); }
+.ref-table .rd.negative { color: var(--c2); }
 .ref-table tr.is-ref th, .ref-table tr.is-ref td { background: var(--sunk); }
 @media (max-width: 700px) {
   .ref-table th, .ref-table td { padding: 6px 5px; }
@@ -1522,7 +1524,9 @@ function renderRef(items) {
       const v = val(c, x.st), r = val(c, ref.st);
       if (v == null) return `<td><span class="rv">–</span><span class="sr-only">not available</span></td>`;
       const p = refPct(v, r);
-      const d = me ? `<span class="rd">baseline</span>` : p == null ? `<span class="rd" title="No reference value to compare with">–</span>` : `<span class="rd">${fmtPct(p)}</span>`;
+      const pct = fmtPct(p);
+      const signClass = pct.startsWith("+") ? " positive" : pct.startsWith("−") ? " negative" : "";
+      const d = me ? `<span class="rd">baseline</span>` : p == null ? `<span class="rd" title="No reference value to compare with">–</span>` : `<span class="rd${signClass}">${pct}</span>`;
       return `<td><span class="rv">${c[2](x.st)}</span>${d}</td>`;
     }).join("");
     return `<tr${me ? ` class="is-ref"` : ""}><th scope="row"><span class="swatch" style="color:var(${x.color})" aria-hidden="true"></span><span class="rn">${esc(x.dev.n)}${me ? `<small>Reference</small>` : ""}</span></th>${cells}</tr>`;

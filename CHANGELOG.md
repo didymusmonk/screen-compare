@@ -4,6 +4,8 @@ Significant changes to True Size Screens, newest first. The full detail is in th
 
 ## Unreleased
 
+- Reference cards confirm the selection and link to the comparison. Wide tables show a sideways scrolling hint.
+
 - Fixed horizontal page overflow on phones with missing comparison values. Clarified percentage labels, added per-screen page and layout details, and put tablet PCs after tablets in touch shape matches.
 
 - Reference rows show portrait or landscape. The Video table shows only screen coverage for the four ratios.

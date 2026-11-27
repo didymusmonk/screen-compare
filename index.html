@@ -375,7 +375,6 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 (() => {
 if (window.matchMedia && matchMedia("(max-width: 700px)").matches) document.getElementById("custom-details").open = false;
@@ -1455,24 +1454,25 @@ $("#cal-btn").addEventListener("click", () => { $("#cal").hidden = !$("#cal").hi
 $("#cal-done").addEventListener("click", () => { $("#cal").hidden = true; S.scale = "actual"; save(); document.querySelectorAll("#scaleMode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === "actual"))); renderStage(); });
 
 // PDF upload (pdf.js runs in the page; nothing is uploaded anywhere)
-let workerLoaded = null;
-function loadWorker() {
-  if (workerLoaded) return workerLoaded;
-  workerLoaded = new Promise((res, rej) => {
-    const sc = document.createElement("script");
-    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-    sc.onload = res; sc.onerror = () => { workerLoaded = null; rej(new Error("worker")); };
-    document.head.appendChild(sc);
-  });
-  return workerLoaded;
+// The PDF reader (about 100 KB) loads only when someone opens a PDF.
+const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+const loadScript = src => new Promise((res, rej) => {
+  const sc = document.createElement("script");
+  sc.src = src; sc.onload = res; sc.onerror = () => rej(new Error(src));
+  document.head.appendChild(sc);
+});
+let pdfjsReady = null;
+function loadPdfjs() {
+  if (!pdfjsReady) pdfjsReady = Promise.all([loadScript(PDFJS + "pdf.min.js"), loadScript(PDFJS + "pdf.worker.min.js")])
+    .catch(e => { pdfjsReady = null; throw e; });
+  return pdfjsReady;
 }
 async function openPdf(file) {
   const status = $("#pdf-status");
-  if (!window.pdfjsLib) { status.textContent = "The PDF reader didn't load. Check your connection and reload the page."; return; }
   status.textContent = "Reading " + file.name + "…";
+  try { await loadPdfjs(); } catch (err) { status.textContent = "The PDF reader didn't load. Check your connection and try again."; return; }
   try {
-    await loadWorker();
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
     const data = new Uint8Array(await file.arrayBuffer());
     pdf.doc = await pdfjsLib.getDocument({ data, isEvalSupported: false }).promise;
     pdf.pages = pdf.doc.numPages; pdf.page = 1; pdf.name = file.name.replace(/\.pdf$/i, "");

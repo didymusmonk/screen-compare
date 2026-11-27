@@ -64,7 +64,7 @@ def ppi_check(r, w, h, d, at, warns):
         warns.append(f"{at}: calculated_ppi {P} doesn't match {W:g} x {H:g} at {D:g} in ({math.hypot(W, H) / D:.1f})")
     O = f(r.get("official_ppi"))
     if W and H and D and O and abs(math.hypot(W, H) / D - O) / O > 0.02:
-        warns.append(f"{at}: official_ppi {O:g} differs from the calculated {math.hypot(W, H) / D:.1f} by more than 2% (needs a second pass)")
+        warns.append(f"{at}: official_ppi {O:g} differs from the calculated {math.hypot(W, H) / D:.1f} by more than 2% (it will be listed in the exceptions report)")
 
 def check(path):
     errs, warns = [], []
@@ -112,11 +112,11 @@ def check(path):
                 errs.append(f"{at}: CORRECT needs the verified values that change")
             if act in ("SPLIT", "MERGE") and not r["notes"]: errs.append(f"{at}: {act} needs notes naming the new rows or the target row")
             if act in ("CORRECT", "SPLIT", "MERGE") and r["change_class"] == "material" and not r["second_pass_reasons"]:
-                warns.append(f"{at}: a material change should list second_pass_reasons (at least 'material change')")
+                warns.append(f"{at}: a material change should explain the source in notes or evidence")
             if st == "UNVERIFIED" and act == "KEEP": warns.append(f"{at}: KEEP while still UNVERIFIED; use FLAG_FOR_REVIEW if research couldn't finish")
             ppi_check(r, "verified_width_px", "verified_height_px", "verified_diagonal", at, warns)
         elif kind == "missing_devices":
-            if not re.fullmatch(r"NEW-B\d\d-\d\d", r["new_id"]): errs.append(f"{at}: new_id must look like NEW-B10-01")
+            if not re.fullmatch(r"NEW-(?:B\d\d|G\d)-\d\d", r["new_id"]): errs.append(f"{at}: new_id must look like NEW-G1-01 (or NEW-B10-01)")
             if r["product_status"] in ("RUMORED", "ANNOUNCED") and r["inclusion_priority"] != "review_queue":
                 errs.append(f"{at}: unreleased devices go in the review queue (inclusion_priority = review_queue)")
             if not r["primary_source_url"] and not r["secondary_source_url"]: errs.append(f"{at}: a proposed device needs a source URL")
@@ -127,7 +127,7 @@ def check(path):
             ppi_check(r, "width_px", "height_px", "verified_diagonal", at, warns)
         else:
             rel = r["related_id"]
-            if rel and not (rel in LEDGER or re.fullmatch(r"NEW-B\d\d-\d\d", rel)): errs.append(f"{at}: related_id must be a DEV- or NEW- ID")
+            if rel and not (rel in LEDGER or re.fullmatch(r"NEW-(?:B\d\d|G\d)-\d\d", rel)): errs.append(f"{at}: related_id must be a DEV- or NEW- ID")
             if not r["explanation"]: errs.append(f"{at}: explanation is empty")
     if kind == "verification_results" and any(r.get("pass") == "primary" for r in rows):
         for b in {r["batch_id"] for r in rows}:

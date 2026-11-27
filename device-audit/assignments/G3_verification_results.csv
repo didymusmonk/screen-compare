@@ -1,0 +1,53 @@
+original_id,batch_id,researcher,pass,original_name,original_type,original_diagonal,original_width_px,original_height_px,manufacturer,verified_name,verified_category,models_covered,screen_role,release_year,nominal_diagonal,verified_diagonal,verified_width_px,verified_height_px,official_ppi,color_ppi,color_width_px,color_height_px,display_technology,active_width_mm,active_height_mm,calculated_ppi,geometry_basis,panel_options,verification_status,product_status,primary_source_url,secondary_source_url,evidence,verified_date,action,change_class,second_pass_reasons,notes
+DEV-0093,B07,gemini,primary,Galaxy S26 Ultra,phone,6.9,3120,1440,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S25 Ultra.
+DEV-0094,B07,gemini,primary,Galaxy S26+,phone,6.7,3120,1440,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN USED_IN_TESTS; Same diagonal and pixels as: Galaxy S25 Edge; Galaxy S25+; Galaxy S24+.
+DEV-0095,B07,gemini,primary,Galaxy S26,phone,6.3,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: USED_IN_TESTS
+DEV-0096,B07,gemini,primary,Galaxy S26 FE,phone,6.7,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: RELEASE_CHECK SAME_SCREEN; Same diagonal and pixels as: Galaxy S25 FE; Galaxy S24 FE; Galaxy A56; Galaxy A16.
+DEV-0097,B07,gemini,primary,Galaxy S25 Ultra,phone,6.9,3120,1440,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN USED_IN_TESTS; Same diagonal and pixels as: Galaxy S26 Ultra.
+DEV-0098,B07,gemini,primary,Galaxy S25 Edge,phone,6.7,3120,1440,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S26+; Galaxy S25+; Galaxy S24+.
+DEV-0099,B07,gemini,primary,Galaxy S25+,phone,6.7,3120,1440,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S26+; Galaxy S25 Edge; Galaxy S24+.
+DEV-0100,B07,gemini,primary,Galaxy S25,phone,6.2,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN USED_IN_TESTS; Same diagonal and pixels as: Galaxy S24.
+DEV-0101,B07,gemini,primary,Galaxy S25 FE,phone,6.7,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S26 FE; Galaxy S24 FE; Galaxy A56; Galaxy A16.
+DEV-0102,B07,gemini,primary,Galaxy S24 Ultra,phone,6.8,3120,1440,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,
+DEV-0103,B07,gemini,primary,Galaxy S24+,phone,6.7,3120,1440,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S26+; Galaxy S25 Edge; Galaxy S25+.
+DEV-0104,B07,gemini,primary,Galaxy S24,phone,6.2,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S25.
+DEV-0105,B07,gemini,primary,Galaxy S24 FE,phone,6.7,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S26 FE; Galaxy S25 FE; Galaxy A56; Galaxy A16.
+DEV-0106,B07,gemini,primary,Galaxy S23 Ultra,phone,6.8,3088,1440,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S22 Ultra.
+DEV-0107,B07,gemini,primary,Galaxy S23+,phone,6.6,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S22+; Galaxy A55 / A35.
+DEV-0108,B07,gemini,primary,Galaxy S23,phone,6.1,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S22.
+DEV-0109,B07,gemini,primary,Galaxy S23 FE,phone,6.4,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S21 FE; Galaxy A54.
+DEV-0110,B07,gemini,primary,Galaxy S22 Ultra,phone,6.8,3088,1440,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S23 Ultra.
+DEV-0111,B07,gemini,primary,Galaxy S22+,phone,6.6,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S23+; Galaxy A55 / A35.
+DEV-0112,B07,gemini,primary,Galaxy S22,phone,6.1,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S23.
+DEV-0113,B07,gemini,primary,Galaxy S21 Ultra,phone,6.8,3200,1440,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,
+DEV-0114,B07,gemini,primary,Galaxy S21+,phone,6.7,2400,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy Note20.
+DEV-0115,B07,gemini,primary,Galaxy S21,phone,6.2,2400,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,
+DEV-0116,B07,gemini,primary,Galaxy S21 FE,phone,6.4,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S23 FE; Galaxy A54.
+DEV-0117,B07,gemini,primary,Galaxy Note20 Ultra,phone,6.9,3088,1440,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,
+DEV-0118,B07,gemini,primary,Galaxy Note20,phone,6.7,2400,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S21+.
+DEV-0140,B07,gemini,primary,Galaxy A56,phone,6.7,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S26 FE; Galaxy S25 FE; Galaxy S24 FE; Galaxy A16.
+DEV-0141,B07,gemini,primary,Galaxy A55 / A35,phone,6.6,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: GROUP SAME_SCREEN; Same diagonal and pixels as: Galaxy S23+; Galaxy S22+.
+DEV-0142,B07,gemini,primary,Galaxy A54,phone,6.4,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S23 FE; Galaxy S21 FE.
+DEV-0143,B07,gemini,primary,Galaxy A16,phone,6.7,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: SAME_SCREEN; Same diagonal and pixels as: Galaxy S26 FE; Galaxy S25 FE; Galaxy S24 FE; Galaxy A56.
+DEV-0144,B07,gemini,primary,Galaxy A15,phone,6.5,2340,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,
+DEV-0119,B08,gemini,primary,Galaxy Z TriFold (inner),phone,10.0,2160,1584,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_INNER RELEASE_CHECK
+DEV-0120,B08,gemini,primary,Galaxy Z TriFold (cover),phone,6.5,2520,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_COVER RELEASE_CHECK SAME_SCREEN; Same diagonal and pixels as: Galaxy Z Fold8 Ultra (cover); Galaxy Z Fold7 (cover).
+DEV-0121,B08,gemini,primary,Galaxy Z Fold8 Ultra (inner),phone,8.0,2504,2256,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_INNER RELEASE_CHECK; Confirm model name and existence.
+DEV-0122,B08,gemini,primary,Galaxy Z Fold8 Ultra (cover),phone,6.5,2520,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_COVER RELEASE_CHECK SAME_SCREEN; Same diagonal and pixels as: Galaxy Z TriFold (cover); Galaxy Z Fold7 (cover).
+DEV-0123,B08,gemini,primary,Galaxy Z Fold8 (inner),phone,7.6,2448,1848,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_INNER RELEASE_CHECK; Smaller (7.6 in) than Fold7's 8.0 in inner screen with a near 4:3 shape: confirm this is a real shipping model and not a mixed-up rumor.
+DEV-0124,B08,gemini,primary,Galaxy Z Fold8 (cover),phone,5.5,1972,1248,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_COVER RELEASE_CHECK
+DEV-0125,B08,gemini,primary,Galaxy Z Fold7 (inner),phone,8.0,2184,1968,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_INNER
+DEV-0126,B08,gemini,primary,Galaxy Z Fold7 (cover),phone,6.5,2520,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_COVER SAME_SCREEN; Same diagonal and pixels as: Galaxy Z TriFold (cover); Galaxy Z Fold8 Ultra (cover).
+DEV-0127,B08,gemini,primary,Galaxy Z Fold6 (inner),phone,7.6,2160,1856,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_INNER
+DEV-0128,B08,gemini,primary,Galaxy Z Fold6 (cover),phone,6.3,2376,968,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_COVER
+DEV-0129,B08,gemini,primary,Galaxy Z Fold5 / Fold4 (inner),phone,7.6,2176,1812,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: GROUP FOLD_INNER
+DEV-0130,B08,gemini,primary,Galaxy Z Fold5 / Fold4 (cover),phone,6.2,2316,904,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: GROUP FOLD_COVER
+DEV-0131,B08,gemini,primary,Galaxy Z Fold3 (inner),phone,7.6,2208,1768,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_INNER
+DEV-0132,B08,gemini,primary,Galaxy Z Fold3 (cover),phone,6.2,2268,832,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_COVER
+DEV-0133,B08,gemini,primary,Galaxy Z Flip8,phone,6.9,2520,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,"PREP: FOLD_INNER RELEASE_CHECK SAME_SCREEN; Inner screen but not labelled (inner), unlike the Fold rows. Same diagonal and pixels as: Galaxy Z Flip7."
+DEV-0134,B08,gemini,primary,Galaxy Z Flip8 (cover),phone,4.1,1048,948,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_COVER RELEASE_CHECK SAME_SCREEN; Same diagonal and pixels as: Galaxy Z Flip7 (cover).
+DEV-0135,B08,gemini,primary,Galaxy Z Flip7,phone,6.9,2520,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,"PREP: FOLD_INNER SAME_SCREEN; Inner screen but not labelled (inner), unlike the Fold rows. Same diagonal and pixels as: Galaxy Z Flip8."
+DEV-0136,B08,gemini,primary,Galaxy Z Flip7 (cover),phone,4.1,1048,948,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_COVER SAME_SCREEN; Same diagonal and pixels as: Galaxy Z Flip8 (cover).
+DEV-0137,B08,gemini,primary,Galaxy Z Flip7 FE / Flip6 / Flip5 / Flip4,phone,6.7,2640,1080,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,"PREP: GROUP FOLD_INNER; Inner screen, not labelled (inner). The matching cover row groups only FE/6/5, because the Flip4 cover differs (separate row)."
+DEV-0138,B08,gemini,primary,Galaxy Z Flip7 FE / Flip6 / Flip5 (cover),phone,3.4,748,720,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: GROUP FOLD_COVER
+DEV-0139,B08,gemini,primary,Galaxy Z Flip4 (cover),phone,1.9,512,260,,,,,,,,,,,,,,,,,,,,,UNVERIFIED,,,,,,,,,PREP: FOLD_COVER

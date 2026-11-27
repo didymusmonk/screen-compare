@@ -1,0 +1,6 @@
+issue_id,batch_id,researcher,related_id,device_name,issue_type,field,existing_value,candidate_value,conflicting_sources,explanation,suggested_next_step
+ISS-B04-01,B04,gemini,DEV-0231,Dell XPS 13 2-in-1 (9315),NAMING,diagonal,13,13.0,None,Baseline diagonal recorded without trailing zero as integer 13 while database convention uses 13.0.,Standardize to 13.0 during next integration pass.
+ISS-B04-02,B04,gemini,DEV-0232,HP Spectre x360 14,NAMING,diagonal,14,14.0,None,Baseline diagonal recorded without trailing zero as integer 14 while database convention uses 14.0.,Standardize to 14.0 during next integration pass.
+ISS-B04-03,B04,gemini,DEV-0233,HP Spectre x360 16,NAMING,diagonal,16,16.0,None,Baseline diagonal recorded without trailing zero as integer 16 while database convention uses 16.0.,Standardize to 16.0 during next integration pass.
+ISS-B04-04,B04,gemini,DEV-0257,ASUS Zenbook 14 OLED,NAMING,diagonal,14,14.0,None,Baseline diagonal recorded without trailing zero as integer 14 while database convention uses 14.0.,Standardize to 14.0 during next integration pass.
+ISS-B04-05,B04,gemini,DEV-0260,Framework Laptop 16,NAMING,diagonal,16,16.0,None,Baseline diagonal recorded without trailing zero as integer 16 while database convention uses 16.0.,Standardize to 16.0 during next integration pass.

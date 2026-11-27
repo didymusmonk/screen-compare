@@ -1,5 +1,7 @@
 # Batch manifest
 
+> **Superseded on 27 Nov 2026** by the simplified workflow in `README.md` and `GEMINI_PROMPT.md` (one Gemini pass, script checks, Claude reviews exceptions only, no second pass). Kept for the record and for the flag legend.
+
 The 315 original rows of `devices_original.csv` are divided into 12 category-based batches. Every row is in exactly one batch; `COVERAGE_LEDGER.csv` names the batch for each audit ID, and `batches/<batch>_verification_results.csv` lists each batch's rows, pre-filled.
 
 ## 1. Batches

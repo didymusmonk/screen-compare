@@ -1,0 +1,384 @@
+change_id,audit_id,change_type,field,old_value,new_value,old_app_id,new_app_id,needs_renamed_entry,change_class,source_url,evidence,approved,notes
+CHG-0001,DEV-0001,KEEP,,,,ipad-pro-13-inch-m4-m5,ipad-pro-13-inch-m4-m5,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0002,DEV-0002,KEEP,,,,ipad-pro-11-inch-m4-m5,ipad-pro-11-inch-m4-m5,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0003,DEV-0003,KEEP,,,,ipad-pro-12-9-inch-1st-to-6th-gen,ipad-pro-12-9-inch-1st-to-6th-gen,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0004,DEV-0004,KEEP,,,,ipad-pro-11-inch-1st-to-4th-gen,ipad-pro-11-inch-1st-to-4th-gen,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0005,DEV-0005,KEEP,,,,ipad-pro-10-5-inch,ipad-pro-10-5-inch,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0006,DEV-0006,KEEP,,,,ipad-pro-9-7-inch,ipad-pro-9-7-inch,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0007,DEV-0007,KEEP,,,,ipad-air-13-inch-m2-to-m4,ipad-air-13-inch-m2-to-m4,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0008,DEV-0008,KEEP,,,,ipad-air-11-inch-m2-to-m4,ipad-air-11-inch-m2-to-m4,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0009,DEV-0009,KEEP,,,,ipad-air-4th-5th-gen,ipad-air-4th-5th-gen,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0010,DEV-0010,KEEP,,,,ipad-air-3rd-gen,ipad-air-3rd-gen,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0011,DEV-0011,KEEP,,,,ipad-air-2-ipad-air,ipad-air-2-ipad-air,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0012,DEV-0012,KEEP,,,,ipad-11th-gen-a16-ipad-10th-gen,ipad-11th-gen-a16-ipad-10th-gen,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0013,DEV-0013,KEEP,,,,ipad-7th-8th-9th-gen,ipad-7th-8th-9th-gen,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0014,DEV-0014,KEEP,,,,ipad-5th-6th-gen,ipad-5th-6th-gen,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0015,DEV-0015,KEEP,,,,ipad-mini-a20-pro-2026,ipad-mini-a20-pro-2026,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0016,DEV-0016,KEEP,,,,ipad-mini-a17-pro-6th-gen,ipad-mini-a17-pro-6th-gen,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0017,DEV-0017,KEEP,,,,ipad-mini-4th-5th-gen,ipad-mini-4th-5th-gen,NO,none,https://www.apple.com/ipad/compare/,,,
+CHG-0018,DEV-0018,KEEP,,,,galaxy-tab-s11-ultra,galaxy-tab-s11-ultra,NO,none,https://www.samsung.com/us/tablets/galaxy-tab-s11/buy/galaxy-tab-s11-ultra-512gb-gray-wi-fi-sku-sm-x930nzaexar/,,,
+CHG-0019,DEV-0019,KEEP,,,,galaxy-tab-s11,galaxy-tab-s11,NO,none,https://www.samsung.com/us/tablets/galaxy-tab-s11/,,,
+CHG-0020,DEV-0020,KEEP,,,,galaxy-tab-s10-ultra,galaxy-tab-s10-ultra,NO,none,https://news.samsung.com/us/galaxy-tab-s10-series-samsung-ai-ready-tablet/,,,
+CHG-0021,DEV-0021,KEEP,,,,galaxy-tab-s10-plus,galaxy-tab-s10-plus,NO,none,https://news.samsung.com/us/galaxy-tab-s10-series-samsung-ai-ready-tablet/,,,
+CHG-0022,DEV-0022,KEEP,,,,galaxy-tab-s10-fe-plus,galaxy-tab-s10-fe-plus,NO,none,https://www.samsung.com/us/tablets/galaxy-tab-s10-fe/,,,
+CHG-0023,DEV-0023,KEEP,,,,galaxy-tab-s10-fe,galaxy-tab-s10-fe,NO,none,https://www.samsung.com/us/tablets/galaxy-tab-s10-fe/,,,
+CHG-0024,DEV-0024,KEEP,,,,galaxy-tab-s9-ultra,galaxy-tab-s9-ultra,NO,none,https://www.samsung.com/us/support/answer/ANS10003691/,,,
+CHG-0025,DEV-0025,KEEP,,,,galaxy-tab-s9-plus,galaxy-tab-s9-plus,NO,none,https://www.samsung.com/us/support/answer/ANS10003691/,,,
+CHG-0026,DEV-0026,KEEP,,,,galaxy-tab-s9,galaxy-tab-s9,NO,none,https://www.samsung.com/us/support/answer/ANS10003691/,,,
+CHG-0027,DEV-0027,KEEP,,,,galaxy-tab-s9-fe-plus,galaxy-tab-s9-fe-plus,NO,none,https://image-us.samsung.com/SamsungUS/home/my-assets/10-11-23/TabS9FE-Spec.pdf,,,
+CHG-0028,DEV-0028,KEEP,,,,galaxy-tab-s9-fe,galaxy-tab-s9-fe,NO,none,https://image-us.samsung.com/SamsungUS/home/my-assets/10-11-23/TabS9FE-Spec.pdf,,,
+CHG-0029,DEV-0029,KEEP,,,,galaxy-tab-s8-ultra,galaxy-tab-s8-ultra,NO,none,https://news.samsung.com/global/break-the-rules-with-galaxy-tab-s8-series-the-ultimate-tablet-to-power-our-hybrid-world,,,
+CHG-0030,DEV-0030,KEEP,,,,galaxy-tab-s8-plus-s7-plus,galaxy-tab-s8-plus-s7-plus,NO,none,https://news.samsung.com/global/break-the-rules-with-galaxy-tab-s8-series-the-ultimate-tablet-to-power-our-hybrid-world,,,
+CHG-0031,DEV-0031,KEEP,,,,galaxy-tab-s8-s7,galaxy-tab-s8-s7,NO,none,https://news.samsung.com/global/break-the-rules-with-galaxy-tab-s8-series-the-ultimate-tablet-to-power-our-hybrid-world,,,
+CHG-0032,DEV-0032,KEEP,,,,galaxy-tab-s6-lite,galaxy-tab-s6-lite,NO,none,https://news.samsung.com/global/samsung-reveals-the-new-galaxy-tab-s6-lite-a-stylish-and-affordable-tablet-designed-for-both-work-and-play,,,
+CHG-0033,DEV-0033,KEEP,,,,galaxy-tab-a9-plus,galaxy-tab-a9-plus,NO,none,https://news.samsung.com/global/samsung-announces-the-new-galaxy-tab-a9-and-galaxy-tab-a9-plus-delivering-samsungs-awesome-tablet-experiences-at-great-value,,,
+CHG-0034,DEV-0034,KEEP,,,,galaxy-tab-a9,galaxy-tab-a9,NO,none,https://news.samsung.com/global/samsung-announces-the-new-galaxy-tab-a9-and-galaxy-tab-a9-plus-delivering-samsungs-awesome-tablet-experiences-at-great-value,,,
+CHG-0035,DEV-0035,KEEP,,,,galaxy-tab-a8,galaxy-tab-a8,NO,none,https://news.samsung.com/global/samsungs-new-galaxy-tab-a8-gives-you-more-screen-more-power-and-more-performance,,,
+CHG-0036,DEV-0036,KEEP,,,,lenovo-tab-extreme,lenovo-tab-extreme,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/Lenovo_Tablets/Tab_Extreme/Tab_Extreme_Spec.PDF,,,
+CHG-0037,DEV-0037,KEEP,,,,lenovo-tab-p12-idea-tab-pro,lenovo-tab-p12-idea-tab-pro,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/Lenovo_Tablets/Idea_Tab_Pro/Idea_Tab_Pro_Spec.pdf,,,
+CHG-0038,DEV-0038,KEEP,,,,lenovo-tab-p12-pro,lenovo-tab-p12-pro,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/Lenovo_Tablets/Lenovo_Tab_P12_Pro/Lenovo_Tab_P12_Pro_Spec.pdf,,,
+CHG-0039,DEV-0039,KEEP,,,,lenovo-tab-p11-pro-gen-2,lenovo-tab-p11-pro-gen-2,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/Lenovo_Tablets/Tab_P11_Pro_2nd_Gen/Tab_P11_Pro_2nd_Gen_Spec.pdf,,,"B10 adjudication: figures agree in both passes, but no maker page was read in the second pass."
+CHG-0040,DEV-0040,KEEP,,,,lenovo-tab-p11-gen-2,lenovo-tab-p11-gen-2,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/Lenovo_Tablets/Tab_P11_2nd_Gen/Tab_P11_2nd_Gen_Spec.pdf,,,
+CHG-0041,DEV-0041,KEEP,,,,lenovo-tab-m11,lenovo-tab-m11,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/Lenovo_Tablets/Lenovo_Tab_M11/Lenovo_Tab_M11_Spec.pdf,,,
+CHG-0042,DEV-0042,KEEP,,,,lenovo-tab-m10-plus-gen-3,lenovo-tab-m10-plus-gen-3,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/Lenovo_Tablets/Tab_M10_Plus_3rd_Gen/Tab_M10_Plus_3rd_Gen_Spec.pdf,,,
+CHG-0043,DEV-0043,KEEP,,,,lenovo-tab-m9,lenovo-tab-m9,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/Lenovo_Tablets/Lenovo_Tab_M9/Lenovo_Tab_M9_Spec.pdf,,,
+CHG-0044,DEV-0044,KEEP,,,,lenovo-yoga-tab-plus,lenovo-yoga-tab-plus,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/Lenovo_Tablets/Yoga_Tab_Plus/Yoga_Tab_Plus_Spec.pdf,,,"B10 adjudication: figures agree in both passes, but no maker page was read in the second pass."
+CHG-0045,DEV-0045,KEEP,,,,lenovo-yoga-tab-13,lenovo-yoga-tab-13,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/Lenovo_Tablets/Yoga_Tab_13/Yoga_Tab_13_Spec.pdf,,,
+CHG-0046,DEV-0046,KEEP,,,,lenovo-yoga-tab-11,lenovo-yoga-tab-11,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/Lenovo_Tablets/Yoga_Tab_11/Yoga_Tab_11_Spec.pdf,,,
+CHG-0047,DEV-0047,KEEP,,,,lenovo-legion-tab,lenovo-legion-tab,NO,none,https://psref.lenovo.com/Product/Lenovo_Tablets/Legion_Tab_8_8_5?MT=ZAH2,,,"B10 adjudication: figures agree in both passes, but no maker page was read in the second pass."
+CHG-0048,DEV-0048,KEEP,,,,pixel-tablet,pixel-tablet,NO,none,https://support.google.com/googlepixeltablet/answer/13555146?hl=en,,,
+CHG-0049,DEV-0049,KEEP,,,,amazon-fire-max-11,amazon-fire-max-11,NO,none,https://developer.amazon.com/docs/fire-tablets/ft-device-specifications-firehd-models.html,,,"B10 adjudication: figures agree in both passes, but no maker page was read in the second pass."
+CHG-0050,DEV-0050,KEEP,,,,amazon-fire-hd-10,amazon-fire-hd-10,NO,none,https://developer.amazon.com/docs/fire-tablets/ft-device-specifications-firehd-models.html,,,"B10 adjudication: figures agree in both passes, but no maker page was read in the second pass."
+CHG-0051,DEV-0051,KEEP,,,,amazon-fire-hd-8,amazon-fire-hd-8,NO,none,https://developer.amazon.com/docs/fire-tablets/ft-device-specifications-firehd-models.html,,,
+CHG-0052,DEV-0052,KEEP,,,,amazon-fire-7,amazon-fire-7,NO,none,https://developer.amazon.com/docs/fire-tablets/ft-device-specifications-fire-models.html,,,"B10 adjudication: figures agree in both passes, but no maker page was read in the second pass."
+CHG-0053,DEV-0053,KEEP,,,,oneplus-pad-2,oneplus-pad-2,NO,none,https://www.oneplus.com/global/oneplus-pad-2/specs,,,
+CHG-0054,DEV-0054,KEEP,,,,iphone-duo-inner,iphone-duo-inner,NO,none,https://support.apple.com/en-us/148588,,,"Research gives 7.58 in; under 0.5% from 7.6, so kept as rounding."
+CHG-0055,DEV-0055,KEEP,,,,iphone-duo-front,iphone-duo-front,NO,none,https://support.apple.com/en-us/148588,,,"Not applied: the iPhone rows use Apple's headline size (6.3, 6.9 ...), not the 'standard rectangle' footnote figure, so 5.4 stays for consistency (0.7%). '(front)' is the established label; no rename."
+CHG-0056,DEV-0056,KEEP,,,,iphone-18-pro-max,iphone-18-pro-max,NO,none,https://www.apple.com/iphone-18-pro/specs/,,,
+CHG-0057,DEV-0057,KEEP,,,,iphone-18-pro,iphone-18-pro,NO,none,https://www.apple.com/iphone-18-pro/specs/,,,
+CHG-0058,DEV-0058,KEEP,,,,iphone-17e,iphone-17e,NO,none,https://support.apple.com/en-us/125095,,,
+CHG-0059,DEV-0059,KEEP,,,,iphone-17-pro-max,iphone-17-pro-max,NO,none,https://support.apple.com/en-us/125091,,,
+CHG-0060,DEV-0060,KEEP,,,,iphone-17-pro,iphone-17-pro,NO,none,https://support.apple.com/en-us/125090,,,
+CHG-0061,DEV-0061,KEEP,,,,iphone-air,iphone-air,NO,none,https://support.apple.com/en-us/125092,,,
+CHG-0062,DEV-0062,KEEP,,,,iphone-17,iphone-17,NO,none,https://support.apple.com/en-us/125089,,,
+CHG-0063,DEV-0063,KEEP,,,,iphone-16-pro-max,iphone-16-pro-max,NO,none,https://support.apple.com/en-us/120999,,,
+CHG-0064,DEV-0064,KEEP,,,,iphone-16-pro,iphone-16-pro,NO,none,https://support.apple.com/en-us/120998,,,
+CHG-0065,DEV-0065,KEEP,,,,iphone-16-plus,iphone-16-plus,NO,none,https://support.apple.com/en-us/120997,,,
+CHG-0066,DEV-0066,KEEP,,,,iphone-16,iphone-16,NO,none,https://support.apple.com/en-us/120996,,,
+CHG-0067,DEV-0067,KEEP,,,,iphone-16e,iphone-16e,NO,none,https://support.apple.com/en-us/122208,,,
+CHG-0068,DEV-0068,KEEP,,,,iphone-15-pro-max,iphone-15-pro-max,NO,none,https://support.apple.com/en-us/111839,,,
+CHG-0069,DEV-0069,KEEP,,,,iphone-15-pro,iphone-15-pro,NO,none,https://support.apple.com/en-us/111840,,,
+CHG-0070,DEV-0070,KEEP,,,,iphone-15-plus,iphone-15-plus,NO,none,https://support.apple.com/en-us/111838,,,
+CHG-0071,DEV-0071,KEEP,,,,iphone-15,iphone-15,NO,none,https://support.apple.com/en-us/111837,,,
+CHG-0072,DEV-0072,KEEP,,,,iphone-14-pro-max,iphone-14-pro-max,NO,none,https://support.apple.com/en-us/111849,,,
+CHG-0073,DEV-0073,KEEP,,,,iphone-14-pro,iphone-14-pro,NO,none,https://support.apple.com/en-us/111850,,,
+CHG-0074,DEV-0074,KEEP,,,,iphone-14-plus,iphone-14-plus,NO,none,https://support.apple.com/en-us/111848,,,
+CHG-0075,DEV-0075,KEEP,,,,iphone-14,iphone-14,NO,none,https://support.apple.com/en-us/111847,,,
+CHG-0076,DEV-0076,KEEP,,,,iphone-13-pro-max,iphone-13-pro-max,NO,none,https://support.apple.com/en-us/111874,,,
+CHG-0077,DEV-0077,KEEP,,,,iphone-13-pro,iphone-13-pro,NO,none,https://support.apple.com/en-us/111873,,,
+CHG-0078,DEV-0078,KEEP,,,,iphone-13,iphone-13,NO,none,https://support.apple.com/en-us/111872,,,
+CHG-0079,DEV-0079,KEEP,,,,iphone-13-mini,iphone-13-mini,NO,none,https://support.apple.com/en-us/111871,,,
+CHG-0080,DEV-0080,KEEP,,,,iphone-12-pro-max,iphone-12-pro-max,NO,none,https://support.apple.com/en-us/111880,,,
+CHG-0081,DEV-0081,KEEP,,,,iphone-12-pro,iphone-12-pro,NO,none,https://support.apple.com/en-us/111879,,,
+CHG-0082,DEV-0082,KEEP,,,,iphone-12,iphone-12,NO,none,https://support.apple.com/en-us/111878,,,
+CHG-0083,DEV-0083,KEEP,,,,iphone-12-mini,iphone-12-mini,NO,none,https://support.apple.com/en-us/111877,,,
+CHG-0084,DEV-0084,KEEP,,,,iphone-11-pro-max,iphone-11-pro-max,NO,none,https://support.apple.com/en-us/111867,,,
+CHG-0085,DEV-0085,KEEP,,,,iphone-11-pro,iphone-11-pro,NO,none,https://support.apple.com/en-us/111866,,,
+CHG-0086,DEV-0086,KEEP,,,,iphone-11,iphone-11,NO,none,https://support.apple.com/en-us/111865,,,
+CHG-0087,DEV-0087,KEEP,,,,iphone-xs-max,iphone-xs-max,NO,none,https://support.apple.com/en-us/111928,,,
+CHG-0088,DEV-0088,KEEP,,,,iphone-xs-x,iphone-xs-x,NO,none,https://support.apple.com/en-us/111927,,,
+CHG-0089,DEV-0089,KEEP,,,,iphone-xr,iphone-xr,NO,none,https://support.apple.com/en-us/111929,,,
+CHG-0090,DEV-0090,KEEP,,,,iphone-8-plus-7-plus,iphone-8-plus-7-plus,NO,none,https://support.apple.com/en-us/111950,,,
+CHG-0091,DEV-0091,KEEP,,,,iphone-se-2nd-3rd-gen-8,iphone-se-2nd-3rd-gen-8,NO,none,https://support.apple.com/en-us/111949,,,
+CHG-0092,DEV-0092,KEEP,,,,iphone-se-1st-gen,iphone-se-1st-gen,NO,none,https://support.apple.com/en-us/111957,,,
+CHG-0093,DEV-0093,KEEP,,,,galaxy-s26-ultra,galaxy-s26-ultra,NO,none,https://www.samsung.com/us/smartphones/galaxy-s26-ultra/compare/,,,
+CHG-0094,DEV-0094,KEEP,,,,galaxy-s26-plus,galaxy-s26-plus,NO,none,https://news.samsung.com/global/samsung-unveils-galaxy-s26-series-the-most-intuitive-galaxy-ai-phone-yet,,,
+CHG-0095,DEV-0095,KEEP,,,,galaxy-s26,galaxy-s26,NO,none,https://news.samsung.com/global/samsung-unveils-galaxy-s26-series-the-most-intuitive-galaxy-ai-phone-yet,,,
+CHG-0096,DEV-0096,KEEP,,,,galaxy-s26-fe,galaxy-s26-fe,NO,none,https://www.samsung.com/us/smartphones/galaxy-s26-fe/,,,
+CHG-0097,DEV-0097,KEEP,,,,galaxy-s25-ultra,galaxy-s25-ultra,NO,none,https://www.samsung.com/levant/business/smartphones/galaxy-s/galaxy-s25-ultra-sm-s938bztimea/,,,
+CHG-0098,DEV-0098,KEEP,,,,galaxy-s25-edge,galaxy-s25-edge,NO,none,https://www.samsung.com/us/smartphones/galaxy-s25-edge/compare/,,,
+CHG-0099,DEV-0099,KEEP,,,,galaxy-s25-plus,galaxy-s25-plus,NO,none,https://www.samsung.com/hk_en/news/product/Samsung-Galaxy-S25-Series-Revolutionizing-Mobile-AI-Standard/,,,
+CHG-0100,DEV-0100,KEEP,,,,galaxy-s25,galaxy-s25,NO,none,https://www.samsung.com/hk_en/news/product/Samsung-Galaxy-S25-Series-Revolutionizing-Mobile-AI-Standard/,,,
+CHG-0101,DEV-0101,KEEP,,,,galaxy-s25-fe,galaxy-s25-fe,NO,none,https://www.samsung.com/us/smartphones/galaxy-s25-fe/,,,
+CHG-0102,DEV-0102,KEEP,,,,galaxy-s24-ultra,galaxy-s24-ultra,NO,none,https://www.samsung.com/ae/support/mobile-devices/what-are-the-sizes-and-the-resolution-of-the-new-s24-series/,,,
+CHG-0103,DEV-0103,KEEP,,,,galaxy-s24-plus,galaxy-s24-plus,NO,none,https://www.samsungmobilepress.com/media-assets/galaxy-s24-plus?tab=specs,,,
+CHG-0104,DEV-0104,KEEP,,,,galaxy-s24,galaxy-s24,NO,none,https://www.samsung.com/ae/support/mobile-devices/what-are-the-sizes-and-the-resolution-of-the-new-s24-series/,,,
+CHG-0105,DEV-0105,KEEP,,,,galaxy-s24-fe,galaxy-s24-fe,NO,none,https://news.samsung.com/global/galaxy-s24-series-expands-with-s24-fe-a-premium-experience-that-makes-full-galaxy-ai-capabilities-attainable-for-more-users,,,
+CHG-0106,DEV-0106,KEEP,,,,galaxy-s23-ultra,galaxy-s23-ultra,NO,none,https://www.samsung.com/ae/business/smartphones/galaxy-s/galaxy-s23-ultra-green-256gb-sm-s918bzgcmea/,,,
+CHG-0107,DEV-0107,KEEP,,,,galaxy-s23-plus,galaxy-s23-plus,NO,none,https://www.samsung.com/hk_en/news/product/samsung-galaxy-s23-series-integrated-with-innovative-galaxy-technology/,,,
+CHG-0108,DEV-0108,KEEP,,,,galaxy-s23,galaxy-s23,NO,none,https://www.samsung.com/ae/business/smartphones/galaxy-s/galaxy-s23-lime-128gb-sm-s911blgbmea/,,,
+CHG-0109,DEV-0109,KEEP,,,,galaxy-s23-fe,galaxy-s23-fe,NO,none,https://news.samsung.com/global/samsung-announces-new-galaxy-s23-fe,,,
+CHG-0110,DEV-0110,KEEP,,,,galaxy-s22-ultra,galaxy-s22-ultra,NO,none,https://www.samsung.com/sg/business/smartphones/galaxy-s/galaxy-s22-ultra-for-business-sm-s908-sm-s908ezgdxsp/,,,
+CHG-0111,DEV-0111,KEEP,,,,galaxy-s22-plus,galaxy-s22-plus,NO,none,https://news.samsung.com/global/samsung-galaxy-s22-and-s22-plus-designed-for-those-who-want-to-create-and-share,,,
+CHG-0112,DEV-0112,KEEP,,,,galaxy-s22,galaxy-s22,NO,none,https://news.samsung.com/global/samsung-galaxy-s22-and-s22-plus-designed-for-those-who-want-to-create-and-share,,,
+CHG-0113,DEV-0113,KEEP,,,,galaxy-s21-ultra,galaxy-s21-ultra,NO,none,https://news.samsung.com/global/samsung-galaxy-s21-ultra-the-ultimate-smartphone-experience-designed-to-be-epic-in-every-way,,,
+CHG-0114,DEV-0114,KEEP,,,,galaxy-s21-plus,galaxy-s21-plus,NO,none,https://news.samsung.com/global/make-every-day-epic-with-samsung-galaxy-s21-and-galaxy-s21plus,,,
+CHG-0115,DEV-0115,KEEP,,,,galaxy-s21,galaxy-s21,NO,none,https://news.samsung.com/global/make-every-day-epic-with-samsung-galaxy-s21-and-galaxy-s21plus,,,
+CHG-0116,DEV-0116,KEEP,,,,galaxy-s21-fe,galaxy-s21-fe,NO,none,https://www.samsung.com/hk_en/news/product/meet-s21-fe-5g/,,,
+CHG-0117,DEV-0117,KEEP,,,,galaxy-note20-ultra,galaxy-note20-ultra,NO,none,https://news.samsung.com/global/samsung-unveils-five-new-power-devices-in-the-galaxy-ecosystem-to-empower-your-work-and-play,,,
+CHG-0118,DEV-0118,KEEP,,,,galaxy-note20,galaxy-note20,NO,none,https://news.samsung.com/global/samsung-unveils-five-new-power-devices-in-the-galaxy-ecosystem-to-empower-your-work-and-play,,,
+CHG-0119,DEV-0119,KEEP,,,,galaxy-z-trifold-inner,galaxy-z-trifold-inner,NO,none,https://news.samsung.com/global/introducing-galaxy-z-trifold-the-shape-of-whats-next-in-mobile-innovation,,,
+CHG-0120,DEV-0120,KEEP,,,,galaxy-z-trifold-cover,galaxy-z-trifold-cover,NO,none,https://news.samsung.com/global/introducing-galaxy-z-trifold-the-shape-of-whats-next-in-mobile-innovation,,,
+CHG-0121,DEV-0121,KEEP,,,,galaxy-z-fold8-ultra-inner,galaxy-z-fold8-ultra-inner,NO,none,https://news.samsung.com/global/samsung-galaxy-z-fold8-ultra-fold8-and-flip8foldables-perfected-for-every-way-of-living,,,
+CHG-0122,DEV-0122,KEEP,,,,galaxy-z-fold8-ultra-cover,galaxy-z-fold8-ultra-cover,NO,none,https://news.samsung.com/global/samsung-galaxy-z-fold8-ultra-fold8-and-flip8foldables-perfected-for-every-way-of-living,,,
+CHG-0123,DEV-0123,KEEP,,,,galaxy-z-fold8-inner,galaxy-z-fold8-inner,NO,none,https://news.samsung.com/us/samsung-galaxy-z-fold8-ultra-fold8-flip8-foldables-perfected-every-way-of-living/,,,
+CHG-0124,DEV-0124,KEEP,,,,galaxy-z-fold8-cover,galaxy-z-fold8-cover,NO,none,https://news.samsung.com/us/samsung-galaxy-z-fold8-ultra-fold8-flip8-foldables-perfected-every-way-of-living/,,,"Gemini had it backwards. Samsung's Fold8 buying guide footnote: 'Cover Screen size is 5.5"" in the full rectangle and 5.4"" accounting for the rounded corners'. The list uses the full rectangle, so 5.5 stays (checked by Claude, 27 Nov 2026)."
+CHG-0125,DEV-0125,KEEP,,,,galaxy-z-fold7-inner,galaxy-z-fold7-inner,NO,none,https://news.samsung.com/global/samsung-galaxy-z-fold7-raising-the-bar-for-smartphones,,,
+CHG-0126,DEV-0126,KEEP,,,,galaxy-z-fold7-cover,galaxy-z-fold7-cover,NO,none,https://news.samsung.com/global/samsung-galaxy-z-fold7-raising-the-bar-for-smartphones,,,
+CHG-0127,DEV-0127,KEEP,,,,galaxy-z-fold6-inner,galaxy-z-fold6-inner,NO,none,https://news.samsung.com/global/samsung-galaxy-z-fold-6-and-z-flip-6-elevate-galaxy-ai-to-new-heights,,,
+CHG-0128,DEV-0128,KEEP,,,,galaxy-z-fold6-cover,galaxy-z-fold6-cover,NO,none,https://news.samsung.com/global/samsung-galaxy-z-fold-6-and-z-flip-6-elevate-galaxy-ai-to-new-heights,,,
+CHG-0129,DEV-0129,KEEP,,,,galaxy-z-fold5-fold4-inner,galaxy-z-fold5-fold4-inner,NO,none,https://news.samsung.com/global/samsung-galaxy-z-flip5-and-galaxy-z-fold5-delivering-flexibility-and-versatility-without-compromise,,,
+CHG-0130,DEV-0130,KEEP,,,,galaxy-z-fold5-fold4-cover,galaxy-z-fold5-fold4-cover,NO,none,https://news.samsung.com/global/samsung-galaxy-z-flip5-and-galaxy-z-fold5-delivering-flexibility-and-versatility-without-compromise,,,
+CHG-0131,DEV-0131,KEEP,,,,galaxy-z-fold3-inner,galaxy-z-fold3-inner,NO,none,https://news.samsung.com/global/the-next-chapter-in-mobile-innovation-unfold-your-world-with-galaxy-z-fold3-5g-and-galaxy-z-flip3-5g,,,
+CHG-0132,DEV-0131,RENAME,name,Galaxy Z Fold3 (inner),Galaxy Z Fold3 / Fold2 (inner),galaxy-z-fold3-inner,galaxy-z-fold3-fold2-inner,YES,material,https://news.samsung.com/global/the-next-chapter-in-mobile-innovation-unfold-your-world-with-galaxy-z-fold3-5g-and-galaxy-z-flip3-5g,,,"Proposed, not applied in devices_verified.csv. Recommended together with adding Galaxy Z Fold2 (cover) (NEW-B08-03): the Fold2 inner screen is the same 7.6-inch 2208 x 1768 panel."
+CHG-0133,DEV-0132,KEEP,,,,galaxy-z-fold3-cover,galaxy-z-fold3-cover,NO,none,https://news.samsung.com/global/the-next-chapter-in-mobile-innovation-unfold-your-world-with-galaxy-z-fold3-5g-and-galaxy-z-flip3-5g,,,
+CHG-0134,DEV-0133,KEEP,,,,galaxy-z-flip8,galaxy-z-flip8,NO,none,https://news.samsung.com/global/samsung-galaxy-z-fold8-ultra-fold8-and-flip8foldables-perfected-for-every-way-of-living,,,Rename to '(inner)' not recommended: flip phones deliberately label only the cover (DATABASE_CONTRACT section 4); a style-only rename breaks saved links.
+CHG-0135,DEV-0134,KEEP,,,,galaxy-z-flip8-cover,galaxy-z-flip8-cover,NO,none,https://news.samsung.com/global/samsung-galaxy-z-fold8-ultra-fold8-and-flip8foldables-perfected-for-every-way-of-living,,,
+CHG-0136,DEV-0135,KEEP,,,,galaxy-z-flip7,galaxy-z-flip7,NO,none,https://news.samsung.com/global/samsung-galaxy-z-flip7-a-pocket-sized-ai-powerhouse-with-a-new-edge-to-edge-flexwindow,,,Rename to '(inner)' not recommended: flip phones deliberately label only the cover (DATABASE_CONTRACT section 4); a style-only rename breaks saved links.
+CHG-0137,DEV-0136,KEEP,,,,galaxy-z-flip7-cover,galaxy-z-flip7-cover,NO,none,https://news.samsung.com/global/samsung-galaxy-z-flip7-a-pocket-sized-ai-powerhouse-with-a-new-edge-to-edge-flexwindow,,,
+CHG-0138,DEV-0137,KEEP,,,,galaxy-z-flip7-fe-flip6-flip5-flip4,galaxy-z-flip7-fe-flip6-flip5-flip4,NO,none,https://news.samsung.com/global/the-next-chapter-in-mobile-innovation-unfold-your-world-with-galaxy-z-fold3-5g-and-galaxy-z-flip3-5g,,,
+CHG-0139,DEV-0137,RENAME,name,Galaxy Z Flip7 FE / Flip6 / Flip5 / Flip4,Galaxy Z Flip7 FE / Flip6 / Flip5 / Flip4 / Flip3 (inner),galaxy-z-flip7-fe-flip6-flip5-flip4,galaxy-z-flip7-fe-flip6-flip5-flip4-flip3-inner,YES,material,https://news.samsung.com/global/the-next-chapter-in-mobile-innovation-unfold-your-world-with-galaxy-z-fold3-5g-and-galaxy-z-flip3-5g,,,"Proposed, not applied in devices_verified.csv. Added '(inner)' and included Flip3 5G which shares the identical 6.7-inch 2640x1080 panel. (Original Z Flip/Flip 5G used 2636x1080)."
+CHG-0140,DEV-0138,KEEP,,,,galaxy-z-flip7-fe-flip6-flip5-cover,galaxy-z-flip7-fe-flip6-flip5-cover,NO,none,https://news.samsung.com/global/samsung-galaxy-z-flip5-and-galaxy-z-fold5-delivering-flexibility-and-versatility-without-compromise,,,
+CHG-0141,DEV-0139,KEEP,,,,galaxy-z-flip4-cover,galaxy-z-flip4-cover,NO,none,https://news.samsung.com/global/the-next-chapter-in-mobile-innovation-unfold-your-world-with-galaxy-z-fold3-5g-and-galaxy-z-flip3-5g,,,
+CHG-0142,DEV-0139,RENAME,name,Galaxy Z Flip4 (cover),Galaxy Z Flip4 / Flip3 (cover),galaxy-z-flip4-cover,galaxy-z-flip4-flip3-cover,YES,material,https://news.samsung.com/global/the-next-chapter-in-mobile-innovation-unfold-your-world-with-galaxy-z-fold3-5g-and-galaxy-z-flip3-5g,,,"Proposed, not applied in devices_verified.csv. Flip3 5G shares the identical 1.9-inch 512x260 Super AMOLED cover screen; group renamed to cover both."
+CHG-0143,DEV-0140,KEEP,,,,galaxy-a56,galaxy-a56,NO,none,https://news.samsung.com/us/samsung-new-galaxy-a56-a36-a26-5g-marks-step-forward-with-ai-for-everyone/,,,
+CHG-0144,DEV-0141,KEEP,,,,galaxy-a55-a35,galaxy-a55-a35,NO,none,https://news.samsung.com/global/samsung-galaxy-a55-5g-and-galaxy-a35-5g-awesome-innovations-and-security-engineered-for-everyone,,,
+CHG-0145,DEV-0142,KEEP,,,,galaxy-a54,galaxy-a54,NO,none,https://www.samsung.com/uk/business/smartphones/galaxy-a/galaxy-a54-5g-green-256gb-sm-a546blgdeub/,,,
+CHG-0146,DEV-0143,KEEP,,,,galaxy-a16,galaxy-a16,NO,none,https://news.samsung.com/sg/elevate-everyday-experiences-with-the-samsung-galaxy-a16-now-available-in-singapore,,,
+CHG-0147,DEV-0144,KEEP,,,,galaxy-a15,galaxy-a15,NO,none,https://news.samsung.com/global/samsung-galaxy-a15-5g-and-galaxy-a25-5g-elevate-everyday-experiences,,,
+CHG-0148,DEV-0145,KEEP,,,,pixel-10-pro-xl,pixel-10-pro-xl,NO,none,https://store.google.com/product/pixel_10_pro_specs,,,
+CHG-0149,DEV-0146,KEEP,,,,pixel-9-pro-xl,pixel-9-pro-xl,NO,none,https://fi.google.com/about/phones/pixel-9-pro-specs,,,
+CHG-0150,DEV-0147,KEEP,,,,pixel-9-pro,pixel-9-pro,NO,none,https://fi.google.com/about/phones/pixel-9-pro-specs,,,
+CHG-0151,DEV-0148,KEEP,,,,pixel-9,pixel-9,NO,none,https://support.google.com/pixelphone/answer/7158570,,,
+CHG-0152,DEV-0149,KEEP,,,,pixel-9a,pixel-9a,NO,none,https://store.google.com/us/product/pixel_9a_specs,,,
+CHG-0153,DEV-0150,KEEP,,,,pixel-11-pro-fold-inner,pixel-11-pro-fold-inner,NO,none,https://store.google.com/us/product/pixel_11_pro_fold_specs,,,
+CHG-0154,DEV-0151,KEEP,,,,pixel-11-pro-fold-cover,pixel-11-pro-fold-cover,NO,none,https://store.google.com/us/product/pixel_11_pro_fold_specs,,,
+CHG-0155,DEV-0152,KEEP,,,,pixel-10-pro-fold-inner,pixel-10-pro-fold-inner,NO,none,https://store.google.com/product/pixel_10_pro_fold_specs,,,
+CHG-0156,DEV-0153,KEEP,,,,pixel-10-pro-fold-cover,pixel-10-pro-fold-cover,NO,none,https://store.google.com/product/pixel_10_pro_fold_specs,,,
+CHG-0157,DEV-0154,KEEP,,,,pixel-9-pro-fold-inner,pixel-9-pro-fold-inner,NO,none,https://support.google.com/pixelphone/answer/7158570,,,
+CHG-0158,DEV-0155,KEEP,,,,pixel-9-pro-fold-cover,pixel-9-pro-fold-cover,NO,none,https://support.google.com/pixelphone/answer/7158570,,,
+CHG-0159,DEV-0156,KEEP,,,,pixel-fold-inner,pixel-fold-inner,NO,none,https://support.google.com/pixelphone/answer/7158570,,,
+CHG-0160,DEV-0157,KEEP,,,,pixel-fold-cover,pixel-fold-cover,NO,none,https://support.google.com/pixelphone/answer/7158570,,,
+CHG-0161,DEV-0158,KEEP,,,,xiaomi-17-ultra,xiaomi-17-ultra,NO,none,https://www.mi.com/global/product/xiaomi-17-ultra/,,,
+CHG-0162,DEV-0159,KEEP,,,,redmi-note-15,redmi-note-15,NO,none,https://www.mi.com/global/product/redmi-note-15/specs/,,,
+CHG-0163,DEV-0160,KEEP,,,,poco-f9-ultra,poco-f9-ultra,NO,none,https://www.po.co/global/product/poco-f9-ultra/specs/,,,
+CHG-0164,DEV-0161,KEEP,,,,oneplus-open-oppo-find-n3-inner,oneplus-open-oppo-find-n3-inner,NO,none,https://www.oneplus.com/global/open/specs,,,
+CHG-0165,DEV-0162,KEEP,,,,oneplus-open-oppo-find-n3-cover,oneplus-open-oppo-find-n3-cover,NO,none,https://www.oneplus.com/global/open/specs,,,
+CHG-0166,DEV-0163,KEEP,,,,oneplus-13,oneplus-13,NO,none,https://www.oneplus.com/global/13/specs,,,
+CHG-0167,DEV-0164,KEEP,,,,oppo-find-n5-inner,oppo-find-n5-inner,NO,none,https://www.oppo.com/en/smartphones/series-find-n/find-n5/specs/,,,
+CHG-0168,DEV-0165,KEEP,,,,oppo-find-n5-cover,oppo-find-n5-cover,NO,none,https://www.oppo.com/en/smartphones/series-find-n/find-n5/specs/,,,
+CHG-0169,DEV-0166,KEEP,,,,kindle-scribe-3-scribe-colorsoft-2025,kindle-scribe-3-scribe-colorsoft-2025,NO,none,https://goodereader.com/blog/electronic-readers/amazon-kindle-scribe-3-full-review,,,"Gemini wrongly called it rumored. Amazon's newsroom (30 Sep 2025) announced Kindle Scribe and Kindle Scribe Colorsoft with a 'larger 11-inch glare-free display'. The page gives no pixel count, so the stored 2640 x 1980 is kept as partial."
+CHG-0170,DEV-0167,KEEP,,,,kindle-scribe-1st-2nd-gen,kindle-scribe-1st-2nd-gen,NO,none,https://en.wikipedia.org/wiki/Amazon_Kindle_devices,,,
+CHG-0171,DEV-0168,KEEP,,,,kindle-colorsoft-colorsoft-2,kindle-colorsoft-colorsoft-2,NO,none,https://en.wikipedia.org/wiki/Amazon_Kindle_devices,,,
+CHG-0172,DEV-0168,RENAME,name,Kindle Colorsoft / Colorsoft 2,Kindle Colorsoft (2024/2026),kindle-colorsoft-colorsoft-2,kindle-colorsoft-2024-2026,YES,material,https://en.wikipedia.org/wiki/Amazon_Kindle_devices,,,"Proposed, not applied in devices_verified.csv. Optional. Amazon has no 'Colorsoft 2'; the 2026 model is 'Kindle Colorsoft (2026)' (Notebookcheck, Engadget, Oct 2026). Gemini's claim that only the Signature Edition exists is out of date; figures unchanged."
+CHG-0173,DEV-0169,KEEP,,,,kindle-paperwhite-6-7-2024-2026,kindle-paperwhite-6-7-2024-2026,NO,none,https://en.wikipedia.org/wiki/Amazon_Kindle_devices,,,"Rename rejected: Gemini said the 2026 Paperwhite is hypothetical, but Amazon launched Kindle Paperwhite (2026) in Oct 2026 (Notebookcheck: 'the 7-inch display'). Figures confirmed."
+CHG-0174,DEV-0170,KEEP,,,,kindle-paperwhite-2021,kindle-paperwhite-2021,NO,none,https://goodereader.com/blog/electronic-readers/amazon-kindle-paperwhite-11th-gen-vs-kindle-paperwhite-12th-generation,,,
+CHG-0175,DEV-0171,KEEP,,,,kindle-paperwhite-2015-to-2018,kindle-paperwhite-2015-to-2018,NO,none,https://en.wikipedia.org/wiki/Amazon_Kindle_devices,,,Style-only rename (years to generation numbers) not applied; figures confirmed.
+CHG-0176,DEV-0172,KEEP,,,,kindle-oasis-2017-2019,kindle-oasis-2017-2019,NO,none,https://goodereader.com/blog/reviews/amazon-kindle-oasis-3-e-reader-review,,,Style-only rename (years to generation numbers) not applied; figures confirmed.
+CHG-0177,DEV-0173,KEEP,,,,kindle-2022-2024-2026-kindle-aluminum,kindle-2022-2024-2026-kindle-aluminum,NO,none,https://en.wikipedia.org/wiki/Amazon_Kindle_devices,,,"Rename rejected: Gemini said there is no 2026 Kindle or aluminum model, but Amazon launched Kindle (2026), 6-inch 300 ppi, with an aluminum-back variant (Notebookcheck, Engadget, Oct 2026)."
+CHG-0178,DEV-0174,KEEP,,,,kindle-2019,kindle-2019,NO,none,https://en.wikipedia.org/wiki/Amazon_Kindle_devices,,,Style-only rename (year to generation number) not applied; figures confirmed.
+CHG-0179,DEV-0175,KEEP,,,,kindle-voyage,kindle-voyage,NO,none,https://wiki.mobileread.com/wiki/Kindle_Voyage,,,
+CHG-0180,DEV-0176,KEEP,,,,boox-note-max,boox-note-max,NO,none,https://shop.boox.com/products/notemax,,,
+CHG-0181,DEV-0177,KEEP,,,,boox-tab-x-c,boox-tab-x-c,NO,none,https://shop.boox.com/products/tabxc,,,
+CHG-0182,DEV-0178,KEEP,,,,boox-tab-x,boox-tab-x,NO,none,https://shop.boox.com/products/tabx,,,
+CHG-0183,DEV-0179,KEEP,,,,boox-note-air6-c,boox-note-air6-c,NO,none,https://shop.boox.com/products/noteair6c,,,
+CHG-0184,DEV-0180,KEEP,,,,boox-note-air5-c,boox-note-air5-c,NO,none,https://shop.boox.com/products/noteair5c,,,
+CHG-0185,DEV-0181,KEEP,,,,boox-note-air4-c,boox-note-air4-c,NO,none,https://shop.boox.com/products/noteair4c,,,
+CHG-0186,DEV-0182,KEEP,,,,boox-note-air3-c,boox-note-air3-c,NO,none,https://shop.boox.com/products/boox-note-air3,,,
+CHG-0187,DEV-0183,KEEP,,,,boox-note-air3,boox-note-air3,NO,none,https://shop.boox.com/products/boox-note-air3,,,
+CHG-0188,DEV-0184,KEEP,,,,boox-go-10-3-go-10-3-gen-ii,boox-go-10-3-go-10-3-gen-ii,NO,none,https://shop.boox.com/products/go103,,,
+CHG-0189,DEV-0185,KEEP,,,,boox-go-10-3-gen-ii-lumi,boox-go-10-3-gen-ii-lumi,NO,none,https://shop.boox.com/products/go103gen2lumi,,,
+CHG-0190,DEV-0186,KEEP,,,,boox-tab-ultra-c-pro,boox-tab-ultra-c-pro,NO,none,https://shop.boox.com/products/tabultracpro,,,
+CHG-0191,DEV-0187,KEEP,,,,boox-tab-ultra,boox-tab-ultra,NO,none,https://shop.boox.com/products/tab,,,
+CHG-0192,DEV-0188,KEEP,,,,boox-note5,boox-note5,NO,none,https://www.gsmchoice.com/en/catalogue/onyx/booxnote5/,,,
+CHG-0193,DEV-0189,KEEP,,,,boox-note-mini-c,boox-note-mini-c,NO,none,https://shop.boox.com/blogs/news/meet-the-8-52-note-mini-c,,,
+CHG-0194,DEV-0190,KEEP,,,,boox-tab-mini-c,boox-tab-mini-c,NO,none,https://shop.boox.com/products/tabminic,,,
+CHG-0195,DEV-0191,KEEP,,,,boox-go-7-go-color-7-incl-gen-ii,boox-go-7-go-color-7-incl-gen-ii,NO,none,https://shop.boox.com/products/go7,,,
+CHG-0196,DEV-0192,KEEP,,,,boox-page,boox-page,NO,none,https://shop.boox.com/products/page,,,
+CHG-0197,DEV-0193,KEEP,,,,boox-leaf-3c,boox-leaf-3c,NO,none,https://www.notebookcheck.net/Onyx-Boox-Leaf-3C-has-a-color-E-Ink-display-Android-and-the-look-of-the-Amazon-Kindle-Oasis.807629.0.html,,,
+CHG-0198,DEV-0194,KEEP,,,,boox-go-6-go-6-gen-ii,boox-go-6-go-6-gen-ii,NO,none,https://shop.boox.com/products/go6gen2,,,
+CHG-0199,DEV-0195,KEEP,,,,boox-palma-3,boox-palma-3,NO,none,https://shop.boox.com/products/palma3,,,
+CHG-0200,DEV-0196,KEEP,,,,boox-palma-palma-2-palma-2-pro,boox-palma-palma-2-palma-2-pro,NO,none,https://shop.boox.com/products/palma,,,
+CHG-0201,DEV-0197,KEEP,,,,boox-picco,boox-picco,NO,none,https://shop.boox.com/products/picco,,,
+CHG-0202,DEV-0198,KEEP,,,,kobo-elipsa-2e,kobo-elipsa-2e,NO,none,https://ereader.kobo.com/en-us/products/kobo-elipsa-2e,,,
+CHG-0203,DEV-0199,KEEP,,,,kobo-libra-colour,kobo-libra-colour,NO,none,https://ereader.kobo.com/en-us/products/kobo-libra-colour,,,
+CHG-0204,DEV-0200,KEEP,,,,remarkable-2,remarkable-2,NO,none,https://support.remarkable.com/s/article/About-reMarkable-2,,,
+CHG-0205,DEV-0201,KEEP,,,,remarkable-paper-pro,remarkable-paper-pro,NO,none,https://remarkable.com/products/remarkable-paper/pro/details/compare,,,
+CHG-0206,DEV-0202,KEEP,,,,surface-pro-12-inch-2025,surface-pro-12-inch-2025,NO,none,https://learn.microsoft.com/en-us/surface/tech-specs/surface-pro-copilot-plus-pc-12inch-tech-specs,,,
+CHG-0207,DEV-0203,KEEP,,,,surface-pro-11th-edition-13,surface-pro-11th-edition-13,NO,none,https://learn.microsoft.com/en-us/surface/tech-specs/surface-pro-snapdragon-tech-specs,,,
+CHG-0208,DEV-0204,KEEP,,,,surface-pro-10-for-business,surface-pro-10-for-business,NO,none,https://learn.microsoft.com/en-ie/answers/questions/5935626/surface-pro-10-for-business-does-it-support-1920-1,,,
+CHG-0209,DEV-0205,KEEP,,,,surface-pro-9,surface-pro-9,NO,none,https://support.microsoft.com/en-us/surface/models/surface-pro-9-features-and-specs,,,
+CHG-0210,DEV-0206,KEEP,,,,surface-pro-8,surface-pro-8,NO,none,https://support.microsoft.com/en-us/surface/models/surface-pro-8-features-and-specs,,,
+CHG-0211,DEV-0207,KEEP,,,,surface-pro-x,surface-pro-x,NO,none,https://support.microsoft.com/en-us/surface/models/surface-pro-x-features-and-specs,,,
+CHG-0212,DEV-0208,KEEP,,,,surface-pro-7-7-plus,surface-pro-7-7-plus,NO,none,https://support.microsoft.com/en-us/surface/models/surface-pro-7-specs-and-features,,,
+CHG-0213,DEV-0209,KEEP,,,,surface-pro-6,surface-pro-6,NO,none,https://support.microsoft.com/en-us/surface/models/surface-pro-6-specs-and-features,,,
+CHG-0214,DEV-0210,KEEP,,,,surface-pro-2017-pro-5,surface-pro-2017-pro-5,NO,none,https://support.microsoft.com/en-us/surface/models/surface-pro-5th-gen-features-and-specs,,,
+CHG-0215,DEV-0211,KEEP,,,,surface-pro-4,surface-pro-4,NO,none,https://support.microsoft.com/en-us/surface/models/surface-pro-4-specs-and-features,,,
+CHG-0216,DEV-0212,KEEP,,,,surface-pro-3,surface-pro-3,NO,none,https://support.microsoft.com/en-us/surface/models/surface-pro-3-specs-and-features,,,
+CHG-0217,DEV-0213,KEEP,,,,surface-pro-2-pro-1st-gen,surface-pro-2-pro-1st-gen,NO,none,https://support.microsoft.com/en-us/surface/models/surface-pro-2-specs-and-features,,,
+CHG-0218,DEV-0214,KEEP,,,,surface-3,surface-3,NO,none,https://support.microsoft.com/en-us/surface/models/surface-3-specs-and-features,,,
+CHG-0219,DEV-0215,KEEP,,,,surface-2,surface-2,NO,none,https://support.microsoft.com/en-us/surface/models/surface-2-specifications,,,
+CHG-0220,DEV-0216,KEEP,,,,surface-rt,surface-rt,NO,none,https://support.microsoft.com/en-us/surface/models/surface-rt-specifications,,,
+CHG-0221,DEV-0217,KEEP,,,,surface-go-4-go-3-go-2,surface-go-4-go-3-go-2,NO,none,https://support.microsoft.com/en-us/surface/models/surface-go-2-specs-and-features,,,
+CHG-0222,DEV-0218,KEEP,,,,surface-go-1st-gen,surface-go-1st-gen,NO,none,https://support.microsoft.com/en-us/surface/models/surface-go-1st-gen-specs-and-features,,,
+CHG-0223,DEV-0219,KEEP,,,,surface-laptop-studio-2-studio,surface-laptop-studio-2-studio,NO,none,https://news.microsoft.com/wp-content/uploads/prod/sites/664/2023/09/Surface-Laptop-Studio-2-Fact-Sheet.pdf,,,
+CHG-0224,DEV-0220,KEEP,,,,surface-book-3-book-2-13-5,surface-book-3-book-2-13-5,NO,none,https://support.microsoft.com/en-us/surface/models/surface-book-3-specs-and-features,,,
+CHG-0225,DEV-0221,KEEP,,,,surface-book-3-book-2-15,surface-book-3-book-2-15,NO,none,https://support.microsoft.com/en-us/surface/models/surface-book-3-specs-and-features,,,
+CHG-0226,DEV-0222,KEEP,,,,surface-book-1st-gen-book-with-performance-base,surface-book-1st-gen-book-with-performance-base,NO,none,https://support.microsoft.com/en-us/surface/models/surface-book-specs-and-features,,,
+CHG-0227,DEV-0223,KEEP,,,,surface-duo-2-one-screen,surface-duo-2-one-screen,NO,none,https://support.microsoft.com/en-us/surface/models/surface-duo-2-features,,,
+CHG-0228,DEV-0223,CORRECT,type,tablet pc,phone,surface-duo-2-one-screen,surface-duo-2-one-screen,NO,material,https://support.microsoft.com/en-us/surface/models/surface-duo-2-features,,,"Proposed, not applied. Dual-screen mobile device; filed under tablet pc in legacy database; recommend changing type to phone."
+CHG-0229,DEV-0224,KEEP,,,,surface-duo-one-screen,surface-duo-one-screen,NO,none,https://support.microsoft.com/en-us/surface/models/surface-duo-1st-gen-features-and-specs,,,
+CHG-0230,DEV-0224,CORRECT,type,tablet pc,phone,surface-duo-one-screen,surface-duo-one-screen,NO,material,https://support.microsoft.com/en-us/surface/models/surface-duo-1st-gen-features-and-specs,,,"Proposed, not applied. Dual-screen mobile device; filed under tablet pc in legacy database; recommend changing type to phone."
+CHG-0231,DEV-0225,KEEP,,,,lenovo-thinkpad-x1-fold-16,lenovo-thinkpad-x1-fold-16,NO,none,https://www.lenovo.com/us/en/p/laptops/thinkpad/thinkpadx1/thinkpad-x1-fold/len101t0047,,,
+CHG-0232,DEV-0226,KEEP,,,,lenovo-thinkpad-x1-fold-2020,lenovo-thinkpad-x1-fold-2020,NO,none,https://psref.lenovo.com/Product/ThinkPad/ThinkPad_X1_Fold_Gen_1,,,
+CHG-0233,DEV-0227,KEEP,,,,lenovo-thinkpad-x1-tablet-gen-3,lenovo-thinkpad-x1-tablet-gen-3,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/Think_Tablets/ThinkPad_X1_Tablet_3rd_Gen/ThinkPad_X1_Tablet_3rd_Gen_Spec.pdf,,,
+CHG-0234,DEV-0228,KEEP,,,,lenovo-thinkpad-x12-detachable,lenovo-thinkpad-x12-detachable,NO,none,https://psref.lenovo.com/Product/ThinkPad/ThinkPad_X12_Detachable_Gen_1,,,
+CHG-0235,DEV-0229,KEEP,,,,lenovo-yoga-book-9i-one-screen,lenovo-yoga-book-9i-one-screen,NO,none,https://psref.lenovo.com/Product/Yoga/Yoga_Book_9_13IRU8,,,
+CHG-0236,DEV-0230,KEEP,,,,lenovo-yoga-7i-14-2-in-1,lenovo-yoga-7i-14-2-in-1,NO,none,https://psref.lenovo.com/product/Yoga/Yoga_7_14IRL8,,,
+CHG-0237,DEV-0231,KEEP,,,,dell-xps-13-2-in-1-9315,dell-xps-13-2-in-1-9315,NO,none,https://www.dell.com/support/manuals/en-us/xps-13-9315-2-in-1-laptop/xps-13-9315-setup-specs/display,,,
+CHG-0238,DEV-0232,KEEP,,,,hp-spectre-x360-14,hp-spectre-x360-14,NO,none,https://www.hp.com/us-en/shop/pdp/hp-spectre-x360-2-in-1-laptop-14-eu0097nr,,,
+CHG-0239,DEV-0233,KEEP,,,,hp-spectre-x360-16,hp-spectre-x360-16,NO,none,https://www.hp.com/us-en/shop/pdp/hp-spectre-x360-2-in-1-laptop-16-aa0047nr-9c9b5ua-aba,,,
+CHG-0240,DEV-0234,KEEP,,,,asus-rog-flow-z13,asus-rog-flow-z13,NO,none,https://rog.asus.com/laptops/rog-flow/rog-flow-z13-2025/spec/,,,
+CHG-0241,DEV-0235,KEEP,,,,macbook-neo-13,macbook-neo-13,NO,none,https://www.apple.com/mac/compare/,,,
+CHG-0242,DEV-0236,KEEP,,,,macbook-air-13-m2-to-m5,macbook-air-13-m2-to-m5,NO,none,https://www.apple.com/mac/compare/,,,
+CHG-0243,DEV-0237,KEEP,,,,macbook-air-15-m2-to-m5,macbook-air-15-m2-to-m5,NO,none,https://www.apple.com/mac/compare/,,,
+CHG-0244,DEV-0238,KEEP,,,,macbook-air-13-m1,macbook-air-13-m1,NO,none,https://www.apple.com/mac/compare/,,,
+CHG-0245,DEV-0238,RENAME,name,"MacBook Air 13"" (M1)","MacBook Air 13"" (Retina 2018 to 2020 / M1)",macbook-air-13-m1,macbook-air-13-retina-2018-to-2020-m1,YES,material,https://www.apple.com/mac/compare/,,,"Proposed, not applied in devices_verified.csv. B02: same screen in the Intel Retina MacBook Air (Apple support pages). Naming decision for Thomas; needs a RENAMED entry."
+CHG-0246,DEV-0239,KEEP,,,,macbook-pro-14-m1-to-m5,macbook-pro-14-m1-to-m5,NO,none,https://www.apple.com/mac/compare/,,,B02 adjudication: no split. The row stays the Liquid Retina XDR (LCD) panel; the PROLED panel is a new row (NEW-B02-02).
+CHG-0247,DEV-0240,KEEP,,,,macbook-pro-16-m1-to-m5,macbook-pro-16-m1-to-m5,NO,none,https://www.apple.com/mac/compare/,,,B02 adjudication: no split. The row stays the Liquid Retina XDR (LCD) panel; the PROLED panel is a new row (NEW-B02-03).
+CHG-0248,DEV-0241,KEEP,,,,macbook-pro-13-m2,macbook-pro-13-m2,NO,none,https://www.apple.com/mac/compare/,,,
+CHG-0249,DEV-0241,RENAME,name,"MacBook Pro 13"" (M2)","MacBook Pro 13"" (2016 to 2020 / M1 / M2)",macbook-pro-13-m2,macbook-pro-13-2016-to-2020-m1-m2,YES,material,https://www.apple.com/mac/compare/,,,"Proposed, not applied in devices_verified.csv. B02: same screen in the 2016-2020 Intel and M1 MacBook Pro 13-inch (Apple support pages). Naming decision for Thomas; needs a RENAMED entry."
+CHG-0250,DEV-0242,KEEP,,,,surface-laptop-13-inch-2025,surface-laptop-13-inch-2025,NO,none,https://laptopmedia.com/series/microsoft-surface-laptop-13-inch-2025/,,,
+CHG-0251,DEV-0243,KEEP,,,,surface-laptop-7th-edition-13-8,surface-laptop-7th-edition-13-8,NO,none,https://www.microsoft.com/en-us/store/configure/surface-laptop-13-8-inch/8mzbmmcjzqjk,,,
+CHG-0252,DEV-0244,KEEP,,,,surface-laptop-7th-edition-15,surface-laptop-7th-edition-15,NO,none,https://www.microsoft.com/en-us/store/configure/surface-laptop-13-8-inch/8mzbmmcjzqjk,,,
+CHG-0253,DEV-0245,KEEP,,,,surface-laptop-3-4-5-6-13-5,surface-laptop-3-4-5-6-13-5,NO,none,https://www.microsoft.com/en-us/d/surface-laptop-6-for-business/8pz3fvs57qcv,,,
+CHG-0254,DEV-0246,KEEP,,,,surface-laptop-3-4-5-6-15,surface-laptop-3-4-5-6-15,NO,none,https://www.microsoft.com/en-us/d/surface-laptop-6-for-business/8pz3fvs57qcv,,,
+CHG-0255,DEV-0247,KEEP,,,,surface-laptop-laptop-2,surface-laptop-laptop-2,NO,none,https://support.microsoft.com/en-us/surface/models/surface-laptop-2-specs-and-features,,,
+CHG-0256,DEV-0248,KEEP,,,,surface-laptop-go-3-go-2-go,surface-laptop-go-3-go-2-go,NO,none,https://news.microsoft.com/wp-content/uploads/prod/sites/664/2023/09/Surface-Laptop-Go-3-Fact-Sheet.pdf,,,"Research gives 12.4 in; under 0.5% from 12.45, so kept as rounding."
+CHG-0257,DEV-0249,KEEP,,,,surface-laptop-se,surface-laptop-se,NO,none,https://support.microsoft.com/en-us/surface/models/surface-laptop-se-features-and-specs,,,
+CHG-0258,DEV-0250,KEEP,,,,lenovo-thinkpad-x1-carbon-gen-14-aura-edition,lenovo-thinkpad-x1-carbon-gen-14-aura-edition,NO,none,https://www.lenovo.com/us/en/p/laptops/thinkpad/thinkpadx1/lenovo-thinkpad-x1-carbon-gen-14-aura-edition-14-inch-intel/len101t0159,,,
+CHG-0259,DEV-0251,KEEP,,,,lenovo-thinkpad-p1-gen-8,lenovo-thinkpad-p1-gen-8,NO,none,https://psref.lenovo.com/Product/ThinkPad/ThinkPad_P1_Gen_8,,,
+CHG-0260,DEV-0252,KEEP,,,,lenovo-thinkpad-t14-gen-6-intel-amd,lenovo-thinkpad-t14-gen-6-intel-amd,NO,none,https://psref.lenovo.com/Product/ThinkPad/ThinkPad_T14_Gen_6_Intel,,,
+CHG-0261,DEV-0253,KEEP,,,,lenovo-thinkpad-t16-gen-5-intel-amd,lenovo-thinkpad-t16-gen-5-intel-amd,NO,none,https://psref.lenovo.com/Product/ThinkPad_T16_Gen_5_Intel,,,
+CHG-0262,DEV-0254,KEEP,,,,dell-xps-13-9350,dell-xps-13-9350,NO,none,https://www.dell.com/support/manuals/en-us/xps-13-9350-laptop/xps-13-9350-setup-specs/display,,,
+CHG-0263,DEV-0255,KEEP,,,,dell-xps-14-9440,dell-xps-14-9440,NO,none,https://www.dell.com/support/manuals/en-us/xps-14-9440-laptop/xps-14-9440-setup-specs/display,,,
+CHG-0264,DEV-0256,KEEP,,,,dell-xps-16-9640,dell-xps-16-9640,NO,none,https://www.dell.com/support/manuals/en-us/xps-16-9640-laptop/xps-16-9640-setup-specs/display,,,
+CHG-0265,DEV-0257,KEEP,,,,asus-zenbook-14-oled,asus-zenbook-14-oled,NO,none,https://www.asus.com/laptops/for-home/zenbook/asus-zenbook-14-oled-ux3405/techspec/,,,
+CHG-0266,DEV-0258,KEEP,,,,framework-laptop-13-2-8k,framework-laptop-13-2-8k,NO,none,https://frame.work/products/laptop-13-intel-core-ultra-series-1,,,
+CHG-0267,DEV-0259,KEEP,,,,framework-laptop-13-2-2k,framework-laptop-13-2-2k,NO,none,https://frame.work/products/laptop-13-gen-intel,,,
+CHG-0268,DEV-0260,KEEP,,,,framework-laptop-16,framework-laptop-16,NO,none,https://frame.work/products/laptop-16,,,
+CHG-0269,DEV-0261,KEEP,,,,typical-15-6-full-hd-laptop,typical-15-6-full-hd-laptop,NO,none,https://psref.lenovo.com/syspool/Sys/PDF/ThinkPad/ThinkPad_P15_Gen_1/ThinkPad_P15_Gen_1_Spec.pdf,,,
+CHG-0270,DEV-0262,KEEP,,,,typical-14-full-hd-laptop,typical-14-full-hd-laptop,NO,none,https://c-data.co.il/Content/Images/uploaded/5482.pdf,,,
+CHG-0271,DEV-0263,KEEP,,,,typical-11-6-chromebook,typical-11-6-chromebook,NO,none,https://store.acer.com/en-us/acer-chromebook-311-cboa311-2h-823d,,,
+CHG-0272,DEV-0264,KEEP,,,,imac-24-inch-m1-to-m4,imac-24-inch-m1-to-m4,NO,none,https://www.apple.com/mac/compare/,,,
+CHG-0273,DEV-0265,KEEP,,,,27-5k-apple-studio-display-monitor,27-5k-apple-studio-display-monitor,NO,none,https://support.apple.com/en-gb/111890,,,
+CHG-0274,DEV-0266,KEEP,,,,32-6k-pro-display-xdr-monitor,32-6k-pro-display-xdr-monitor,NO,none,https://support.apple.com/en-gb/111892,,,
+CHG-0275,DEV-0267,KEEP,,,,surface-studio-2-plus-studio-2-studio,surface-studio-2-plus-studio-2-studio,NO,none,https://support.microsoft.com/en-us/surface/models/surface-studio-2-plus-features-and-specs,,,
+CHG-0276,DEV-0268,KEEP,,,,21-5-full-hd-monitor,21-5-full-hd-monitor,NO,none,https://www.dell.com/en-us/shop/dell-22-monitor-e2222h/apd/210-bbcv/monitors-monitor-accessories,,,
+CHG-0277,DEV-0269,KEEP,,,,24-full-hd-monitor,24-full-hd-monitor,NO,none,https://www.dell.com/en-us/shop/dell-24-monitor-p2422h/apd/210-bbcc/monitors-monitor-accessories,,,
+CHG-0278,DEV-0270,KEEP,,,,24-qhd-1440p-monitor,24-qhd-1440p-monitor,NO,none,https://www.dell.com/en-us/shop/dell-24-monitor-p2423d/apd/210-bdke/monitors-monitor-accessories,,,
+CHG-0279,DEV-0271,KEEP,,,,24-4k-monitor,24-4k-monitor,NO,none,https://www.lg.com/us/monitors/lg-24ud58-b-4k-uhd-led-monitor,,,
+CHG-0280,DEV-0272,KEEP,,,,27-full-hd-monitor,27-full-hd-monitor,NO,none,https://www.dell.com/en-us/shop/dell-27-monitor-se2722h/apd/210-bbyv/monitors-monitor-accessories,,,
+CHG-0281,DEV-0273,KEEP,,,,27-qhd-1440p-monitor,27-qhd-1440p-monitor,NO,none,https://www.dell.com/en-us/shop/dell-27-monitor-p2723d/apd/210-bdkg/monitors-monitor-accessories,,,
+CHG-0282,DEV-0274,KEEP,,,,27-4k-monitor,27-4k-monitor,NO,none,https://www.lg.com/us/monitors/lg-27up850-w-uhd-monitor,,,
+CHG-0283,DEV-0275,KEEP,,,,32-qhd-1440p-monitor,32-qhd-1440p-monitor,NO,none,https://dl.dell.com/manuals/all-products/esuprt_electronics_accessories/esuprt_electronics_accessories_monitor/dell-s3222dgm-monitor_Users-Guide_en-us.pdf,,,
+CHG-0284,DEV-0276,KEEP,,,,32-4k-monitor,32-4k-monitor,NO,none,https://www.lg.com/us/monitors/lg-32un880-b-4k-uhd-led-monitor,,,
+CHG-0285,DEV-0277,KEEP,,,,29-ultrawide-1080p-monitor,29-ultrawide-1080p-monitor,NO,none,https://www.displayspecifications.com/en/model-weight/31532ca4,,,
+CHG-0286,DEV-0278,KEEP,,,,34-ultrawide-1080p-monitor,34-ultrawide-1080p-monitor,NO,none,https://www.lg.com/us/monitors/lg-34wl500-b-ultrawide-monitor,,,
+CHG-0287,DEV-0279,KEEP,,,,34-ultrawide-1440p-monitor,34-ultrawide-1440p-monitor,NO,none,https://www.shi.com/product/47821450/Dell-UltraSharp-U3425WE,,,
+CHG-0288,DEV-0280,KEEP,,,,38-ultrawide-monitor,38-ultrawide-monitor,NO,none,https://www.bhphotovideo.com/lit_files/1039204.pdf,,,
+CHG-0289,DEV-0281,KEEP,,,,40-ultrawide-5k2k-monitor,40-ultrawide-5k2k-monitor,NO,none,https://media.itscope.com/c/50/5b/505b30bd-535b-41ee-83dd-6b2b01537a0f.pdf,,,
+CHG-0290,DEV-0282,KEEP,,,,45-ultrawide-1440p-monitor,45-ultrawide-1440p-monitor,NO,none,https://pangoly.com/en/product/lg-45gr95qe-b,,,
+CHG-0291,DEV-0283,KEEP,,,,49-super-ultrawide-monitor,49-super-ultrawide-monitor,NO,none,https://www.samsung.com/us/monitors/gaming/49-inch-odyssey-g9-g91f-dqhd-144hz-gaming-monitor-sku-ls49fg910enxza/,,,
+CHG-0292,DEV-0284,KEEP,,,,42-4k-oled-monitor,42-4k-oled-monitor,NO,none,https://www.lg.com/us/tvs/lg-oled42c2pua,,,
+CHG-0293,DEV-0285,KEEP,,,,15-6-portable-monitor,15-6-portable-monitor,NO,none,https://texas.gs.shi.com/product/33716623/ASUS-ZenScreen-MB16AC,,,
+CHG-0294,DEV-0286,KEEP,,,,us-letter-paper,us-letter-paper,NO,none,https://www.iso.org/standard/3663.html,,,
+CHG-0295,DEV-0287,KEEP,,,,us-legal-paper,us-legal-paper,NO,none,https://www.iso.org/standard/3663.html,,,
+CHG-0296,DEV-0288,KEEP,,,,tabloid-ledger-paper,tabloid-ledger-paper,NO,none,https://www.iso.org/standard/3663.html,,,
+CHG-0297,DEV-0289,KEEP,,,,half-letter-statement-paper,half-letter-statement-paper,NO,none,https://www.iso.org/standard/3663.html,,,
+CHG-0298,DEV-0290,KEEP,,,,executive-paper,executive-paper,NO,none,https://bdsdoc.com/blog/what-is-the-size-of-executive-paper/,,,
+CHG-0299,DEV-0291,KEEP,,,,a3-paper,a3-paper,NO,none,https://www.iso.org/standard/3663.html,,,
+CHG-0300,DEV-0292,KEEP,,,,a4-paper,a4-paper,NO,none,https://www.iso.org/standard/3663.html,,,
+CHG-0301,DEV-0293,KEEP,,,,a5-paper,a5-paper,NO,none,https://www.iso.org/standard/3663.html,,,
+CHG-0302,DEV-0294,KEEP,,,,a6-paper,a6-paper,NO,none,https://www.iso.org/standard/3663.html,,,
+CHG-0303,DEV-0295,KEEP,,,,b5-paper-iso,b5-paper-iso,NO,none,https://www.iso.org/standard/3663.html,,,
+CHG-0304,DEV-0296,KEEP,,,,b5-paper-jis,b5-paper-jis,NO,none,https://papersizes.guide/regional/japan/,,,
+CHG-0305,DEV-0297,KEEP,,,,b6-paper-jis,b6-paper-jis,NO,none,https://papersizes.guide/regional/japan/,,,
+CHG-0306,DEV-0298,KEEP,,,,index-card-3-5,index-card-3-5,NO,none,https://en.wikipedia.org/wiki/Index_card,,,
+CHG-0307,DEV-0299,KEEP,,,,index-card-photo-4-6,index-card-photo-4-6,NO,none,https://en.wikipedia.org/wiki/Photo_print_sizes,,,
+CHG-0308,DEV-0300,KEEP,,,,index-card-5-8,index-card-5-8,NO,none,https://en.wikipedia.org/wiki/Index_card,,,
+CHG-0309,DEV-0301,KEEP,,,,mass-market-paperback,mass-market-paperback,NO,none,https://riaanwilmans.co.za/common-book-cover-trim-sizes/,,,
+CHG-0310,DEV-0302,KEEP,,,,trade-paperback-5-5-8-5,trade-paperback-5-5-8-5,NO,none,https://barkerpublishinghouse.com/blog/standard-book-size/,,,
+CHG-0311,DEV-0303,KEEP,,,,digest-book-5-5-8-25,digest-book-5-5-8-25,NO,none,https://blog.lulu.com/choosing-the-right-book-size/,,,
+CHG-0312,DEV-0304,KEEP,,,,novel-5-8,novel-5-8,NO,none,https://kdpbook.io/kdp/trim-sizes/,,,
+CHG-0313,DEV-0305,KEEP,,,,book-6-9-trade-hardcover,book-6-9-trade-hardcover,NO,none,https://lacuna.pub/guides/book-sizes,,,
+CHG-0314,DEV-0306,KEEP,,,,royal-book-6-14-9-21,royal-book-6-14-9-21,NO,none,https://lacuna.pub/guides/book-sizes,,,
+CHG-0315,DEV-0307,KEEP,,,,crown-quarto-book,crown-quarto-book,NO,none,https://kdpbook.io/kdp/trim-sizes/7-44x9-69,,,
+CHG-0316,DEV-0308,KEEP,,,,textbook-workbook-8-5-11,textbook-workbook-8-5-11,NO,none,https://lacuna.pub/guides/book-sizes,,,
+CHG-0317,DEV-0309,KEEP,,,,us-comic-book,us-comic-book,NO,none,https://blankcomic.com/blog/standard-comic-book-page-size,,,
+CHG-0318,DEV-0310,KEEP,,,,manga-tankobon,manga-tankobon,NO,none,https://mceprinting.com/resources/manga-printing-guide/,,,
+CHG-0319,DEV-0311,KEEP,,,,graphic-novel-6-625-10-25,graphic-novel-6-625-10-25,NO,none,https://authorwings.com/guides/comic-book-size/,,,
+CHG-0320,DEV-0312,KEEP,,,,notebook-pocket-3-5-5-5,notebook-pocket-3-5-5-5,NO,none,https://www.walmart.com/ip/Moleskine-Classic-Notebook-Hard-Cover-Pocket-3-5-x-5-5-Squared-Grid-Black-192-Pages/5046203981,,,
+CHG-0321,DEV-0313,KEEP,,,,notebook-large-5-8-25,notebook-large-5-8-25,NO,none,https://www.desertcart.in/products/357012334-moleskine-classic-notebook-hard-cover-large-5-x-8-25,,,
+CHG-0322,DEV-0314,KEEP,,,,credit-card,credit-card,NO,none,https://www.iso.org/standard/70483.html,,,
+CHG-0323,DEV-0315,KEEP,,,,business-card-us,business-card-us,NO,none,https://en.wikipedia.org/wiki/Business_card,,,
+CHG-0324,NEW-B01-03,ADD,,,iPhone 4s / iPhone 4,,iphone-4s-iphone-4,NO,material,https://support.apple.com/en-us/112004,3.5-inch (diagonal) widescreen Multi-Touch display; 960-by-640-pixel resolution at 326 ppi,,Original 3:2 Retina display baseline. Historically vital benchmark for mobile web and reading layout comparison.
+CHG-0325,NEW-B02-02,ADD,,,"MacBook Pro 14"" (PROLED XDR)",,macbook-pro-14-proled-xdr,NO,material,https://www.apple.com/macbook-pro/proled-xdr-display/specs/,Display specification: 3024 x 1986 pixels; 14.2-inch diagonal.,,"Apple PROLED XDR specs page: 14.2-inch, 3024-by-1986 at 254 ppi (checked by Claude, 27 Nov 2026). A distinct panel, so a new row."
+CHG-0326,NEW-B02-03,ADD,,,"MacBook Pro 16"" (PROLED XDR)",,macbook-pro-16-proled-xdr,NO,material,https://www.apple.com/macbook-pro/proled-xdr-display/specs/,Display specification: 3472 x 2266 pixels; 16.3-inch diagonal.,,"Apple PROLED XDR specs page: 16.3-inch, 3472-by-2266 at 254 ppi (checked by Claude, 27 Nov 2026). A distinct panel, so a new row."
+CHG-0327,NEW-B02-08,ADD,,,iPad mini (1st gen),,ipad-mini-1st-gen,NO,material,https://support.apple.com/en-us/111978,Display specification: 1024 x 768 pixels; 7.9-inch diagonal.,,"B02 adjudication: distinct older screen, both passes agree."
+CHG-0328,NEW-B02-14,ADD,,,"MacBook 12"" (2015 to 2017)",,macbook-12-2015-to-2017,NO,material,https://support.apple.com/en-gb/111986,Display specification: 2304 x 1440 pixels; 12-inch diagonal.,,"B02 adjudication: distinct older screen, both passes agree."
+CHG-0329,NEW-B02-15,ADD,,,"MacBook Pro 15"" (Retina, 2012 to 2019)",,macbook-pro-15-retina-2012-to-2019,NO,material,https://support.apple.com/en-us/111955,Display specification: 2880 x 1800 pixels; 15.4-inch diagonal.,,"B02 adjudication: distinct older screen, both passes agree."
+CHG-0330,NEW-B02-16,ADD,,,"MacBook Pro 16"" (Intel, 2019)",,macbook-pro-16-intel-2019,NO,material,https://www.apple.com/mac/compare/,Display specification: 3072 x 1920 pixels; 16-inch diagonal.,,"B02 adjudication: distinct older screen, both passes agree."
+CHG-0331,NEW-B02-17,ADD,,,"MacBook Air 13"" (2010 to 2017)",,macbook-air-13-2010-to-2017,NO,material,https://www.apple.com/mac/compare/,Display specification: 1440 x 900 pixels; 13.3-inch diagonal.,,"B02 adjudication: distinct older screen (1440 x 900), both passes agree."
+CHG-0332,NEW-B02-20,ADD,,,"iMac 21.5"" 4K (2015 to 2019)",,imac-21-5-4k-2015-to-2019,NO,material,https://www.apple.com/mac/compare/,Display specification: 4096 x 2304 pixels; 21.5-inch diagonal.,,"B02 adjudication: distinct older screen, both passes agree."
+CHG-0333,NEW-B04-01,ADD,,,Dell XPS 13 (9345),,dell-xps-13-9345,NO,material,https://www.dell.com/en-us/shop/dell-laptops/xps-13-copilot-pc/spd/xps-13-9345-laptop,13.4-inch OLED touch display 2880 x 1800 60Hz 400 nits,,Major flagship Copilot+ laptop featuring Qualcomm Snapdragon X Elite and distinctive 13.4-inch 2.8K OLED panel.
+CHG-0334,NEW-B04-02,ADD,,,Dell XPS 13 Plus (9320),,dell-xps-13-plus-9320,NO,material,https://www.dell.com/support/manuals/en-us/xps-13-9320-laptop/xps-13-plus-9320-setup-specs/display,13.4-inch 3.5K (3456 x 2160) OLED InfinityEdge touch 400 nits,,Iconic modern redesign of XPS 13 with 3.5K OLED InfinityEdge panel widely compared by mobile workers.
+CHG-0335,NEW-B04-04,ADD,,,Lenovo Yoga Slim 7x,,lenovo-yoga-slim-7x,NO,material,https://psref.lenovo.com/Product/Yoga/Yoga_Slim_7x_14Q8X9,"14.5"" 3K (2944x1840) OLED 1000nits peak 90Hz 16:10",,Top-selling flagship Lenovo Snapdragon X Elite consumer laptop with unique 14.5-inch 2944x1840 display.
+CHG-0336,NEW-B04-05,ADD,,,HP OmniBook X 14,,hp-omnibook-x-14,NO,material,https://www.hp.com/us-en/shop/pdp/hp-omnibook-x-laptop-14-fe0097nr,"14"" diagonal 2.2K (2240 x 1400) multitouch-enabled IPS 300 nits",,HP's flagship consumer AI Copilot+ PC with distinctive 2.2K 16:10 IPS touchscreen.
+CHG-0337,NEW-B04-06,ADD,,,HP Elite Dragonfly G4,,hp-elite-dragonfly-g4,NO,material,https://support.hp.com/us-en/document/ish_7761001-7761049-16,"13.5"" diagonal WUXGA+ (1920 x 1280) IPS touchscreen 400 nits",,Popular executive premium business ultraportable featuring 3:2 aspect ratio display.
+CHG-0338,NEW-B04-07,ADD,,,LG gram 17,,lg-gram-17,NO,material,https://www.lg.com/us/laptops/lg-17z90s-g.aab6u1-gram-laptop,17.0-inch WQXGA (2560 x 1600) IPS LCD 350 nits 99% DCI-P3,,Benchmark lightweight 17-inch ultraportable laptop widely cross-compared for screen real estate.
+CHG-0339,NEW-B04-08,ADD,,,Acer Swift Go 14 OLED,,acer-swift-go-14-oled,NO,material,https://www.acer.com/us-en/laptops/swift/swift-go-14,"14.0"" 2.8K (2880 x 1800) 16:10 CineCrystal OLED 90Hz",,Extremely popular mainstream value 14-inch OLED laptop.
+CHG-0340,NEW-B04-09,ADD,,,Razer Blade 16 (2024),,razer-blade-16-2024,NO,material,https://www.razer.com/gaming-laptops/razer-blade-16,16-inch Dual-Mode Mini-LED (UHD+ 120Hz / FHD+ 240Hz) 16:10,,Pioneering dual-mode gaming laptop screen natively switching between 3840x2400 and 1920x1200.
+CHG-0341,NEW-B04-10,ADD,,,ASUS ROG Ally / Ally X,,asus-rog-ally-ally-x,NO,material,https://rog.asus.com/gaming-handhelds/rog-ally/rog-ally-2023/spec/,7-inch FHD (1920 x 1080) 16:9 IPS touchscreen 120Hz 500 nits,,Leading Windows handheld gaming PC with native landscape 7.0-inch 1080p display.
+CHG-0342,NEW-B04-12,ADD,,,Dell XPS 13 (9340),,dell-xps-13-9340,NO,material,https://www.dell.com/support/manuals/en-us/xps-13-9340-laptop/xps-13-9340-setup-specs/display,13.4-inch FHD+ (1920 x 1200) InfinityEdge non-touch 500 nits 120Hz,,Base panel option for current-generation Dell XPS 13 lineup.
+CHG-0343,NEW-B05-01,ADD,,,Kobo Clara BW,,kobo-clara-bw,NO,material,https://ereader.kobo.com/en-us/products/kobo-clara-bw,"6-inch E Ink Carta 1300 HD touchscreen, 1448 x 1072 resolution with Dark Mode, 300 ppi",,Flagship 6-inch black-and-white e-reader from Kobo featuring Carta 1300 panel.
+CHG-0344,NEW-B05-02,ADD,,,Kobo Clara Colour,,kobo-clara-colour,NO,material,https://ereader.kobo.com/en-us/products/kobo-clara-colour,"6-inch E Ink Kaleido 3 display, 1448 x 1072, 300 PPI B&W, 150 PPI color",,One of the most popular mainstream 6-inch color e-readers on the market.
+CHG-0345,NEW-B05-03,ADD,,,Kobo Libra 2,,kobo-libra-2,NO,material,https://ereader.kobo.com/en-us/products/certified-refurbished-kobo-libra-2,"7-inch HD E Ink Carta 1200 touchscreen, 300 PPI, 1264 x 1680 resolution",,Widely used 7-inch monochrome ergonomic e-reader predecessor to Libra Colour.
+CHG-0346,NEW-B05-04,ADD,,,Kobo Sage,,kobo-sage,NO,material,https://ereader.kobo.com/en-us/products/kobo-sage,"8-inch HD flush E Ink Carta 1200 touchscreen, 300 PPI, 1440 x 1920 resolution",,Distinctive 8.0-inch 300 PPI form factor widely compared against 7-inch and 10.3-inch devices.
+CHG-0347,NEW-B05-05,ADD,,,Supernote Nomad (A6 X2),,supernote-nomad-a6-x2,NO,material,https://supernote.com/products/supernote-nomad,"7.8 inch, glass E Ink screen, 1404 x 1872 resolution (300 PPI)",,Leading modular digital notebook e-note in the portable 7.8-inch form factor.
+CHG-0348,NEW-B05-06,ADD,,,Supernote Manta (A5 X2),,supernote-manta-a5-x2,NO,material,https://supernote.com/products/supernote-manta,"10.7 inch, flexible E Ink screen, 1920 x 2560 resolution (300 PPI)",,Highly anticipated 10.7-inch 300 PPI flexible E Ink e-note.
+CHG-0349,NEW-B05-07,ADD,,,PocketBook Era Color,,pocketbook-era-color,NO,material,https://pocketbook.ch/en-ch/catalog/color-e-readers/pocketbook-era-color-ch,"7-inch (17.8 cm) E Ink Kaleido 3, 1264 x 1680 at 300 ppi B&W, 632 x 840 at 150 ppi color",,Prominent European 7-inch color e-reader competitor to Kindle Colorsoft and Kobo Libra Colour.
+CHG-0350,NEW-B06-01,ADD,,,"24"" WUXGA 16:10 monitor",,24-wuxga-16-10-monitor,NO,material,https://dl.dell.com/manuals/all-products/esuprt_display_projector/esuprt_display/dell-u2415_user's-guide_en-us.pdf,61.13 cm (24.1-inch) viewable area display; 1920 x 1200 resolution; Active Area: 518.40 x 324.00 mm,,Highly popular productivity aspect ratio (16:10) for office and document comparison. Specifically noted in BATCH_MANIFEST.md.
+CHG-0351,NEW-B06-02,ADD,,,"27"" 5K monitor",,27-5k-monitor,NO,material,https://www.lg.com/us/monitors/lg-27md5kl-b-5k-uhd-led-monitor,"27"" 5K (5120 x 2880) IPS Display; 218 PPI; Active area 596.74 x 335.66 mm",,Generic non-Apple branded 27-inch 5K high-PPI desktop monitor class requested in BATCH_MANIFEST.md.
+CHG-0352,NEW-B06-03,ADD,,,"32"" 6K monitor",,32-6k-monitor,NO,material,https://www.dell.com/en-us/shop/dell-ultrasharp-32-6k-monitor-u3224kb/apd/210-bhzd/monitors-monitor-accessories,"Diagonal Size: 31.5""; Native Resolution: 6K 6144 x 3456 at 60 Hz; Pixel Per Inch: 224; IPS Black",,Generic non-Apple 31.5-inch 6K high-density monitor class requested in BATCH_MANIFEST.md.
+CHG-0353,NEW-B06-04,ADD,,,"Typical 14"" 16:10 laptop",,typical-14-16-10-laptop,NO,material,https://psref.lenovo.com/syspool/Sys/PDF/ThinkPad/ThinkPad_T14_Gen_4_Intel/ThinkPad_T14_Gen_4_Intel_Spec.pdf,"14.0"" WUXGA (1920x1200) IPS anti-glare 16:10; Screen Size: 14.0 inches",,The predominant modern business laptop display configuration replacing 16:9 Full HD.
+CHG-0354,NEW-B06-05,ADD,,,"Typical 13.3"" Full HD laptop",,typical-13-3-full-hd-laptop,NO,material,https://psref.lenovo.com/syspool/Sys/PDF/ThinkPad/ThinkPad_X13_Gen_1_Intel/ThinkPad_X13_Gen_1_Intel_Spec.pdf,"13.3"" FHD (1920x1080) IPS display; 16:9 aspect ratio; anti-glare",,Widespread classic subnotebook and ultraportable format missing from generic laptops.
+CHG-0355,NEW-B07-03,ADD,,,Galaxy A53 5G,,galaxy-a53-5g,NO,material,https://news.samsung.com/global/samsung-galaxy-a53-5g-and-galaxy-a33-5g-awesome-mobile-experiences-open-to-everyone,6.5-inch FHD+ Super AMOLED Display 120Hz (2400 x 1080),,Very widely used older mid-range benchmark device with distinct 20:9 ratio panel
+CHG-0356,NEW-B07-05,ADD,,,Galaxy A14,,galaxy-a14,NO,material,https://news.samsung.com/global/samsung-galaxy-a14-5g-brings-signature-galaxy-innovations-to-more-people,6.6-inch FHD+ LCD Display 90Hz (2400 x 1080),,Best-selling global entry tier model from 2023 with distinct 6.6-inch 20:9 LCD panel
+CHG-0357,NEW-B07-06,ADD,,,Galaxy S20 FE,,galaxy-s20-fe,NO,material,https://news.samsung.com/global/samsung-galaxy-s20-fe-fans-favorite-features-at-an-accessible-price-point,6.5-inch Flat FHD+ Super AMOLED (2400x1080) 407ppi,,Major landmark Fan Edition phone still widely held by users
+CHG-0358,NEW-B08-01,ADD,,,Galaxy Fold (inner),,galaxy-fold-inner,NO,material,https://news.samsung.com/global/samsung-unfolds-the-future-with-a-whole-new-mobile-category-introducing-galaxy-fold,"Main Display: 7.3” QXGA+ Dynamic AMOLED Display (4.2:3) Infinity Flex Display, 2152*1536, 362ppi",,Missing first-generation historical foldable flagship
+CHG-0359,NEW-B08-02,ADD,,,Galaxy Fold (cover),,galaxy-fold-cover,NO,material,https://news.samsung.com/global/samsung-unfolds-the-future-with-a-whole-new-mobile-category-introducing-galaxy-fold,"Cover Display: 4.6” HD+ Super AMOLED Display (21:9), 1680*720, 399ppi",,Missing first-generation historical foldable cover screen
+CHG-0360,NEW-B08-03,ADD,,,Galaxy Z Fold2 (cover),,galaxy-z-fold2-cover,NO,material,https://news.samsung.com/global/introducing-the-galaxy-z-fold2-change-the-shape-of-the-future,"Cover Screen: 6.2” HD+ Super AMOLED Display (25:9), 2260 x 816, 386ppi",,"Its inner screen (7.6 in, 2208 x 1768) is the same as Galaxy Z Fold3 (inner); add Fold2 to that row's name together with this cover row."
+CHG-0361,NEW-B08-04,ADD,,,Galaxy Z Flip / Flip 5G (inner),,galaxy-z-flip-flip-5g-inner,NO,material,https://news.samsung.com/global/the-future-changes-shape-express-yourself-with-galaxy-z-flip,Main Display: 6.7“ FHD+ Dynamic AMOLED Display(21.9:9) Infinity Flex Display 2636 x 1080 425ppi,,First-generation clamshell inner display has distinct 2636x1080 resolution
+CHG-0362,NEW-B08-05,ADD,,,Galaxy Z Flip / Flip 5G (cover),,galaxy-z-flip-flip-5g-cover,NO,material,https://news.samsung.com/global/the-future-changes-shape-express-yourself-with-galaxy-z-flip,Cover Display: 1.1“ Super AMOLED Display 300 x 112 303ppi,,First-generation clamshell cover pill display
+CHG-0363,NEW-B09-01,ADD,,,Pixel 8 Pro,,pixel-8-pro,NO,material,https://www.scc.com/wp-content/uploads/2024/09/pixel-8-pro.pdf,Super Actua display (1344 x 2992) LTPO OLED at 489 PPI. Full-screen 6.7 inches,,Major flagship Pixel predecessor missing from database.
+CHG-0364,NEW-B09-02,ADD,,,Pixel 8,,pixel-8,NO,material,https://en.wikipedia.org/wiki/Pixel_8,6.2 in (157 mm) FHD+ 1080p OLED display at 428 ppi with a 2400 x 1080 pixel resolution,,Mainstream compact Google Pixel predecessor.
+CHG-0365,NEW-B09-03,ADD,,,Pixel 8a,,pixel-8a,NO,material,https://support.google.com/pixelphone/answer/7158570,6.1-inch Actua display (1080 x 2400) OLED at 430 PPI,,Best-selling mid-range A-series device.
+CHG-0366,NEW-B09-04,ADD,,,Pixel 7 Pro,,pixel-7-pro,NO,material,https://blisk.io/devices/details/google-pixel-7-pro,"6.7-inch LTPO AMOLED display, 1440 x 3120 pixels, 512 PPI",,Older flagship with 1440p high-density display.
+CHG-0367,NEW-B09-05,ADD,,,Pixel 7,,pixel-7,NO,material,https://droid10.com/devices/pixel-7/,Screen size is 6.3 inches diagonal with a resolution of 2400 x 1080 px at 416 ppi,,Extremely popular mainstream Android device.
+CHG-0368,NEW-B09-07,ADD,,,Xiaomi 15,,xiaomi-15,NO,material,https://www.devicespecifications.com/en/model/551961de,"AMOLED, 6.36 inches, 1200 x 2670 pixels, 460 ppi",,Current compact mainstream flagship from Xiaomi.
+CHG-0369,NEW-B09-08,ADD,,,Xiaomi 15 Ultra,,xiaomi-15-ultra,NO,material,https://www.galaxus.de/en/page/now-with-us-xiaomis-latest-smartphone-tablet-and-smartwatch-line-up-37111,"6.73-inch AMOLED display, 3200 x 1440 pixels, 120Hz",,Top-tier camera flagship display.
+CHG-0370,NEW-B09-09,ADD,,,Motorola Razr 50 Ultra,,motorola-razr-50-ultra,NO,material,https://www.motorola.com/we/en/p/phones/razr/50-ultra/pmipmgs37ms,"6.9 inch pOLED display, 2640 x 1080 pixels, 165Hz",,Major competing clamshell foldable inner screen.
+CHG-0371,NEW-B09-10,ADD,,,Motorola Razr 50 Ultra (cover),,motorola-razr-50-ultra-cover,NO,material,https://www.motorola.com/we/en/p/phones/razr/50-ultra/pmipmgs37ms,"4.0 inch external pOLED display, 1272 x 1080 pixels, 165Hz",,Largest mainstream clamshell cover screen.
+CHG-0372,NEW-B10-01,ADD,,,Galaxy Tab S10 Lite,,galaxy-tab-s10-lite,NO,material,https://www.samsung.com/us/tablets/galaxy-tab-s10/,"Tab S10 Lite: 10.9 in (280 mm) diagonal TFT LCD, 1320 x 2112 px, 16:10",,Successor to Galaxy Tab S6 Lite offering high-volume mid-range comparison value.
+CHG-0373,NEW-B10-02,ADD,,,OnePlus Pad,,oneplus-pad,NO,material,https://www.oneplus.com/us/pad/specs,"11.61"" LCD, 2800 x 2000 pixels, 7:5 ratio, 296 ppi, 144Hz",,First-generation flagship OnePlus tablet with distinctive 7:5 aspect ratio.
+CHG-0374,NEW-B10-03,ADD,,,OnePlus Pad Go,,oneplus-pad-go,NO,material,https://www.oneplus.in/pad-go/specs,"11.35"" LCD, 2408 x 1720 pixels, 7:5 ratio, 260 ppi, 90Hz",,Mainstream budget 7:5 aspect ratio tablet popular in global markets.
+CHG-0375,NEW-B10-04,ADD,,,Xiaomi Pad 6,,xiaomi-pad-6,NO,material,https://www.mi.com/global/product/xiaomi-pad-6/specs,"11"" WQHD+ display, 2880 x 1800, 309 ppi, 144Hz, 16:10 aspect ratio",,Top-selling international 11-inch Android tablet missing entirely from current database.
+CHG-0376,NEW-B10-05,ADD,,,Xiaomi Pad 6S Pro 12.4,,xiaomi-pad-6s-pro-12-4,NO,material,https://www.mi.com/global/product/xiaomi-pad-6s-pro-124/specs,"12.4"" 3K display, 3048 x 2032, 3:2 aspect ratio, 294 ppi, 144Hz",,Key 3:2 productivity tablet competing directly against Galaxy Tab S+ and iPad Pro.
+CHG-0377,NEW-B10-06,ADD,,,Redmi Pad Pro,,redmi-pad-pro,NO,material,https://www.mi.com/global/product/redmi-pad-pro/specs,"12.1"" 2.5K display, 2560 x 1600, 249 ppi, 16:10 aspect ratio, 120Hz",,Very popular 12.1-inch budget/mid-range tablet (also sold as POCO Pad).
+CHG-0378,NEW-B10-07,ADD,,,Redmi Pad SE,,redmi-pad-se,NO,material,https://www.mi.com/global/product/redmi-pad-se/specs,"11.0"" FHD+ display, 1920 x 1200, 207 ppi, 16:10 aspect ratio, 90Hz",,Major global budget seller sharing 11.0-inch 1920x1200 panel with Tab A9+ and Tab M11.
+CHG-0379,NEW-B10-08,ADD,,,Huawei MatePad 11.5S,,huawei-matepad-11-5s,NO,material,https://consumer.huawei.com/en/tablets/matepad-11-5-s/specs/,"11.5 inches, 2800 x 1840, 291 PPI, 3:2 aspect ratio, 144 Hz PaperMatte Display",,Leading anti-glare PaperMatte tablet widely compared against e-ink and iPad nano-texture.
+CHG-0380,NEW-B10-09,ADD,,,Huawei MatePad Pro 12.2,,huawei-matepad-pro-12-2,NO,material,https://consumer.huawei.com/en/tablets/matepad-pro-12-2/specs/,"12.2 inches, 2800 x 1840, 274 PPI, 3:2 aspect ratio, Tandem OLED PaperMatte Display",,Flagship dual-layer Tandem OLED tablet with anti-sparkle nano-etching.
+CHG-0381,NEW-B10-10,ADD,,,Honor MagicPad 2,,honor-magicpad-2,NO,material,https://www.honor.com/global/tablets/honor-magicpad-2/spec/,"12.3 inches, 3000 x 1920, OLED, 144Hz, 290 PPI",,Leading global 12.3-inch 144Hz OLED tablet with high pixel density.
+CHG-0382,NEW-B11-07,ADD,,,Boox Mira,,boox-mira,NO,material,https://shop.boox.com/products/mira,"Screen: 13.3"" E Ink Mobius flexible screen. Resolution: 2200 x 1650 (207 ppi)",,Dedicated portable secondary E Ink monitor widely used for reading and programming.
+CHG-0383,NEW-B11-08,ADD,,,Boox Mira Pro,,boox-mira-pro,NO,material,https://shop.boox.com/products/mirapro,"Screen: 25.3"" E Ink glass screen. Resolution: 3200 x 1800 (145 ppi)",,Major 25.3-inch desktop E Ink monitor; highly distinctive category addition.

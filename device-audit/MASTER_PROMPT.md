@@ -1,5 +1,7 @@
 # True Size Screens: master research and verification prompt
 
+> **Superseded on 27 Nov 2026** by the simplified workflow in `README.md` and `GEMINI_PROMPT.md` (one Gemini pass, script checks, Claude reviews exceptions only, no second pass). Kept for the record and for the flag legend.
+
 Give this whole file to every model (ChatGPT, Gemini, Claude) together with `DATABASE_CONTRACT.md`, `BATCH_MANIFEST.md` and the batch file it's working on.
 
 - **Part A** is Thomas's master instructions, with the wording unchanged.

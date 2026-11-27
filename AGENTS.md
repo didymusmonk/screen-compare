@@ -31,7 +31,7 @@ These rules replace the earlier practice (until 27 Nov 2026) of committing strai
 5. **Keep changes narrowly focused** on the requested task. One task, one pull request.
 6. **No unsolicited refactoring, architectural changes, new dependencies or database expansion.** That includes adding devices to `devices.csv`, adding columns, adding a build step, a framework, an npm runtime dependency, a CDN, a backend or an outside service. Propose these in the pull request description or an issue instead.
 7. **Preserve backward compatibility** unless Thomas explicitly authorizes otherwise. In this project that especially means saved settings (`localStorage` keys `tss:*`), share links (`#s=...`), device IDs (see section 4), and offline copies held by visitors' service workers.
-8. **Run the regression tests before submitting**: `node tests/run-all.js` (setup in `tests/README.md`). GitHub Actions also runs them on every pull request. Report the result honestly, including failures and anything you could not run (for example real-iPhone checks).
+8. **Run the regression tests before submitting**: `node tests/run-all.js` (setup in `tests/README.md`). For an eligible batch, use the targeted local checks below. GitHub Actions runs the full suite on every pull request. Report the result honestly, including failures and anything you could not run (for example real-iPhone checks).
 9. **Add targeted regression tests** for new features and bug fixes where appropriate: a hand-worked value in `tests/unit.js` for new maths, a check in `tests/browser.js` that fails without the fix for a bug, and one quick check in `tests/smoke.js` for a new feature. **Never weaken, skip or delete an existing check** to make a change pass.
 10. **Document what you did** in the pull request: files changed, decisions made, assumptions, unresolved issues and possible regressions. Add a line to `CHANGELOG.md` for significant changes. Update `docs/` when you change architecture, a decision or a known limitation.
 11. **Check for conflicts with existing decisions before implementing.** If a request conflicts with `docs/DECISIONS.md`, stop and describe the conflict to Thomas before writing code.
@@ -39,11 +39,21 @@ These rules replace the earlier practice (until 27 Nov 2026) of committing strai
 13. **Before opening the pull request, rebase (or merge) onto the latest `origin/main`** and re-run the tests if anything changed.
 14. **Independent review.** When asked to review another agent's pull request, check it against this file and `docs/DECISIONS.md`, run the tests yourself, and report findings in the pull request. Don't push fixes to their branch.
 
+### Small changes
+
+Batch approved, verified device-row additions or corrections and copy-only edits in one branch and pull request. Record the sources for device specifications in the pull request and update the README count if the number of devices changes. Use the regular workflow if the batch changes code, layout, device names or IDs, CSV schema, calculations, privacy claims, or browser behavior.
+
+- Run `node tests/unit.js` locally for device rows and review the diff against the sources.
+- Proofread copy in context. For visible site copy, check the affected page on desktop and at a phone-sized viewport.
+- Keep the full GitHub Actions suite on the pull request. Wait for it to pass and for Thomas to approve before merging.
+- The pull request description is sufficient documentation for these batches.
+
 ### Pull request checklist
 
 - [ ] Branched from the latest `main`; rebased before opening
 - [ ] Only files the task needs were changed
-- [ ] `node tests/run-all.js` passes (or failures explained)
+- [ ] Local checks for the task ran and results are reported, including any failures
+- [ ] Full GitHub Actions suite passes before merge
 - [ ] New or fixed behavior has a regression test
 - [ ] No new dependency, outside service, build step or database expansion (or explicitly approved)
 - [ ] Saved settings, share links, device IDs and offline copies still work

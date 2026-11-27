@@ -12,6 +12,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const { chromium, devices } = require("playwright");
+const { check, section, finish } = require("./lib/check");
 
 const ROOT = path.join(__dirname, "..");
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".wasm": "application/wasm", ".csv": "text/csv", ".svg": "image/svg+xml", ".png": "image/png", ".webmanifest": "application/manifest+json" };
@@ -19,11 +20,6 @@ let axeSource = null;
 try { axeSource = fs.readFileSync(require.resolve("axe-core/axe.min.js"), "utf8"); } catch (e) { /* axe-core not installed: accessibility check is skipped */ }
 
 // --- tiny helpers -----------------------------------------------------------
-let failed = 0, passed = 0;
-function check(name, ok, detail = "") {
-  if (ok) { passed++; console.log("  ✓ " + name); }
-  else { failed++; console.log("  ✗ " + name + (detail ? "  (" + detail + ")" : "")); }
-}
 function serve() {
   const server = http.createServer((req, res) => {
     let p = decodeURIComponent(new URL(req.url, "http://x").pathname);
@@ -82,7 +78,7 @@ const shapeCount = p => p.locator("#stage svg *").count();
 
 // --- the checks -------------------------------------------------------------
 async function run(browser, base, label, ctxOptions) {
-  console.log(`\n${label}`);
+  section(label);
   const ctx = await browser.newContext(ctxOptions);
   // Block outside requests (the GoatCounter analytics) so test runs aren't counted as visits
   await ctx.route(url => !url.href.startsWith(base), r => r.abort());
@@ -275,7 +271,7 @@ async function run(browser, base, label, ctxOptions) {
 // The pdf.js version must be the same in index.html, sw.js and the pdfjs/ folder name,
 // and the library and its worker must be the same version
 function pdfjsVersions() {
-  console.log("\nPDF reader files");
+  section("PDF reader files");
   const page = /pdfjs\/([\d.]+)\//.exec(fs.readFileSync(path.join(ROOT, "index.html"), "utf8"));
   const sw = /PDFJS_VERSION = "([\d.]+)"/.exec(fs.readFileSync(path.join(ROOT, "sw.js"), "utf8"));
   const v = page && page[1], dir = path.join(ROOT, "pdfjs", v || "-");
@@ -297,10 +293,9 @@ function pdfjsVersions() {
     await run(browser, base, "Desktop (1280 × 800)", { viewport: { width: 1280, height: 800 } });
     await run(browser, base, "iPhone 13", { ...devices["iPhone 13"] });
   } catch (e) {
-    failed++; console.log("\n✗ test crashed: " + e.message);
+    check("test crashed", false, e.message);
   }
   await browser.close();
   server.close();
-  console.log(`\n${passed} passed, ${failed} failed`);
-  process.exit(failed ? 1 : 0);
+  finish();
 })();

@@ -178,8 +178,9 @@ To change a decision, describe the conflict to Thomas first (`AGENTS.md`, rule 1
 - Percentage = (value ÷ reference − 1) × 100, whole numbers, `+` or a real minus sign; 0% never shows a sign.
 - A missing, zero or inapplicable value (no pixel count, a paper sheet, a zero reference) shows a dash, never 0% or −100%.
 - Green for positive percentages, red for negative percentages and neutral text for 0%, baseline and unavailable values. Signs convey direction without color. The note explains that the percentages describe how much a value changes.
-- Values come from the same `statsOf()` as the cards. Calibration, zoom and drawing scale never affect them. Megapixels is the last screen-size column (shown without "MP" to keep it narrow).
-- All five comparison tabs are available as soon as a reference table is visible. The preview mode selects the initial tab and changing the preview selects its corresponding tab. Selecting a tab only changes the table, calculating that mode with the same saved settings and defaults as the preview. The tab selection is temporary. Pages prompts for a page size or PDF when needed.
+- Tables use the same calculation functions as the cards. Calibration, zoom and drawing scale never affect them. Screen size compares native resolution by total pixels and aspect ratio by long edge divided by short edge.
+- All five comparison tabs are available as soon as a reference table is visible. The preview mode selects the initial tab and changing the preview selects its corresponding tab. Selecting a tab only changes the table, calculating that mode with the saved settings and the comparison values below. The tab selection is temporary. Pages prompts for a page size or PDF when needed.
+- Pages compares apparent 12 pt text at both Fit page and Fit width for the selected page or spread. Page visibility uses each screen’s selected fit. Video compares screen coverage at 16:9, 2.39:1, 4:3 and 9:16. Picture dimensions and pixels use the preview ratio. E-book uses 12 pt (medium) and the saved column settings. Website layout is shown as a label.
 - The reference is saved, marked in share links (`r: 1`) and cleared whenever its card is removed.
 
 ## 11. Originality, privacy and licensing

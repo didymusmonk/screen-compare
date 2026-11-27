@@ -56,7 +56,7 @@ The script is one IIFE, so its functions and `S` aren't reachable from the brows
 | Content previews | `drawPage`, `drawVideo`, `drawEbook`, `drawSite`, `lorem()` | Lorem ipsum for pages, a Pride and Prejudice passage (`AUSTEN`) for e-books, generic mockups (`SITES`, `buildSite`) for websites. |
 | E-book | `ebookText`, `layoutEbook`, `ebookFit` | Real text measurement and line wrapping (section 6). |
 | Display scaling | `dprOf(dev)`, `siteView` | Estimated CSS-pixel scaling per device for website previews. |
-| Card numbers | `statsOf(sel, dev, paper, content = S.content)` | Every number a card shows for the current content mode (screen size, megapixels `mp`, page fit, video incl. picture `diag` and `area`, e-book, website). Used by both `renderCards` and the reference table, so they can't disagree. It must never read zoom or calibration (`unit.js` checks). |
+| Card numbers | `statsOf(sel, dev, paper, content, ebookPt)` | Every number a card shows for the current content mode (screen size, megapixels `mp`, page fit, video incl. picture `diag` and `area`, e-book, website). Used by both `renderCards` and the reference table. Content mode and e-book text size default to the preview settings. It must never read zoom or calibration (`unit.js` checks). |
 | Cards | `renderCards` | Info card per selected screen; ends by calling `renderRef`. |
 | Reference comparison | `REF_COLS`, `refPct`, `fmtPct`, `renderRef` | Table `#ref-panel` below the cards (section 7). |
 | Share links | `shareUrl`, `fromShare`, `SHARE_KEYS` | `#s=<base64url JSON>` (section 9). |
@@ -72,7 +72,7 @@ The script is one IIFE, so its functions and `S` aren't reachable from the brows
 1. **Startup.** Read `tss:custom`, then a share link if the address has `#s=` (it replaces the saved layout once and the address is cleaned), else `tss:state`. Sanitize. Read calibration (`tss:ppiCal`, `tss:ppiCalDpr`).
 2. **Load devices.** `fetch("devices.csv", {cache: "no-cache"})` → `parseCsv` → `BUILTIN`. Apply `RENAMED` to the selection. IDs that match nothing are dropped quietly. If the list can't load, the page shows a message; custom screens still work.
 3. **Interact.** Every control updates `S`, then `save()` + `renderAll()`.
-4. **Render.** For each selected screen: `geom()` → `statsOf()` → card and stage drawing. The reference table reuses the card results for Screen size and for the active preview mode. Selecting another comparison tab calculates that mode only, using the same `statsOf()` function.
+4. **Render.** For each selected screen: `geom()` → `statsOf()` → card and stage drawing. The reference table reuses the card results for Screen size and when its mode and e-book text size match the preview. Selecting another comparison tab calculates that mode only, using the same `statsOf()` function.
 5. **PDF.** Choosing a file loads pdf.js (if not yet loaded), opens the file in the worker, renders the visible page(s) into each screen's preview. The file is never uploaded and is not saved; share links fall back to US Letter.
 
 ## 5. Calculation methods

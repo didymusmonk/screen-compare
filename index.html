@@ -656,8 +656,15 @@ function renderCats() {
 }
 function renderResults() {
   const q = $("#q").value.trim().toLowerCase();
-  const terms = q.split(/\s+/).filter(Boolean);
-  let list = all().filter(d => (S.cat === "all" || d.c === S.cat) && terms.every(t => (d.n + " " + CATS[d.c]).toLowerCase().includes(t.replace(/["″]/g, ""))));
+  const terms = q.split(/\s+/).filter(Boolean).map(t => t.replace(/["″]/g, ""));
+  const shorthand = /^sp\s*(\d+)$/.exec(q);
+  const model = shorthand && new RegExp(`^surface pro ${shorthand[1]}(?: |$)`);
+  const list = all().filter(d => {
+    if (S.cat !== "all" && d.c !== S.cat) return false;
+    const name = d.n.toLowerCase();
+    const searchable = name + " " + CATS[d.c].toLowerCase();
+    return model?.test(name) || terms.every(t => searchable.includes(t));
+  });
   const order = ["tablet", "phone", "ereader", "tabletpc", "laptop", "monitor", "paper", "custom"];
   let html = "";
   for (const c of order) {

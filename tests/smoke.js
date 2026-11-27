@@ -95,6 +95,19 @@ async function run(browser, base, label, ctxOptions) {
   check("first visit shows the two default screens", (await cardCount(p)) === 2);
   check("stage draws the screens", (await shapeCount(p)) > 10);
 
+  const results = () => p.locator("#results .res").evaluateAll(buttons => buttons.map(b => b.dataset.id));
+  await p.fill("#q", "SP9");
+  check("SP9 finds only Surface Pro 9", (await results()).join() === "surface-pro-9");
+  await p.click('#cats [data-k="tablet"]');
+  check("the category filter still excludes Surface Pro 9 from Tablets", (await results()).length === 0);
+  await p.click('#cats [data-k="all"]');
+  await p.fill("#q", "SP1");
+  check("SP1 does not match Surface Pro 10 or 12-inch", !(await results()).some(id => /^surface-pro-1[02]/.test(id)));
+  await p.fill("#q", "Surface Pro 9");
+  check("the full Surface Pro 9 name still finds the same device", (await results()).join() === "surface-pro-9");
+  await p.fill("#q", "11-inch iPad Pro");
+  check("11-inch iPad Pro finds both generations without the 13-inch model", (await results()).sort().join() === "ipad-pro-11-inch-1st-to-4th-gen,ipad-pro-11-inch-m4-m5");
+
   // Add and remove a device from the list
   await p.fill("#q", "Surface Pro");
   const hit = p.locator("#results .res").first();

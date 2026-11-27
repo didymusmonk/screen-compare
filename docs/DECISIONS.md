@@ -177,7 +177,7 @@ To change a decision, describe the conflict to Thomas first (`AGENTS.md`, rule 1
 - One "Set as reference" button per card, no reference by default, one at a time.
 - Percentage = (value ÷ reference − 1) × 100, whole numbers, `+` or a real minus sign; 0% never shows a sign.
 - A missing, zero or inapplicable value (no pixel count, a paper sheet, a zero reference) shows a dash, never 0% or −100%.
-- Neutral colors; the note says percentages describe size, not quality.
+- Green for positive percentages, red for negative percentages and neutral text for 0%, baseline and unavailable values. Signs convey direction without color. The note explains that the percentages describe how much a value changes.
 - Values come from the same `statsOf()` as the cards. Calibration, zoom and drawing scale never affect them. Megapixels is the last screen-size column (shown without "MP" to keep it narrow).
 - The reference is saved, marked in share links (`r: 1`) and cleared whenever its card is removed.
 

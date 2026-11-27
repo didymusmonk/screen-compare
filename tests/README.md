@@ -7,6 +7,7 @@
 - every content mode (pages, video, e-book, website, nothing) and layout (overlay, side by side, free arrange)
 - a share link opens the same screens for a new visitor
 - a PDF opens and its page size is read
+- "Crop white margins" finds the content on an off-white scan (ignoring dust), crops facing book pages separately, keeps 100% at printed size, and the card statistics and preview match the cropped page
 - on the phone: no sideways scrolling, and the quick controls bar shows
 - no accessibility problems found by axe-core
 - the site opens offline after the first visit

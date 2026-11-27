@@ -21,7 +21,7 @@ The site is static, with no build step, no framework, no backend and no npm depe
 | `sw.js` | Service worker for offline use. The page and `devices.csv` load fresh when online (3-second limit, then the saved copy). Everything else is saved on first load. Registered only in the GitHub copy, by `wrap.sh` |
 | `favicon.svg`, `og-image.png` | Tab icon and link-preview image |
 | `pdfjs/` | pdf.js 3.11.174 (`pdf.min.js`, `pdf.worker.min.js`, Apache-2.0 `LICENSE`), copied unchanged from the `pdfjs-dist` npm package |
-| `tests/smoke.js` | Saved Playwright smoke test (desktop + iPhone 13): devices, search, modes, share link, PDF, phone layout, axe-core, offline, JS errors. Run `node tests/smoke.js`; setup in `tests/README.md`. Not part of the site |
+| `tests/smoke.js` | Saved Playwright smoke test (desktop + iPhone 13): devices, search, modes, share link, PDF, PDF crop, phone layout, axe-core, offline, JS errors. Run `node tests/smoke.js`; setup in `tests/README.md`. Not part of the site |
 | `README.md`, `LICENSE` | Public description and the MIT license (© 2026 DidymusMonk) |
 
 Inside `index.html`, all state lives in one object, `S`, and is saved to `localStorage` under the `tss:` prefix. Every change calls `save()` and then `renderAll()`, which redraws the category list, search results, the SVG stage and the cards. Main functions:
@@ -36,6 +36,7 @@ Inside `index.html`, all state lives in one object, `S`, and is saved to `localS
 - `shareUrl` / `fromShare`: share links in the form `#s=<base64url JSON>`.
 - `myScreenMatches` / `setupMyPhone`: the "Compare with my screen" feature.
 - `loadPdfjs` / `openPdf`: the PDF preview. `pdfjs/pdf.min.js` loads only when a PDF is opened, and the parsing runs in a background Web Worker (`pdfjs/pdf.worker.min.js`).
+- `inkBox` / `pageInk` / `scanDoc` / `prepareCrop` / `cropOf`: the "Crop white margins" checkbox (`S.crop`). `pageInk()` renders a page at 800 px, finds the content box and caches it per page in `pdf.ink`. `scanDoc()` samples up to 12 pages for a typical crop size and odd/even position. `prepareCrop()` sets `pdf.crops` for the two pages on screen, and `paperDims()` then returns the cropped page.
 
 ## Key decisions and why
 
@@ -43,6 +44,7 @@ Inside `index.html`, all state lives in one object, `S`, and is saved to `localS
 - **Devices live in a CSV, not in the code.** This lets non-programmers add or fix a device on GitHub (the README explains how).
 - **Outlines show the screen area only, never the bezels.** The size comes from the diagonal and the pixel aspect ratio, because those are what spec sheets publish reliably.
 - **PDFs never leave the browser.** pdf.js renders them locally. It loads on demand because most visitors never open a PDF, and it is the biggest download (about 90 KB plus a 290 KB worker, compressed). It is hosted in the repo, not on a CDN, so the site depends on no outside service.
+- **Crop white margins is one checkbox, off by default, with no manual controls** (Thomas, Nov 2026). The background is the most common color (so off-white scans work), anything 40+ levels away is ink, groups under 3 cells (4 px each) are dust, and ink in the outer 1.5% band counts only if it joins content further in. 0.12 in safety margin. Every page gets the same cropped size (the largest content of the sample, skipping one outlier such as a cover), placed per odd/even page so mirrored book margins crop well, and grown for any page with more content. A page with no clear background (a photo) isn't cropped. The cropped page replaces the page in Fit page, Fit width and the card stats; 100% keeps printed scale.
 - **The website previews are generic and unbranded** (news, search, social, shop, wiki) to avoid trademark trouble and to stay original.
 - **The default first visit shows only two screens:** iPad mini (A20 Pro) and iPad Pro 11" (M5), both portrait, with a Letter page fit. A short page suits phone visitors.
 - **Lorem text is drawn as real SVG `<text>`, ragged right.** `textLength` justification made redraws about 10× slower. `PROSE_EM` measures the browser's real serif width so that lines wrap correctly. Below 3.5 px, the text turns into gray bars (in e-book mode, bars the length of the real lines).

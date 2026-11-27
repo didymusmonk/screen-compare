@@ -216,6 +216,8 @@ dd { margin: 0; font-family: var(--font-mono); font-size: 13px; font-variant-num
 input[type="range"] { width: 100%; accent-color: var(--accent); }
 .file-drop { border: 1.5px dashed var(--line); border-radius: 8px; padding: 12px; text-align: center; font-size: 13px; color: var(--muted); }
 .file-drop.over { border-color: var(--accent); color: var(--fg); }
+.check { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
 /* Bigger tap targets on touch screens */
 @media (pointer: coarse) {
   input[type="text"], input[type="number"], select { font-size: 16px; } /* iPhone zooms the page into smaller text fields */
@@ -224,6 +226,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   .chip { min-height: 36px; padding: 6px 12px; }
   .icon-btn { width: 38px; height: 38px; }
   .btn { min-height: 40px; }
+  .check { min-height: 44px; }
   .res { min-height: 40px; }
 }
 @media (prefers-reduced-motion: no-preference) { .scr { transition: opacity .15s; } }
@@ -315,6 +318,10 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
             <button class="btn ghost" id="pg-next" type="button" aria-label="Next page">›</button>
           </div>
         </div>
+        <div id="crop-ctrls" hidden>
+          <label class="check"><input id="crop" type="checkbox" aria-describedby="crop-hint"> Crop white margins</label>
+          <p class="hint" id="crop-hint">Trims the empty border around your pages on every screen, like the crop setting in e-reader apps. Headers, page numbers and pictures are kept.</p>
+        </div>
         </div>
       </section>
     </aside>
@@ -361,6 +368,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <summary><h2 style="display:inline; font-size:inherit">What the numbers mean</h2></summary>
         <div class="glossary">
           <div><b>PPI (pixels per inch)</b>How many screen pixels fit in one inch. Higher means sharper text. Phones are usually 400 to 500, tablets 260 to 330, laptops 200 to 250. Phone makers and spec sheets often call this DPI too.</div>
+          <div><b>Crop white margins</b>Trims the empty border of your PDF so its text fills more of each screen. Each page is cut around its own text, so books with different inner and outer margins crop well, and every page keeps the same cropped size. Sizes stay true: at 100% the text is still its printed size. Your file isn't changed.</div>
           <div><b>Size vs. printed page</b>How big a PDF page looks on that screen compared with the same page printed on paper. At 80%, 12 pt text looks like 9.6 pt text.</div>
           <div><b>Pixels per page inch</b>How many screen pixels each inch of the page gets. It's the effective resolution of the page on that screen, like a scanner's DPI. Around 150 or more looks crisp.</div>
           <div><b>Sizes are screen only</b>Rectangles show the visible display area from the diagonal and pixel count, not bezels or the case. Diagonals are the maker's figures, which round a little and ignore rounded corners.</div>
@@ -484,7 +492,7 @@ const defaults = () => ({
     { id: "ipad-pro-11-inch-m4-m5", uid: "d3" },
   ],
   mode: "side", orient: "portrait", anchor: "center", units: "in", scale: "fit",
-  paper: "us-letter-paper", paperOrient: "portrait", fit: "page", content: "page", video: "16:9", ebookPt: 12, ebookCols: "1", site: "news", siteLayout: "auto", cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
+  paper: "us-letter-paper", paperOrient: "portrait", fit: "page", content: "page", video: "16:9", ebookPt: 12, ebookCols: "1", site: "news", siteLayout: "auto", crop: false, cat: "all", order: "added", zoom: 50, pos: {}, zo: [],
 });
 let custom = store.get("custom", []);
 // A shared link carries the comparison in the address after #s=. It replaces the saved layout once, then the address is cleaned up.
@@ -506,7 +514,7 @@ const fromShare = (() => {
 })();
 const S = Object.assign(defaults(), fromShare || store.get("state", {}));
 let ppiCal = store.get("ppiCal", 96);
-let pdf = { doc: null, page: 1, pages: 0, img: null, img2: null, w: 0, h: 0, name: "" };
+let pdf = { doc: null, page: 1, pages: 0, img: null, img2: null, w: 0, h: 0, name: "", ink: new Map(), typ: null, scan: null, crops: null };
 const COLORS = ["--c1", "--c2", "--c3", "--c4", "--c5", "--c6", "--c7", "--c8", "--c9", "--c10", "--c11", "--c12"];
 const MAX = 12;
 const save = () => store.set("state", { ...S });
@@ -539,11 +547,19 @@ function aspectLabel(a, b) {
 const fmtLen = (inch, dp = 2) => S.units === "cm" ? `${(inch * 2.54).toFixed(dp === 2 ? 1 : dp)} cm` : `${inch.toFixed(dp)}″`;
 const paperDims = () => {
   if (S.content !== "page" || S.paper === "none") return null;
-  if (S.paper === "upload") return pdf.img ? { w: pdf.w, h: pdf.h, name: pdf.name || "Your PDF" } : null;
+  if (S.paper === "upload") {
+    if (!pdf.img) return null;
+    const c = cropOf(), name = pdf.name || "Your PDF";
+    // the cropped page stands in for the page: Fit page and Fit width size it, and the cards measure it.
+    // Its scale is unchanged, so at 100% the text is still its printed size.
+    return c ? { w: pdf.w * c[0].w, h: pdf.h * c[0].h, name: name + " (cropped)", crop: c } : { w: pdf.w, h: pdf.h, name };
+  }
   const p = byId(S.paper); if (!p || !p.sheet) return null;
   const land = S.paperOrient === "landscape";
   return { w: land ? p.w : p.h, h: land ? p.h : p.w, name: p.n.replace(/ paper\b/i, "") };
 };
+// [this page's crop box, next page's crop box] as fractions of the page {x, y, w, h}, or null when not cropping
+const cropOf = () => S.crop && S.paper === "upload" && pdf.img ? pdf.crops : null;
 const spreadOf = (sel, paper) => paper && sel && sel.spread ? { ...paper, w: paper.w * 2, single: paper.w } : paper;
 const fitOf = sel => (sel && sel.fit) || S.fit;
 const spokenLen = inch => S.units === "cm" ? `${(inch * 2.54).toFixed(1)} centimeters` : `${inch.toFixed(1)} inches`;
@@ -1016,7 +1032,12 @@ function drawPage(x, r, s, paper0, i, col) {
     g += `<rect x="${qx}" y="${py}" width="${one}" height="${ph}" fill="var(--paper)" stroke="var(--paper-edge)" stroke-width="0.75"/>`;
     if (S.paper === "upload" && pdf.img) {
       const img = n === 0 ? pdf.img : pdf.img2;
-      if (img) g += `<image href="${img}" x="${qx}" y="${py}" width="${one}" height="${ph}" preserveAspectRatio="none"/>`;
+      const c = paper0.crop && paper0.crop[n];
+      if (img && c) {
+        // a window onto the cropped part of the page: the whole page image, cut to the crop box
+        const W = pdf.w * 72, H = pdf.h * 72, f = v => (v * 1).toFixed(2);
+        g += `<svg class="pdf-crop" x="${qx}" y="${py}" width="${one}" height="${ph}" viewBox="${f(c.x * W)} ${f(c.y * H)} ${f(c.w * W)} ${f(c.h * H)}" preserveAspectRatio="none"><image href="${img}" width="${W}" height="${H}" preserveAspectRatio="none"/></svg>`;
+      } else if (img) g += `<image href="${img}" x="${qx}" y="${py}" width="${one}" height="${ph}" preserveAspectRatio="none"/>`;
     } else {
       // 12 pt body text with 1 inch margins, drawn to scale (line pitch 14.4 pt)
       const m = Math.min(1, paper0.w * 0.12) * k * s, lh = (14.4 / 72) * k * s, th = (7 / 72) * k * s;
@@ -1284,7 +1305,7 @@ function renderCards() {
           <dt>Size vs. printed page</dt><dd>${pct.toFixed(0)}%</dd>
           <dt>12 pt text looks like</dt><dd>${(12 * f.k).toFixed(1)} pt</dd>
           ${eff ? `<dt>Pixels per page inch</dt><dd>${Math.round(eff)}</dd>` : ""}
-          <dt>${x.s.spread ? "Spread" : "Page"} visible at once</dt><dd>${Math.round(f.shown * 100)}%</dd>
+          <dt${paper.crop ? ` title="Share of the cropped ${x.s.spread ? "spread" : "page"} (white margins removed) that fits on the screen at once"` : ""}>${paper.crop ? "Cropped " + (x.s.spread ? "spread" : "page") : x.s.spread ? "Spread" : "Page"} visible at once</dt><dd>${Math.round(f.shown * 100)}%</dd>
         </dl>
       </div>`;
     }
@@ -1362,6 +1383,8 @@ function syncVisibility() {
   $("#fit").parentElement.hidden = S.paper === "none";
   $("#spreadAll").parentElement.hidden = S.paper === "none";
   $("#page-ctrls").hidden = S.content !== "page";
+  $("#crop-ctrls").hidden = !(S.paper === "upload" && pdf.img);
+  $("#crop").checked = !!S.crop;
   $("#video").value = S.video; $("#ebookPt").value = String(S.ebookPt);
   $("#video-ctrls").hidden = S.content !== "video";
   $("#ebook-ctrls").hidden = S.content !== "ebook";
@@ -1556,6 +1579,7 @@ async function openPdf(file) {
     pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
     const data = new Uint8Array(await file.arrayBuffer());
     pdf.doc = await pdfjsLib.getDocument({ data, isEvalSupported: false }).promise;
+    pdf.ink = new Map(); pdf.typ = null; pdf.crops = null; pdf.scan = null;
     pdf.pages = pdf.doc.numPages; pdf.page = 1; pdf.name = file.name.replace(/\.pdf$/i, "");
     await renderPdfPage();
     S.paper = "upload"; $("#paper").value = "upload"; save();
@@ -1581,10 +1605,142 @@ async function renderPdfPage() {
   pdf.img = first.img; pdf.w = first.w; pdf.h = first.h;
   // the next page fills the right side of two-page views
   pdf.img2 = pdf.page < pdf.pages ? (await pageImage(pdf.page + 1)).img : null;
-  $("#pdf-status").textContent = `${pdf.name}: page ${pdf.page} is ${pdf.w.toFixed(2)} × ${pdf.h.toFixed(2)} in (${(pdf.w * 25.4).toFixed(0)} × ${(pdf.h * 25.4).toFixed(0)} mm). Two-page views show pages ${pdf.page} and ${pdf.page + 1}.`;
+  if (S.crop) await prepareCrop();
+  pdfStatus();
   $("#pdf-pager").hidden = pdf.pages < 2;
   $("#pg-label").textContent = `${pdf.page} / ${pdf.pages}`;
 }
+function pdfStatus() {
+  if (!pdf.img) return;
+  const c = cropOf(), mm = v => (v * 25.4).toFixed(0);
+  const cw = c && pdf.w * c[0].w, ch = c && pdf.h * c[0].h;
+  const crop = !S.crop ? "" : pdf.scan ? " Finding the margins…" : c ? ` Cropped to ${cw.toFixed(2)} × ${ch.toFixed(2)} in (${mm(cw)} × ${mm(ch)} mm).` : " No white margins to crop on this page.";
+  $("#pdf-status").textContent = `${pdf.name}: page ${pdf.page} is ${pdf.w.toFixed(2)} × ${pdf.h.toFixed(2)} in (${mm(pdf.w)} × ${mm(pdf.h)} mm).${crop} Two-page views show pages ${pdf.page} and ${pdf.page + 1}.`;
+}
+
+// ---------- Crop white margins ----------
+// Finds where the content is on each page by looking at a small rendering of it (the PDF itself is never changed).
+// 1. The background is the most common color, so off-white and tinted scans work. Anything clearly different is ink.
+// 2. The page is split into small cells. Groups of fewer than 3 inked cells are dust or scanner specks and are ignored.
+// 3. Ink touching the outer edge band (scanner shadows) only counts when it joins up with content further in.
+// The result, cached per page, is the content box as fractions of the page, "full" when the page can't be read
+// reliably (a photo, say), or null for a blank page.
+const CROP_RES = 800, CELL = 4, CROP_PAD = 0.12; // pixels on the long side, pixels per cell, inches kept around content
+function inkBox(d, w, h) {
+  const bins = new Map(); let best = 0, bg = 0;
+  for (let i = 0; i < d.length; i += 16) { // every 4th pixel is plenty to find the background
+    const q = (d[i] >> 4) << 8 | (d[i + 1] >> 4) << 4 | d[i + 2] >> 4, n = (bins.get(q) || 0) + 1;
+    bins.set(q, n); if (n > best) { best = n; bg = q; }
+  }
+  if (best < 0.3 * d.length / 16) return "full"; // no clear background: don't guess
+  const br = ((bg >> 8) << 4) + 8, bgG = ((bg >> 4 & 15) << 4) + 8, bb = ((bg & 15) << 4) + 8;
+  const cw = Math.ceil(w / CELL), chh = Math.ceil(h / CELL), cnt = new Uint8Array(cw * chh);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const i = (y * w + x) * 4;
+    if (Math.abs(d[i] - br) > 40 || Math.abs(d[i + 1] - bgG) > 40 || Math.abs(d[i + 2] - bb) > 40) cnt[((y / CELL) | 0) * cw + ((x / CELL) | 0)]++;
+  }
+  const on = new Uint8Array(cw * chh); for (let k = 0; k < on.length; k++) on[k] = cnt[k] >= 3 ? 1 : 0;
+  const band = Math.max(1, Math.round(Math.min(cw, chh) * 0.015));
+  const inner = (cx, cy) => cx >= band && cy >= band && cx < cw - band && cy < chh - band;
+  let x0 = cw, y0 = chh, x1 = -1, y1 = -1;
+  const seen = new Uint8Array(cw * chh), stack = [];
+  for (let k = 0; k < on.length; k++) {
+    if (!on[k] || seen[k]) continue;
+    const cells = []; let core = false; stack.push(k); seen[k] = 1;
+    while (stack.length) { // collect one group of touching cells
+      const j = stack.pop(), cx = j % cw, cy = (j / cw) | 0; cells.push(j); if (inner(cx, cy)) core = true;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = cx + dx, ny = cy + dy, m = ny * cw + nx;
+        if (nx >= 0 && ny >= 0 && nx < cw && ny < chh && on[m] && !seen[m]) { seen[m] = 1; stack.push(m); }
+      }
+    }
+    if (cells.length < 3 || !core) continue;
+    for (const j of cells) { const cx = j % cw, cy = (j / cw) | 0; if (cx < x0) x0 = cx; if (cx > x1) x1 = cx; if (cy < y0) y0 = cy; if (cy > y1) y1 = cy; }
+  }
+  if (x1 < 0) return null;
+  return { x: x0 / cw, y: y0 / chh, w: (x1 + 1 - x0) / cw, h: (y1 + 1 - y0) / chh };
+}
+async function pageInk(n) {
+  if (pdf.ink.has(n)) return pdf.ink.get(n);
+  const doc = pdf.doc;
+  let box = "full";
+  try {
+    const page = await doc.getPage(n);
+    const vp1 = page.getViewport({ scale: 1 });
+    const vp = page.getViewport({ scale: CROP_RES / Math.max(vp1.width, vp1.height) });
+    const c = document.createElement("canvas");
+    c.width = Math.max(8, Math.round(vp.width)); c.height = Math.max(8, Math.round(vp.height));
+    const ctx = c.getContext("2d", { willReadFrequently: true }); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    box = inkBox(ctx.getImageData(0, 0, c.width, c.height).data, c.width, c.height);
+  } catch (err) { console.error(err); }
+  if (pdf.doc === doc) pdf.ink.set(n, box);
+  return box;
+}
+// Content box plus a small safety margin, kept inside the page
+function padBox(b) {
+  const px = CROP_PAD / pdf.w, py = CROP_PAD / pdf.h, x = Math.max(0, b.x - px), y = Math.max(0, b.y - py);
+  return { x, y, w: Math.min(1, b.x + b.w + px) - x, h: Math.min(1, b.y + b.h + py) - y };
+}
+// A typical crop box for odd and for even pages, from up to 12 pages spread through the document.
+// Its size is the largest content found (skipping one odd page, such as a cover, when there are 5 or more),
+// so every page gets the same cropped size and the view doesn't jump as you turn pages.
+async function scanDoc() {
+  const doc = pdf.doc, n = pdf.pages, count = Math.min(12, n);
+  const pages = [...new Set(Array.from({ length: count }, (_, k) => 1 + Math.round(k * (n - 1) / Math.max(1, count - 1))))];
+  const boxes = [];
+  for (const p of pages) { const b = await pageInk(p); if (pdf.doc !== doc) return; if (b && b !== "full") boxes.push({ p, b: padBox(b) }); }
+  const big = vals => { vals.sort((a, b) => b - a); return vals.length >= 5 ? vals[1] : vals[0]; };
+  const mid = vals => { vals.sort((a, b) => a - b); return vals[(vals.length - 1) >> 1]; };
+  if (!boxes.length) { pdf.typ = { size: null }; return; }
+  const w = big(boxes.map(o => o.b.w)), h = big(boxes.map(o => o.b.h));
+  const typ = { size: { w, h } };
+  for (const odd of [true, false]) {
+    const own = boxes.filter(o => (o.p % 2 === 1) === odd);
+    if (own.length) typ[odd ? "odd" : "even"] = { x: mid(own.map(o => o.b.x + o.b.w / 2)) - w / 2, y: mid(own.map(o => o.b.y)) };
+  }
+  // a parity with no sample mirrors the other one, as facing pages do
+  if (!typ.odd) typ.odd = { x: 1 - typ.even.x - w, y: typ.even.y };
+  if (!typ.even) typ.even = { x: 1 - typ.odd.x - w, y: typ.odd.y };
+  pdf.typ = typ;
+}
+const clampBox = b => ({ ...b, x: Math.min(Math.max(0, b.x), 1 - b.w), y: Math.min(Math.max(0, b.y), 1 - b.h) });
+// This page's crop: the typical box for its side, moved or grown just enough to keep all of its own content
+function pageBox(p, ink) {
+  if (ink === "full") return { x: 0, y: 0, w: 1, h: 1 };
+  const t = pdf.typ, s = t.size;
+  const pos = t[p % 2 === 1 ? "odd" : "even"];
+  if (!ink) return clampBox({ x: pos.x, y: pos.y, w: s.w, h: s.h }); // a blank page crops like its neighbors
+  const c = padBox(ink);
+  let b = clampBox({ x: pos.x, y: pos.y, w: Math.max(s.w, c.w), h: Math.max(s.h, c.h) });
+  if (c.x < b.x) b.x = c.x; if (c.x + c.w > b.x + b.w) b.x = c.x + c.w - b.w;
+  if (c.y < b.y) b.y = c.y; if (c.y + c.h > b.y + b.h) b.y = c.y + c.h - b.h;
+  return clampBox(b);
+}
+// Works out the crop boxes for the pages on screen. Both get the same size, so two-page views line up.
+async function prepareCrop() {
+  pdf.crops = null;
+  if (!pdf.doc) return;
+  const doc = pdf.doc;
+  if (!pdf.typ) {
+    if (!pdf.scan) { const sp = scanDoc().finally(() => { if (pdf.scan === sp) pdf.scan = null; }); pdf.scan = sp; }
+    pdfStatus();
+    await pdf.scan;
+  }
+  const ps = [pdf.page, Math.min(pdf.page + 1, pdf.pages)];
+  const inks = [];
+  for (const p of ps) inks.push(await pageInk(p));
+  if (pdf.doc !== doc || !pdf.typ || !pdf.typ.size) return; // nothing reliable found: show whole pages
+  const bs = ps.map((p, k) => pageBox(p, inks[k]));
+  const w = Math.max(bs[0].w, bs[1].w), h = Math.max(bs[0].h, bs[1].h);
+  if (w > 0.985 && h > 0.985) return; // no margins worth trimming
+  pdf.crops = bs.map(b => clampBox({ x: b.x - (w - b.w) / 2, y: b.y - (h - b.h) / 2, w, h }));
+}
+$("#crop").addEventListener("change", async e => {
+  S.crop = e.target.checked; save();
+  if (S.crop && pdf.doc) await prepareCrop();
+  pdfStatus(); renderAll();
+});
 $("#pdf-file").addEventListener("change", e => { const f = e.target.files[0]; if (f) openPdf(f); e.target.value = ""; });
 const drop = $("#drop");
 ["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));

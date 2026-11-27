@@ -49,6 +49,34 @@ function tinyPdf() {
   out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
   return Buffer.from(out, "latin1");
 }
+// A PDF built by hand from a list of pages: { w, h } in points plus drawing commands.
+function makePdf(pages) {
+  const objs = ["<< /Type /Catalog /Pages 2 0 R >>", ""];
+  const kids = [];
+  for (const pg of pages) {
+    const page = objs.length + 1, stream = page + 1;
+    kids.push(`${page} 0 R`);
+    objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pg.w} ${pg.h}] /Contents ${stream} 0 R >>`);
+    objs.push(`<< /Length ${pg.draw.length} >>\nstream\n${pg.draw}\nendstream`);
+  }
+  objs[1] = `<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${pages.length} >>`;
+  let out = "%PDF-1.4\n";
+  const offs = objs.map((o, i) => { const at = out.length; out += `${i + 1} 0 obj\n${o}\nendobj\n`; return at; });
+  const xref = out.length;
+  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offs.map(o => String(o).padStart(10, "0") + " 00000 n \n").join("");
+  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return Buffer.from(out, "latin1");
+}
+// 5 × 7 in scanned-looking page: off-white paper, a text block from 1 to 4 in across and 1 in from the top,
+// a page number down to 0.5 in from the bottom, and one speck of dust near the top left corner.
+// Content is 3 × 5.5 in, so with the 0.12 in safety margin the crop should be 3.24 × 5.74 in.
+const scanPdf = () => makePdf([{ w: 360, h: 504, draw: "0.95 0.94 0.89 rg 0 0 360 504 re f 0.1 0.1 0.1 rg 72 108 216 324 re f 166 36 28 10 re f 29 475 1 1 re f" }]);
+// Two facing pages with mirrored margins: content 1.5–4 in on page 1 and 1–3.5 in on page 2 (2.5 in wide each).
+// Cropping each page around its own text gives 2.74 in; one shared crop for both would give 3.24 in.
+const bookPdf = () => makePdf([
+  { w: 360, h: 504, draw: "0 0 0 rg 108 72 180 360 re f" },
+  { w: 360, h: 504, draw: "0 0 0 rg 72 72 180 360 re f" },
+]);
 const cardCount = p => p.locator("#cards .card").count();
 const shapeCount = p => p.locator("#stage svg *").count();
 
@@ -133,6 +161,49 @@ async function run(browser, base, label, ctxOptions) {
   await p.setInputFiles("#pdf-file", { name: "test.pdf", mimeType: "application/pdf", buffer: tinyPdf() });
   const pdfOk = await p.waitForFunction(() => /5\.00 × 7\.00 in/.test(document.querySelector("#pdf-status").textContent), null, { timeout: 15000 }).then(() => true, () => false);
   check("PDF opens and reports its page size", pdfOk, await p.textContent("#pdf-status"));
+
+  // Crop white margins
+  const status = () => p.textContent("#pdf-status");
+  const cropped = async () => { await p.waitForFunction(() => /Cropped to|No white margins/.test(document.querySelector("#pdf-status").textContent), null, { timeout: 15000 }).catch(() => {}); const m = /Cropped to ([\d.]+) × ([\d.]+) in/.exec(await status()); return m ? [+m[1], +m[2]] : null; };
+  const stats = () => p.evaluate(() => [...document.querySelectorAll("#cards .card")].map(c => {
+    const dd = name => { const d = [...c.querySelectorAll("dt")].find(d => d.textContent.endsWith(name)); return d ? d.nextElementSibling.textContent : null; };
+    return { pct: parseFloat(dd("Size vs. printed page")), pt: parseFloat(dd("12 pt text looks like")), ppi: parseFloat(dd("Pixels per page inch")), seen: dd("visible at once"),
+      label: ([...c.querySelectorAll("dt")].find(d => d.textContent.endsWith("visible at once")) || {}).textContent, tip: ([...c.querySelectorAll("dt")].find(d => d.textContent.endsWith("visible at once")) || { title: "" }).title };
+  }));
+  const fitAll = v => p.click(`#fit button[data-v="${v}"]`);
+  const near = (a, b, tol) => Math.abs(a - b) <= tol;
+  await p.setInputFiles("#pdf-file", { name: "scan.pdf", mimeType: "application/pdf", buffer: scanPdf() });
+  await p.waitForFunction(() => /^scan:/.test(document.querySelector("#pdf-status").textContent), null, { timeout: 15000 });
+  check("crop checkbox shows for a PDF, off by default", await p.isVisible("#crop") && !(await p.isChecked("#crop")));
+  await fitAll("width");
+  const before = await stats();
+  await p.check("#crop");
+  const box = await cropped();
+  check("crop finds the content on an off-white scan, ignoring dust", box && near(box[0], 3.24, 0.08) && near(box[1], 5.74, 0.08), await status());
+  const after = await stats();
+  check("Fit width zooms in by page width ÷ cropped width", after.every((a, k) => near(a.pct / before[k].pct, 5 / box[0], 0.04)), JSON.stringify([before.map(b => b.pct), after.map(a => a.pct)]));
+  check("12 pt text size follows the cropped scale", after.every(a => near(a.pt, 12 * a.pct / 100, 0.15)));
+  check("pixels per page inch follow the cropped scale", after.every((a, k) => !a.ppi || near(a.ppi / a.pct, before[k].ppi / before[k].pct, 0.05)));
+  check("visible-at-once is labeled for the cropped page", after.every(a => a.label.startsWith("Cropped") && /white margins removed/.test(a.tip)));
+  const shape = await p.$$eval("#stage svg.pdf-crop", els => els.map(e => ({ w: +e.getAttribute("width"), h: +e.getAttribute("height"), vb: e.getAttribute("viewBox").split(" ").map(Number) })));
+  check("preview shows the cropped page in the same shape", shape.length > 0 && shape.every(s => near(s.w / s.h, box[0] / box[1], 0.01) && near(s.vb[2] / s.vb[3], box[0] / box[1], 0.01)));
+  await fitAll("actual");
+  const real = await stats();
+  const wCrop = await p.$$eval("#stage svg.pdf-crop", els => els.map(e => +e.getAttribute("width")));
+  await p.uncheck("#crop");
+  const wFull = await p.$$eval("#stage g[clip-path] > image", els => els.map(e => +e.getAttribute("width")));
+  check("100% keeps the printed size when cropped", real.every(a => a.pct === 100) && wFull.length === wCrop.length && wCrop.every((w, k) => near(w / wFull[k], box[0] / 5, 0.01)), JSON.stringify([wCrop, wFull]));
+  check("unchecking shows the whole page again", !/Cropped/.test(await status()) && (await p.locator("#stage svg.pdf-crop").count()) === 0);
+  await fitAll("page");
+  await p.setInputFiles("#pdf-file", { name: "book.pdf", mimeType: "application/pdf", buffer: bookPdf() });
+  await p.waitForFunction(() => /^book:/.test(document.querySelector("#pdf-status").textContent), null, { timeout: 15000 });
+  await p.click('#spreadAll button[data-v="spread"]');
+  await p.check("#crop");
+  const book = await cropped();
+  const halves = await p.$$eval("#stage svg.pdf-crop", els => els.map(e => ({ w: +e.getAttribute("width"), x: +e.getAttribute("viewBox").split(" ")[0] })));
+  check("book pages with mirrored margins each crop around their own text", book && near(book[0], 2.74, 0.08) && halves.length >= 2 && near(halves[0].w, halves[1].w, 0.01) && halves[0].x > halves[1].x + 20, `${await status()} ${JSON.stringify(halves.slice(0, 2))}`);
+  await p.click('#spreadAll button[data-v="single"]');
+  await p.uncheck("#crop");
 
   if (phone) {
     const overflow = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);

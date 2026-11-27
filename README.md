@@ -2,7 +2,7 @@
 
 Compare phone, tablet, laptop, tablet PC (including Surface Pro) and monitor screens at true relative size.
 
-- Search 343 built-in screens plus 30 paper, book and card sizes, or enter your own screen (diagonal plus resolution or aspect ratio)
+- Search 344 built-in screens plus 30 paper, book and card sizes, or enter your own screen (diagonal plus resolution or aspect ratio)
 - See each screen's pixel density (PPI), resolution, megapixels, aspect ratio and physical size
 - Preview how Letter, A4, Legal and other page sizes, or your own PDF, fit on each screen
 - Video mode shows the picture's real size, diagonal and area without the black bars

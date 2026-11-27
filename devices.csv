@@ -303,6 +303,7 @@ ASUS Zenbook 14 OLED,laptop,14,2880,1800
 "27"" Full HD monitor",monitor,27,1920,1080
 "27"" QHD 1440p monitor",monitor,27,2560,1440
 "27"" 4K monitor",monitor,27,3840,2160
+iMac 24-inch (M1 to M4),monitor,23.5,4480,2520
 "27"" 5K (Apple Studio Display) monitor",monitor,27,5120,2880
 "32"" QHD 1440p monitor",monitor,31.5,2560,1440
 "32"" 4K monitor",monitor,31.5,3840,2160

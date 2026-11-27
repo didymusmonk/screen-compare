@@ -928,7 +928,7 @@ function dprOf(dev) {
   if (/^iPhone/.test(dev.n)) return /\b(SE|XR|11)$|\b(SE|XR)\b/.test(dev.n) ? 2 : 3;
   if (/^iPad/.test(dev.n)) return 2;
   if (/^MacBook/.test(dev.n)) return +(ppi / 127).toFixed(2); // macOS default "looks like" setting, about 127 points per inch
-  if (/^(Apple Studio|.*Pro Display XDR)/.test(dev.n)) return 2;
+  if (/^(iMac|.*Apple Studio|.*Pro Display XDR)/.test(dev.n)) return 2;
   if (dev.c === "phone") return dev.w / dev.h > 1.6 ? q(dev.h / 412, 8) : q(ppi / 160, 8); // most phones are about 412 px wide; folded-open screens follow density
   if (dev.c === "tablet" || dev.c === "ereader") return q(ppi / 160, 8);
   if (dev.c === "monitor") return q(ppi / 110); // Windows' recommended scaling for desktop monitors

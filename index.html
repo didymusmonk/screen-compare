@@ -552,14 +552,14 @@ function pageFit(g, paper, fit = S.fit) {
 
 // ---------- Search & categories ----------
 function renderCats() {
-  const keys = ["all", "phone", "tablet", "tabletpc", "laptop", "ereader", "monitor", "paper"].concat(custom.length ? ["custom"] : []);
+  const keys = ["all", "tablet", "phone", "ereader", "tabletpc", "laptop", "monitor", "paper"].concat(custom.length ? ["custom"] : []);
   $("#cats").innerHTML = keys.map(k => `<button class="chip" data-k="${k}" aria-pressed="${S.cat === k}">${k === "all" ? "All" : CATS[k]}</button>`).join("");
 }
 function renderResults() {
   const q = $("#q").value.trim().toLowerCase();
   const terms = q.split(/\s+/).filter(Boolean);
   let list = all().filter(d => (S.cat === "all" || d.c === S.cat) && terms.every(t => (d.n + " " + CATS[d.c]).toLowerCase().includes(t.replace(/["″]/g, ""))));
-  const order = ["custom", "tabletpc", "tablet", "phone", "laptop", "ereader", "monitor", "paper"];
+  const order = ["tablet", "phone", "ereader", "tabletpc", "laptop", "monitor", "paper", "custom"];
   let html = "";
   for (const c of order) {
     const items = list.filter(d => d.c === c);

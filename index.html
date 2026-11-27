@@ -99,15 +99,13 @@ h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin
 /* Phones: the drawing and cards first, with the content switch pinned at the top */
 @media (max-width: 700px) {
   .layout > .rail, .layout > main { display: contents !important; }
-  .quickbar { order: 0; display: flex; gap: 8px; align-items: center; position: sticky; top: 0; z-index: 20;
+  .quickbar { order: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; position: sticky; top: 0; z-index: 20;
     margin: 0 -16px; padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px; background: color-mix(in srgb, var(--bg) 92%, transparent);
     -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-  .quickbar { flex-wrap: wrap; }
-  #open-pdf { min-height: 44px; }
-  .quickbar .pdf-share-note { flex: 0 0 100%; }
-  .quickbar .seg { flex: 1; flex-wrap: nowrap; background: var(--surface); }
-  .quickbar .seg button { flex: 1 1 0; padding-inline: 4px; }
-  .quickbar .share-btn { flex: none; background: var(--surface); color: var(--fg); }
+  .quickbar .pdf-share-note { grid-column: 1 / -1; }
+  .quickbar .seg { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: var(--surface); }
+  .quickbar .seg button { min-width: 0; min-height: 44px; padding-inline: 2px; }
+  .quickbar .share-btn { width: 44px; height: 44px; background: var(--surface); color: var(--fg); }
   #content { display: none; }
   .stage-panel { order: 1; }
   #cards-bar { order: 2; }
@@ -162,6 +160,12 @@ details > summary { cursor: pointer; font-family: var(--font-display); font-weig
 details[open] > summary { margin-bottom: 12px; }
 
 .stage-panel { padding: 0; overflow: hidden; gap: 0; }
+.pdf-toolbar { display: grid; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line); min-width: 0; }
+.pdf-toolbar button { min-height: 44px; }
+#pdf-pager { gap: 6px; }
+#pg-prev, #pg-next { min-width: 44px; }
+#pg-number { width: 5em; min-height: 44px; font-size: 16px; }
+#pdf-status { overflow-wrap: anywhere; }
 .stage-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--line); }
 .stage {
   position: relative; overflow-x: auto; min-height: 360px;
@@ -352,27 +356,12 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
         <div class="row"><span class="lbl">Page</span>
           <div class="seg" id="paperOrient"><button data-v="portrait">Portrait</button><button data-v="landscape">Landscape</button></div>
         </div>
-        <div class="row"><span class="lbl">Pages</span>
-          <div class="seg" id="spreadAll" aria-label="Pages on every screen"><button data-v="single">One page</button><button data-v="spread">Two pages</button></div>
-        </div>
-        <div class="row"><span class="lbl">Page fit</span>
-          <div class="seg" id="fit"><button data-v="page">Fit page</button><button data-v="width">Fit width</button><button data-v="actual">100%</button></div>
-        </div>
         <div class="file-drop" id="drop">
           <div>Preview your own PDF</div>
           <div class="row" style="justify-content:center; margin-top:8px">
             <label class="btn ghost" style="display:inline-block; cursor:pointer">Choose PDF<input id="pdf-file" type="file" accept="application/pdf,.pdf" hidden></label>
           </div>
-          <p class="hint" id="pdf-status" style="margin-top:8px">Or drop a file here. It stays on your computer.</p>
-          <div class="row" id="pdf-pager" style="justify-content:center; margin-top:6px" hidden>
-            <button class="btn ghost" id="pg-prev" type="button" aria-label="Previous page">‹</button>
-            <span id="pg-label" class="pct"></span>
-            <button class="btn ghost" id="pg-next" type="button" aria-label="Next page">›</button>
-          </div>
-        </div>
-        <div id="crop-ctrls" hidden>
-          <label class="check"><input id="crop" type="checkbox" aria-describedby="crop-hint"> Crop white margins</label>
-          <p class="hint" id="crop-hint">Trims the empty border around your pages on every screen, like the crop setting in e-reader apps. Headers, page numbers and pictures are kept.</p>
+          <p class="hint" style="margin-top:8px">Or drop a file here. It stays on your computer.</p>
         </div>
         </div>
       </section>
@@ -386,13 +375,37 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
             <div class="seg" id="orient" aria-label="Orientation"><button data-v="portrait">Portrait</button><button data-v="landscape">Landscape</button></div>
             <div class="seg" id="order" aria-label="Order"><button data-v="added">Card order</button><button data-v="height">Shortest first</button></div>
             <div class="seg" id="anchor" aria-label="Overlay alignment"><button data-v="center">Centered</button><button data-v="corner">Corner</button></div>
-            <button class="btn ghost" id="open-pdf" type="button" hidden>Open a PDF</button>
             <button class="btn ghost more-btn" id="more-btn" type="button" aria-expanded="false" aria-controls="stage-more">More options</button>
           </div>
           <div class="row" id="stage-more">
             <div class="seg" id="units" aria-label="Units"><button data-v="in">in</button><button data-v="cm">cm</button></div>
             <div class="seg" id="scaleMode" aria-label="Scale"><button data-v="fit">Fit</button><button data-v="actual">Actual size</button></div>
             <label class="zoom">Zoom<input id="zoom" type="range" min="6" max="260" step="1"></label>
+          </div>
+        </div>
+        <div class="pdf-toolbar" id="pdf-toolbar" role="group" aria-label="Pages controls" hidden>
+          <div class="row">
+            <button class="btn ghost" id="open-pdf" type="button">Open a PDF</button>
+            <form class="row" id="pdf-pager" aria-label="PDF page navigation" hidden>
+              <button class="btn ghost" id="pg-prev" type="button" aria-label="Previous page">‹</button>
+              <label class="row" for="pg-number">Page
+                <input id="pg-number" type="number" inputmode="numeric" min="1" step="1" required aria-describedby="pg-total">
+              </label>
+              <span id="pg-total" class="pct"></span>
+              <button class="btn ghost" type="submit">Go</button>
+              <button class="btn ghost" id="pg-next" type="button" aria-label="Next page">›</button>
+            </form>
+          </div>
+          <p class="hint" id="pdf-status" role="status" hidden></p>
+          <div class="row"><span class="lbl">Pages</span>
+            <div class="seg" id="spreadAll" aria-label="Pages on every screen"><button data-v="single">One page</button><button data-v="spread">Two pages</button></div>
+          </div>
+          <div class="row"><span class="lbl">Page fit</span>
+            <div class="seg" id="fit"><button data-v="page">Fit page</button><button data-v="width">Fit width</button><button data-v="actual">100%</button></div>
+          </div>
+          <div id="crop-ctrls" hidden>
+            <label class="check"><input id="crop" type="checkbox" aria-describedby="crop-hint"> Crop white margins</label>
+            <p class="hint" id="crop-hint">Trims the empty border around your pages on every screen, like the crop setting in e-reader apps. Headers, page numbers and pictures are kept.</p>
           </div>
         </div>
         <p class="arr-help" id="arr-help" hidden>Drag screens to move them. Edges and centers snap to each other (hold Alt or Option to stop snapping). Double-click a screen or use its ⟳ button to rotate it. With a keyboard, press Tab to pick a screen, the arrow keys to move it (hold Shift to move 1″ at a time) and R to rotate it. <button class="linkish" id="arr-reset" type="button">Reset layout</button></p>
@@ -948,6 +961,7 @@ $("#reset-btn").addEventListener("click", () => {
   for (const k of Object.keys(S)) delete S[k];
   Object.assign(S, defaults()); save();
   document.querySelectorAll(".seg[id]").forEach(el => el.querySelectorAll("button[data-v]").forEach(b => { const key = el.id === "scaleMode" ? "scale" : el.id; if (key in S) b.setAttribute("aria-pressed", String(S[key] === b.dataset.v)); }));
+  $("#pdf-status").hidden = true;
   buildPaperMenu(); renderAll();
 });
 // keyboard: Tab to a screen, arrows move it (Shift = 1 inch), R rotates
@@ -1659,13 +1673,14 @@ function syncVisibility() {
   $("#paperOrient").parentElement.hidden = S.paper === "upload" || S.paper === "none";
   $("#fit").parentElement.hidden = S.paper === "none";
   $("#spreadAll").parentElement.hidden = S.paper === "none";
-  $("#page-ctrls").hidden = $("#open-pdf").hidden = S.content !== "page";
+  $("#page-ctrls").hidden = $("#pdf-toolbar").hidden = S.content !== "page";
   const pdfActive = S.content === "page" && S.paper === "upload" && !!pdf.img;
   for (const note of document.querySelectorAll(".pdf-share-note")) {
     note.hidden = !pdfActive;
     note.textContent = pdfActive ? "Recipients see a US Letter example. Your PDF stays on your device." : "";
   }
-  $("#crop-ctrls").hidden = !(S.paper === "upload" && pdf.img);
+  $("#pdf-pager").hidden = !pdfActive || pdf.pages < 2;
+  $("#crop-ctrls").hidden = !pdfActive;
   $("#crop").checked = !!S.crop;
   $("#video").value = S.video; $("#ebookPt").value = String(S.ebookPt);
   $("#video-ctrls").hidden = S.content !== "video";
@@ -1693,7 +1708,12 @@ $("#video").addEventListener("change", e => { S.video = e.target.value; save(); 
 $("#ebookPt").innerHTML = EBOOK_PTS.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
 $("#ebookPt").value = String(S.ebookPt);
 $("#ebookPt").addEventListener("change", e => { S.ebookPt = +e.target.value; save(); renderStage(); renderCards(); });
-$("#paper").addEventListener("change", e => { S.paper = e.target.value; save(); renderAll(); if (S.paper === "upload" && !pdf.img) $("#pdf-file").click(); });
+$("#paper").addEventListener("change", e => {
+  S.paper = e.target.value;
+  $("#pdf-status").hidden = S.paper !== "upload" || !pdf.img;
+  save(); renderAll();
+  if (S.paper === "upload" && !pdf.img) $("#pdf-file").click();
+});
 $("#site").innerHTML = SITES.map(([v, t]) => `<option value="${v}">${t}</option>`).join("");
 $("#site").addEventListener("change", e => { S.site = e.target.value; save(); renderStage(); renderCards(); });
 ["mode", "content", "order", "anchor", "units", "scaleMode", "paperOrient", "siteLayout"].forEach(id => bindSeg(id, id === "scaleMode" ? "scale" : id));
@@ -1889,6 +1909,7 @@ let pdfOpens = 0; // counts PDFs chosen, so a slow earlier one can never replace
 async function openPdf(file) {
   const ticket = ++pdfOpens, stale = () => ticket !== pdfOpens;
   const status = $("#pdf-status");
+  status.hidden = false;
   status.textContent = "Reading " + file.name + "…";
   let lib;
   try { lib = await loadPdfjs(); } catch (err) {
@@ -1913,7 +1934,7 @@ async function openPdf(file) {
     pdf.pages = pdf.doc.numPages; pdf.page = 1; pdf.name = file.name.replace(/\.pdf$/i, "");
     await renderPdfPage();
     if (stale()) return;
-    S.paper = "upload"; $("#paper").value = "upload"; save();
+    S.paper = "upload"; $("#paper").value = "upload"; status.hidden = false; save();
     renderAll();
   } catch (err) {
     if (stale()) return; // replaced by a newer PDF while loading: nothing went wrong
@@ -1945,15 +1966,16 @@ async function renderPdfPage() {
   if (S.crop) await prepareCrop();
   if (stale()) return;
   pdfStatus();
-  $("#pdf-pager").hidden = pdf.pages < 2;
-  $("#pg-label").textContent = `${pdf.page} / ${pdf.pages}`;
+  $("#pg-number").value = pdf.page;
+  $("#pg-number").max = pdf.pages;
+  $("#pg-total").textContent = `of ${pdf.pages}`;
 }
 function pdfStatus() {
   if (!pdf.img) return;
   const c = cropOf(), mm = v => (v * 25.4).toFixed(0);
   const cw = c && pdf.w * c[0].w, ch = c && pdf.h * c[0].h;
   const crop = !S.crop ? "" : pdf.scan ? " Finding the margins…" : c ? ` Cropped to ${cw.toFixed(2)} × ${ch.toFixed(2)} in (${mm(cw)} × ${mm(ch)} mm).` : " No white margins to crop on this page.";
-  $("#pdf-status").textContent = `${pdf.name}: page ${pdf.page} is ${pdf.w.toFixed(2)} × ${pdf.h.toFixed(2)} in (${mm(pdf.w)} × ${mm(pdf.h)} mm).${crop} Two-page views show pages ${pdf.page} and ${pdf.page + 1}.`;
+  $("#pdf-status").textContent = `${pdf.name}: page ${pdf.page} is ${pdf.w.toFixed(2)} × ${pdf.h.toFixed(2)} in (${mm(pdf.w)} × ${mm(pdf.h)} mm).${crop} ${pdf.page < pdf.pages ? `Two-page views show pages ${pdf.page} and ${pdf.page + 1}.` : "Last page."}`;
 }
 
 // ---------- Crop white margins ----------
@@ -2085,9 +2107,25 @@ const drop = $("#drop");
 ["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
 ["dragleave", "drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
 drop.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (f) openPdf(f); });
-const turn = async d => { if (!pdf.doc) return; const n = pdf.page + d; if (n < 1 || n > pdf.pages) return; pdf.page = n; await renderPdfPage(); renderAll(); };
-$("#pg-prev").addEventListener("click", () => turn(-1));
-$("#pg-next").addEventListener("click", () => turn(1));
+async function goToPdfPage(n) {
+  const doc = pdf.doc;
+  if (!doc || !Number.isInteger(n) || n < 1 || n > pdf.pages) return;
+  pdf.page = n;
+  try {
+    await renderPdfPage();
+    if (pdf.doc === doc && pdf.page === n) renderAll();
+  } catch (err) {
+    if (pdf.doc !== doc || pdf.page !== n) return;
+    console.error(err);
+    $("#pdf-status").textContent = "Couldn't display that PDF page.";
+  }
+}
+$("#pdf-pager").addEventListener("submit", e => {
+  e.preventDefault();
+  goToPdfPage($("#pg-number").valueAsNumber);
+});
+$("#pg-prev").addEventListener("click", () => goToPdfPage(pdf.page - 1));
+$("#pg-next").addEventListener("click", () => goToPdfPage(pdf.page + 1));
 
 // the uploaded PDF isn't kept between visits, so fall back to Letter
 if (S.paper === "upload") S.paper = "us-letter-paper";

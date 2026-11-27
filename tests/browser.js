@@ -271,12 +271,28 @@ async function pdfs() {
   await p.evaluate(() => { for (let k = 0; k < 3; k++) document.getElementById("pg-next").click(); });
   let st = await pdfSettled(p);
   c = await cards(p); shapes = await imageShapes(p);
-  check("after three quick page turns, page 5 (4 × 6 in) is shown", /page 5 is 4\.00 × 6\.00 in/.test(st) && (await p.textContent("#pg-label")) === "5 / 6", st);
+  check("after three quick page turns, page 5 (4 × 6 in) is shown", /page 5 is 4\.00 × 6\.00 in/.test(st) && await p.inputValue("#pg-number") === "5" && await p.textContent("#pg-total") === "of 6", st);
   check("…with page 5's own image and fit, 125% (no leftover from the slow page 3)", shapes.length === 1 && near(shapes[0], 4 / 6, 0.02) && c[0]["Size vs. printed page"] === "125%", JSON.stringify(shapes) + " " + c[0]["Size vs. printed page"]);
   await click(p, '#spreadAll button[data-v="spread"]');
   await p.evaluate(() => { for (let k = 0; k < 4; k++) document.getElementById("pg-prev").click(); });
   st = await pdfSettled(p); shapes = await imageShapes(p);
   check("quick turns back to page 1 in two-page view show pages 1 and 2 (portrait, then landscape)", /page 1 is 5\.00 × 7\.00 in/.test(st) && shapes.length === 2 && near(shapes[0], 5 / 7, 0.02) && near(shapes[1], 7 / 5, 0.02), st + " " + JSON.stringify(shapes));
+  await click(p, '#spreadAll button[data-v="single"]');
+  const pageNumber = p.locator("#pg-number");
+  await pageNumber.fill("5");
+  await pageNumber.press("Enter");
+  await p.waitForFunction(() => /page 5 is/.test(document.querySelector("#pdf-status").textContent));
+  shapes = await imageShapes(p);
+  check("Enter jumps directly to the typed page in single-page view", shapes.length === 1 && near(shapes[0], 4 / 6, 0.02), JSON.stringify(shapes));
+  await click(p, '#spreadAll button[data-v="spread"]');
+  await pageNumber.fill("7");
+  await p.locator("#pdf-pager").getByRole("button", { name: "Go" }).click();
+  check("the page field rejects numbers beyond the end", await pageNumber.evaluate(el => el.validity.rangeOverflow) && /page 5 is/.test(await pdfStatus(p)));
+  await pageNumber.fill("1");
+  await p.locator("#pdf-pager").getByRole("button", { name: "Go" }).click();
+  await p.waitForFunction(() => /page 1 is/.test(document.querySelector("#pdf-status").textContent));
+  shapes = await imageShapes(p);
+  check("Go jumps to the first page of a spread", shapes.length === 2 && near(shapes[0], 5 / 7, 0.02) && near(shapes[1], 7 / 5, 0.02), JSON.stringify(shapes));
   await click(p, '#spreadAll button[data-v="single"]');
   // Replacing the PDF while the previous one is still loading: the newest file wins
   await p.setInputFiles("#pdf-file", { name: "slow.pdf", mimeType: "application/pdf", buffer: slowPdf() });
@@ -296,6 +312,31 @@ async function pdfs() {
   p.errors = p.errors.filter(e => !/Invalid PDF|InvalidPDFException/.test(e)); // logged on purpose for the bad file
   noErrors(p, "PDF");
   await ctx.close();
+
+  for (const [width, height] of [[320, 568], [768, 1024], [1024, 768]]) {
+    const { ctx: mobile, p: tablet } = await open({
+      state: { sel: sel("c-tri"), content: "page" },
+      ctxOptions: { viewport: { width, height }, screen: { width, height }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 },
+    });
+    await tablet.setInputFiles("#pdf-file", { name: "sizes.pdf", mimeType: "application/pdf", buffer: sizesPdf() });
+    await tablet.waitForSelector("#pg-number");
+    check(`${width} × ${height}: PDF controls fit above the drawing`, await tablet.locator("#pdf-toolbar").evaluate(toolbar => {
+      const drawing = document.querySelector("#stage").getBoundingClientRect();
+      const controls = [...toolbar.querySelectorAll("button, input")].filter(el => el.getClientRects().length);
+      return toolbar.getBoundingClientRect().bottom <= drawing.top && controls.every(el => el.getBoundingClientRect().right <= innerWidth) && document.documentElement.scrollWidth <= innerWidth;
+    }));
+    const switcher = tablet.locator(width <= 700 ? "#content2" : "#content");
+    const modeNames = width <= 700 ? ["Video", "E-book", "Web", "None", "Pages"] : ["Video", "E-book", "Website", "Nothing", "Pages"];
+    let switched = true;
+    for (const mode of modeNames) {
+      const button = switcher.getByRole("button", { name: mode, exact: true });
+      await button.click();
+      switched = switched && await button.getAttribute("aria-pressed") === "true" && await tablet.locator("#pdf-toolbar").isVisible() === (mode === "Pages");
+    }
+    check(`${width} × ${height}: all five modes work with a PDF loaded`, switched && await tablet.locator("#pg-number").isVisible());
+    noErrors(tablet, `PDF at ${width} × ${height}`);
+    await mobile.close();
+  }
 
   // The PDF reader can't be downloaded (flaky connection): a clear message, and it works once it can load
   let block = true;

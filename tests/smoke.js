@@ -172,9 +172,27 @@ async function run(browser, base, label, ctxOptions) {
   const pdfButton = p.getByRole("button", { name: "Open a PDF" });
   check("Pages shows Open a PDF without loading pdf.js", await pdfButton.isVisible() && await p.evaluate(() => !performance.getEntriesByType("resource").some(e => e.name.includes("/pdfjs/"))));
   const [picker] = await Promise.all([p.waitForEvent("filechooser"), pdfButton.click()]);
-  await picker.setFiles({ name: "test.pdf", mimeType: "application/pdf", buffer: tinyPdf() });
+  await picker.setFiles({ name: "test.pdf", mimeType: "application/pdf", buffer: makePdf([{ w: 360, h: 504, draw: "" }, { w: 504, h: 360, draw: "" }]) });
   const pdfOk = await p.waitForFunction(() => /5\.00 × 7\.00 in/.test(document.querySelector("#pdf-status").textContent), null, { timeout: 15000 }).then(() => true, () => false);
   check("PDF opens and reports its page size", pdfOk, await p.textContent("#pdf-status"));
+  check("page navigation, fit, spread and crop sit together above the drawing", await p.locator("#pdf-toolbar").evaluate(toolbar => {
+    const stage = document.querySelector("#stage");
+    return ["#open-pdf", "#pg-number", "#fit", "#spreadAll", "#crop"].every(id => {
+      const control = toolbar.querySelector(id);
+      return control?.getBoundingClientRect().height > 0;
+    }) && toolbar.getBoundingClientRect().bottom <= stage.getBoundingClientRect().top;
+  }));
+  if (phone) {
+    check("all five quick modes and Share fit beside each other with a PDF loaded", await p.locator("#quickbar").evaluate(bar => {
+      const shareBounds = bar.querySelector("[data-share]").getBoundingClientRect();
+      const modes = [...bar.querySelectorAll("#content2 button")];
+      const note = bar.querySelector(".pdf-share-note");
+      return modes.length === 5 && modes.every(button => {
+        const bounds = button.getBoundingClientRect();
+        return bounds.right <= shareBounds.left && bounds.width > 0 && button.scrollWidth <= button.clientWidth;
+      }) && note.getBoundingClientRect().top >= shareBounds.bottom;
+    }));
+  }
   const share = p.locator("[data-share]").filter({ visible: true }).first();
   const note = p.locator("#" + await share.getAttribute("aria-describedby"));
   check("the visible Share control explains the PDF fallback and privacy", await note.isVisible() && /US Letter.*stays on your device/.test(await note.textContent()));

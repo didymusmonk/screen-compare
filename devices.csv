@@ -78,18 +78,18 @@ Surface Go (1st gen),tablet pc,10.0,1800,1200
 Surface Laptop Studio 2 / Studio,tablet pc,14.4,2400,1600
 "Surface Book 3 / Book 2 (13.5"")",tablet pc,13.5,3000,2000
 "Surface Book 3 / Book 2 (15"")",tablet pc,15.0,3240,2160
-Surface Book (1st gen),tablet pc,13.5,3000,2000
+Surface Book (1st gen) / Book with Performance Base,tablet pc,13.5,3000,2000
 Surface Duo 2 (one screen),tablet pc,5.8,1892,1344
 Surface Duo (one screen),tablet pc,5.6,1800,1350
 "Surface Laptop 7th Edition 13.8""",laptop,13.8,2304,1536
 "Surface Laptop 7th Edition 15""",laptop,15.0,2496,1664
 Surface Laptop 13-inch (2025),laptop,13.0,1920,1280
-"Surface Laptop 3 / 4 / 5 (13.5"")",laptop,13.5,2256,1504
-"Surface Laptop 3 / 4 / 5 (15"")",laptop,15.0,2496,1664
+"Surface Laptop 3 / 4 / 5 / 6 (13.5"")",laptop,13.5,2256,1504
+"Surface Laptop 3 / 4 / 5 / 6 (15"")",laptop,15.0,2496,1664
 Surface Laptop / Laptop 2,laptop,13.5,2256,1504
-Surface Laptop Go 3 / Go 2 / Go,laptop,12.4,1536,1024
+Surface Laptop Go 3 / Go 2 / Go,laptop,12.45,1536,1024
 Surface Laptop SE,laptop,11.6,1366,768
-Surface Studio 2+ / Studio 2,monitor,28.0,4500,3000
+Surface Studio 2+ / Studio 2 / Studio,monitor,28.0,4500,3000
 Galaxy S26 Ultra,phone,6.9,3120,1440
 Galaxy S26+,phone,6.7,3120,1440
 Galaxy S26,phone,6.3,2340,1080

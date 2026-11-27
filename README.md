@@ -27,6 +27,19 @@ Surface Pro 9,tablet pc,13.0,2880,1920
 
 To edit it on GitHub, open `devices.csv`, click the pencil icon, make your change and click **Commit changes**. The live site updates in a minute or two.
 
+## The PDF reader (pdf.js)
+
+PDF previews use [pdf.js](https://mozilla.github.io/pdf.js/) **6.5.438** by Mozilla, the "legacy" build (the one that supports Safari), in [`pdfjs/6.5.438/`](pdfjs/6.5.438/). It loads only when someone opens a PDF, and works offline once a PDF has been opened online. The folder is named after the version so a visitor's saved copy of one version can never mix with another.
+
+To update it later:
+
+1. Check the latest version on [npm](https://www.npmjs.com/package/pdfjs-dist) and read the [release notes](https://github.com/mozilla/pdf.js/releases) since 6.5.438, looking for changes to `getDocument()` options, the worker or supported browsers.
+2. Download the package: `npm pack pdfjs-dist@<version>` and unpack it (`tar xzf pdfjs-dist-<version>.tgz`).
+3. Make a folder `pdfjs/<version>/` and copy into it, unchanged, from the package's **`legacy/build/`** folder: `pdf.min.mjs` and `pdf.worker.min.mjs`; the package's `LICENSE`; and from its `wasm/` folder into `pdfjs/<version>/wasm/`: `jbig2.wasm`, `openjpeg.wasm`, `qcms_bg.wasm`, `jbig2_nowasm_fallback.js`, `openjpeg_nowasm_fallback.js` and the `LICENSE_*` files for JBIG2, OpenJPEG and QCMS. Always take every file from the same package so the library and worker versions match.
+4. In `index.html`, change the folder in `const PDFJS = ... "pdfjs/6.5.438/"`. In `sw.js`, change `PDFJS_VERSION` to the same number.
+5. Delete the old `pdfjs/<old version>/` folder.
+6. Run `node tests/smoke.js` (see [`tests/README.md`](tests/README.md)). It checks that the three version numbers agree, and that PDFs open online and offline. Then try a PDF on an iPhone.
+
 ## License
 
-MIT License, © 2026 DidymusMonk. See [LICENSE](LICENSE). The PDF preview uses [pdf.js](https://mozilla.github.io/pdf.js/) 3.11.174 by Mozilla, included in [`pdfjs/`](pdfjs/) under the Apache License 2.0 ([pdfjs/LICENSE](pdfjs/LICENSE)). Product names are trademarks of their owners.
+MIT License, © 2026 DidymusMonk. See [LICENSE](LICENSE). The PDF preview uses [pdf.js](https://mozilla.github.io/pdf.js/) 6.5.438 by Mozilla, included in [`pdfjs/6.5.438/`](pdfjs/6.5.438/) under the Apache License 2.0 ([LICENSE](pdfjs/6.5.438/LICENSE)), with image decoders under their own licenses in [`wasm/`](pdfjs/6.5.438/wasm/). Product names are trademarks of their owners.

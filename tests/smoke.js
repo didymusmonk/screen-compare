@@ -14,7 +14,7 @@ const path = require("path");
 const { chromium, devices } = require("playwright");
 
 const ROOT = path.join(__dirname, "..");
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".csv": "text/csv", ".svg": "image/svg+xml", ".png": "image/png", ".webmanifest": "application/manifest+json" };
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".wasm": "application/wasm", ".csv": "text/csv", ".svg": "image/svg+xml", ".png": "image/png", ".webmanifest": "application/manifest+json" };
 let axeSource = null;
 try { axeSource = fs.readFileSync(require.resolve("axe-core/axe.min.js"), "utf8"); } catch (e) { /* axe-core not installed: accessibility check is skipped */ }
 
@@ -227,6 +227,9 @@ async function run(browser, base, label, ctxOptions) {
     await p.reload();
     const offOk = await p.waitForSelector("#results .res", { timeout: 8000 }).then(() => true, () => false);
     check("opens offline after the first visit", offOk);
+    await p.setInputFiles("#pdf-file", { name: "offline.pdf", mimeType: "application/pdf", buffer: tinyPdf() });
+    const offPdf = await p.waitForFunction(() => /^offline: .*5\.00 × 7\.00 in/.test(document.querySelector("#pdf-status").textContent), null, { timeout: 15000 }).then(() => true, () => false);
+    check("PDFs open offline after one was opened online", offPdf, await p.textContent("#pdf-status"));
     await ctx.setOffline(false);
   }
 
@@ -234,7 +237,24 @@ async function run(browser, base, label, ctxOptions) {
   await ctx.close();
 }
 
+// The pdf.js version must be the same in index.html, sw.js and the pdfjs/ folder name,
+// and the library and its worker must be the same version
+function pdfjsVersions() {
+  console.log("\nPDF reader files");
+  const page = /pdfjs\/([\d.]+)\//.exec(fs.readFileSync(path.join(ROOT, "index.html"), "utf8"));
+  const sw = /PDFJS_VERSION = "([\d.]+)"/.exec(fs.readFileSync(path.join(ROOT, "sw.js"), "utf8"));
+  const v = page && page[1], dir = path.join(ROOT, "pdfjs", v || "-");
+  const inFile = f => { try { return (/pdfjsVersion = ([\d.]+)/.exec(fs.readFileSync(path.join(dir, f), "utf8")) || [])[1]; } catch (e) { return null; } };
+  check("index.html and sw.js name the same pdf.js version", v && sw && v === sw[1], `${v} vs ${sw && sw[1]}`);
+  check("pdf.min.mjs and pdf.worker.min.mjs are that version", inFile("pdf.min.mjs") === v && inFile("pdf.worker.min.mjs") === v);
+  const wasm = ["jbig2.wasm", "openjpeg.wasm", "qcms_bg.wasm", "jbig2_nowasm_fallback.js", "openjpeg_nowasm_fallback.js"];
+  check("image decoders for scanned PDFs are included (wasm/)", wasm.every(f => fs.existsSync(path.join(dir, "wasm", f))));
+  const others = fs.readdirSync(path.join(ROOT, "pdfjs")).filter(f => f !== v);
+  check("no leftover files from another pdf.js version", others.length === 0, others.join(", "));
+}
+
 (async () => {
+  pdfjsVersions();
   const server = await serve();
   const base = `http://127.0.0.1:${server.address().port}/`;
   const browser = await chromium.launch();

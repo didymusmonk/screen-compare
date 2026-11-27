@@ -2,6 +2,7 @@
 
 `smoke.js` opens the site in a headless Chromium browser, at desktop size and as an iPhone 13, and checks that the main features still work:
 
+- the pdf.js version is the same in `index.html`, `sw.js` and the `pdfjs/` folder, and the library, worker and image decoders are all there
 - the device list loads, and the two default screens are shown
 - adding and removing a device from search
 - every content mode (pages, video, e-book, website, nothing) and layout (overlay, side by side, free arrange)
@@ -10,7 +11,7 @@
 - "Crop white margins" finds the content on an off-white scan (ignoring dust), crops facing book pages separately, keeps 100% at printed size, and the card statistics and preview match the cropped page
 - on the phone: no sideways scrolling, and the quick controls bar shows
 - no accessibility problems found by axe-core
-- the site opens offline after the first visit
+- the site opens offline after the first visit, and so do PDFs once one was opened online
 - no JavaScript errors
 
 It starts its own local web server and blocks the analytics script, so test runs don't count as visits.

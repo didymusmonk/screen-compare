@@ -1558,27 +1558,39 @@ $("#cal-btn").addEventListener("click", () => { $("#cal").hidden = !$("#cal").hi
 $("#cal-done").addEventListener("click", () => { $("#cal").hidden = true; S.scale = "actual"; save(); document.querySelectorAll("#scaleMode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === "actual"))); renderStage(); });
 
 // PDF upload (pdf.js runs in the page; nothing is uploaded anywhere)
-// The PDF reader (about 100 KB) loads only when someone opens a PDF.
-const PDFJS = "pdfjs/"; // pdf.js 3.11.174, hosted in this repo (Apache-2.0)
-const loadScript = src => new Promise((res, rej) => {
-  const sc = document.createElement("script");
-  sc.src = src; sc.onload = res; sc.onerror = () => rej(new Error(src));
-  document.head.appendChild(sc);
-});
+// The PDF reader (about 150 KB, plus a 400 KB background worker) loads only when someone opens a PDF.
+// It's pdf.js 6.5.438 by Mozilla (Apache-2.0), the "legacy" build, which is the one that supports Safari.
+// The folder is named after the version, so a new version never mixes with saved copies of an old one.
+// To upgrade it, follow the steps in the README (and change PDFJS_VERSION in sw.js to match).
+const PDFJS = new URL("pdfjs/6.5.438/", document.baseURI).href;
+// Safari 17 lacks Response.bytes(), which pdf.js uses to fetch its image decoders (wasm/)
+if (typeof Response !== "undefined" && !Response.prototype.bytes) Response.prototype.bytes = async function () { return new Uint8Array(await this.arrayBuffer()); };
 let pdfjsReady = null;
 function loadPdfjs() {
-  if (!pdfjsReady) pdfjsReady = loadScript(PDFJS + "pdf.min.js")
-    .catch(e => { pdfjsReady = null; throw e; });
+  if (!pdfjsReady) pdfjsReady = import(PDFJS + "pdf.min.mjs").then(lib => {
+    lib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.mjs"; // the worker must be the same version
+    return lib;
+  }).catch(e => { pdfjsReady = null; throw e; });
   return pdfjsReady;
 }
 async function openPdf(file) {
   const status = $("#pdf-status");
   status.textContent = "Reading " + file.name + "…";
-  try { await loadPdfjs(); } catch (err) { status.textContent = "The PDF reader didn't load. Check your connection and try again."; return; }
+  let lib;
+  try { lib = await loadPdfjs(); } catch (err) {
+    console.error(err);
+    status.textContent = navigator.onLine === false ? "The PDF reader didn't load. Connect to the internet once, then try again."
+      : "The PDF reader didn't load. Reload the page and try again. PDF previews need Safari 18, or a recent Chrome, Edge or Firefox.";
+    return;
+  }
   try {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + "pdf.worker.min.js";
     const data = new Uint8Array(await file.arrayBuffer());
-    pdf.doc = await pdfjsLib.getDocument({ data, isEvalSupported: false }).promise;
+    // wasmUrl: decoders for scanned (JBIG2) and JPEG 2000 images, and color profiles.
+    // pdf.js 6 never turns PDF content into JavaScript, so the old isEvalSupported: false safeguard is now built in.
+    const doc = await lib.getDocument({ data, wasmUrl: PDFJS + "wasm/" }).promise;
+    const old = pdf.doc;
+    pdf.doc = doc;
+    if (old) old.loadingTask.destroy(); // free the previous PDF and its worker
     pdf.ink = new Map(); pdf.typ = null; pdf.crops = null; pdf.scan = null;
     pdf.pages = pdf.doc.numPages; pdf.page = 1; pdf.name = file.name.replace(/\.pdf$/i, "");
     await renderPdfPage();
@@ -1673,7 +1685,7 @@ async function pageInk(n) {
     const ctx = c.getContext("2d", { willReadFrequently: true }); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
     await page.render({ canvasContext: ctx, viewport: vp }).promise;
     box = inkBox(ctx.getImageData(0, 0, c.width, c.height).data, c.width, c.height);
-  } catch (err) { console.error(err); }
+  } catch (err) { if (pdf.doc === doc) console.error(err); } // a newer PDF replaced this one: nothing to report
   if (pdf.doc === doc) pdf.ink.set(n, box);
   return box;
 }

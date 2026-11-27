@@ -89,7 +89,7 @@ h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin
 .quickbar { display: none; }
 .myphone { display: grid; gap: 8px; justify-items: start; }
 .myphone-pick:empty { display: none; }
-.myphone-pick { display: grid; gap: 6px; }
+.myphone-pick { display: grid; gap: 6px; justify-items: start; }
 .more-btn { display: none; }
 .share-btn.ok { color: var(--accent); border-color: var(--accent); }
 /* Phones: the drawing and cards first, with the content switch pinned at the top */
@@ -606,35 +606,56 @@ function flash(btn, msg) {
   const t = btn.dataset.label || btn.textContent; btn.dataset.label = t; btn.textContent = msg; setTimeout(() => { btn.textContent = t; }, 1800);
 }
 
-// ---------- Compare with my phone ----------
-// Browsers report the screen in CSS pixels; times the pixel ratio that gives the real pixel count, which picks out the model.
+// ---------- Compare with my screen ----------
+// Browsers report the screen in CSS pixels; times the pixel ratio that is usually the real pixel count, which picks out
+// phones, tablets and Windows PCs. Macs report their scaled "looks like" size, so for them we match the shape instead.
 function myScreenMatches() {
   const dpr = window.devicePixelRatio || 1;
   const a = Math.round(Math.max(screen.width, screen.height) * dpr), b = Math.round(Math.min(screen.width, screen.height) * dpr);
-  const pool = BUILTIN.filter(d => (d.c === "phone" || d.c === "tablet") && !d.aspectOnly);
-  let hits = pool.filter(d => Math.abs(d.w - a) <= 2 && Math.abs(d.h - b) <= 2);
-  if (!hits.length) hits = pool.filter(d => { const k = d.w / a; return k > 1 && k < 1.6 && Math.abs(d.h / b - k) < 0.006; }); // Android phones set to a lower resolution
-  return { a, b, hits: hits.slice(0, 8) };
+  const touch = window.matchMedia && matchMedia("(pointer: coarse)").matches;
+  const isMac = /Mac/.test(navigator.userAgent) && !touch;
+  const pool = BUILTIN.filter(d => d.c !== "paper" && d.c !== "ereader" && !d.aspectOnly)
+    .filter(d => touch ? (d.c === "phone" || d.c === "tablet" || d.c === "tablet pc") : (d.c !== "phone" && d.c !== "tablet"));
+  const rank = d => ({ phone: 0, tablet: 1, laptop: 2, monitor: 3, "tablet pc": 4 })[d.c] ?? 5;
+  let hits = pool.filter(d => Math.abs(d.w - a) <= 2 && Math.abs(d.h - b) <= 2).sort((x, y) => rank(x) - rank(y) || x.d - y.d), exact = true;
+  if (!hits.length) {
+    exact = false;
+    const ar = a / b, apple = d => /^(MacBook|iMac|Apple|Pro Display)/.test(d.n);
+    hits = pool.filter(d => Math.abs(d.w / d.h - ar) / ar < 0.006 && d.w >= a * 0.6 && d.w <= a * 1.6);
+    if (isMac && hits.some(apple)) hits = hits.filter(apple);
+    hits.sort((x, y) => Math.abs(x.w - a) - Math.abs(y.w - a) || x.d - y.d);
+  }
+  return { a, b, exact, isMac, hits: hits.slice(0, 8) };
 }
 function setupMyPhone() {
   const box = $("#myphone"); if (!box) return;
-  const touch = window.matchMedia && matchMedia("(pointer: coarse)").matches;
-  if (!touch) { box.hidden = true; return; }
-  const small = Math.min(screen.width, screen.height) < 600;
   box.hidden = false;
-  box.innerHTML = `<button class="btn" type="button" id="myphone-btn">${small ? "Compare with my phone" : "Compare with this device"}</button><div class="myphone-pick" id="myphone-pick"></div>`;
+  box.innerHTML = `<button class="btn" type="button" id="myphone-btn">Compare with my screen</button><div class="myphone-pick" id="myphone-pick"></div>`;
   $("#myphone-btn").addEventListener("click", () => {
-    const { a, b, hits } = myScreenMatches(), pick = $("#myphone-pick");
-    const done = d => { addDevice(d.id); const st = $(".stage-panel"); if (st) st.scrollIntoView({ behavior: "smooth", block: "start" }); };
-    if (!hits.length) { pick.innerHTML = `<p class="hint">Couldn't tell which model this is (${a} × ${b} pixels). Search for it in "Add a device".</p>`; return; }
-    const same = hits.every(d => d.d === hits[0].d && d.w === hits[0].w && d.h === hits[0].h);
-    if (same) {
+    const { a, b, exact, isMac, hits } = myScreenMatches(), pick = $("#myphone-pick");
+    const done = d => { addDevice(d.id); pick.innerHTML = ""; const st = $(".stage-panel"); if (st) st.scrollIntoView({ behavior: "smooth", block: "start" }); };
+    const enterOwn = `<button class="linkish" type="button" data-own>Not listed? Enter your screen size</button>`;
+    if (!hits.length) { pick.innerHTML = `<p class="hint">Couldn't match a model to this screen (${a} × ${b} pixels).</p>${enterOwn}`; }
+    else if (exact && hits.every(d => d.d === hits[0].d && d.w === hits[0].w && d.h === hits[0].h)) {
       done(hits[0]);
-      pick.innerHTML = hits.length > 1 ? `<p class="hint">Added ${esc(hits[0].n)}. ${esc(hits.slice(1).map(d => d.n).join(", "))} ${hits.length > 2 ? "have" : "has"} the same screen.</p>` : "";
+      if (hits.length > 1) pick.innerHTML = `<p class="hint">Added ${esc(hits[0].n)}. ${esc(hits.slice(1).map(d => d.n).join(", "))} ${hits.length > 2 ? "have" : "has"} the same screen.</p>`;
       return;
+    } else {
+      const q = exact ? "This screen matches more than one model. Which is yours?" : `Closest matches for this screen's shape (${a} × ${b} as reported). Which is yours?`;
+      pick.innerHTML = `<p class="hint">${q}</p><div class="chips">${hits.map(d => `<button class="chip" type="button" data-id="${esc(d.id)}">${esc(d.n)} · ${d.d}″</button>`).join("")}</div>${enterOwn}`;
     }
-    pick.innerHTML = `<p class="hint">Your screen matches more than one model. Which is yours?</p><div class="chips">${hits.map(d => `<button class="chip" type="button" data-id="${esc(d.id)}">${esc(d.n)}</button>`).join("")}</div>`;
-    pick.onclick = e => { const c = e.target.closest("[data-id]"); if (c) { done(byId(c.dataset.id)); pick.innerHTML = ""; } };
+    pick.onclick = e => {
+      const c = e.target.closest("[data-id]"); if (c) { done(byId(c.dataset.id)); return; }
+      if (e.target.closest("[data-own]")) {
+        // open the custom screen form with the pixel count filled in; the diagonal is the one thing a browser can't know
+        const det = $("#custom-details"); det.open = true;
+        $("#c-name").value = "My screen";
+        if (isMac && !exact) { $("#c-w").value = ""; $("#c-h").value = ""; $("#c-aw").value = a; $("#c-ah").value = b; } // Macs report a scaled size, so only the shape is reliable
+        else { $("#c-w").value = a; $("#c-h").value = b; }
+        det.scrollIntoView({ behavior: "smooth", block: "center" }); $("#c-diag").focus({ preventScroll: true });
+        pick.innerHTML = `<p class="hint">${isMac && !exact ? "The screen's shape is filled in" : "Pixels are filled in"}. Add your screen's diagonal and press Add screen.</p>`;
+      }
+    };
   });
 }
 
@@ -1415,7 +1436,7 @@ loadDevices().catch(err => {
   $("#scale-note").textContent = "The built-in device list didn't load. Reload the page, or enter a screen yourself.";
 }).finally(() => {
   // devices renamed in the list keep working in saved layouts
-  const RENAMED = { "macbook-air-13-m2-m3-m4": "macbook-air-13-m2-to-m5", "macbook-air-15-m2-m3-m4": "macbook-air-15-m2-to-m5", "macbook-pro-16-m1-to-m4": "macbook-pro-16-m1-to-m5", "ipad-air-13-inch-m2-m3-m4": "ipad-air-13-inch-m2-to-m4", "ipad-air-11-inch-m2-m3-m4": "ipad-air-11-inch-m2-to-m4" };
+  const RENAMED = { "macbook-air-13-m2-m3-m4": "macbook-air-13-m2-to-m5", "macbook-air-15-m2-m3-m4": "macbook-air-15-m2-to-m5", "macbook-pro-16-m1-to-m4": "macbook-pro-16-m1-to-m5", "ipad-air-13-inch-m2-m3-m4": "ipad-air-13-inch-m2-to-m4", "ipad-air-11-inch-m2-m3-m4": "ipad-air-11-inch-m2-to-m4", "15-6-portable-monitor-monitor": "15-6-portable-monitor" };
   S.sel.forEach(s => { if (RENAMED[s.id]) s.id = RENAMED[s.id]; });
   S.sel = S.sel.filter(s => byId(s.id));
   S.sel.forEach(s => { if (!s.uid) s.uid = newUid(); });

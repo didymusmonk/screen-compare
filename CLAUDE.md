@@ -29,7 +29,8 @@ Inside `index.html`, all state lives in one object, `S`, and is saved to `localS
 - `parseCsv` / `loadDevices`: read `devices.csv`. The `RENAMED` map keeps old saved IDs working after a device is renamed.
 - `geom(dev, flip)`: physical width and height in inches, from the diagonal and the pixel aspect ratio.
 - `renderStage`: draws the SVG stage in three modes: side by side, overlay, or free arrange (drag, snapping guides, rotation, keyboard moves).
-- `drawPage` / `drawVideo` / `drawEbook` / `drawSite`: draw the content previews. `lorem()` supplies the shared lorem ipsum text.
+- `drawPage` / `drawVideo` / `drawEbook` / `drawSite`: draw the content previews. `lorem()` supplies the lorem ipsum text for page previews.
+- `ebookText` / `layoutEbook` / `ebookFit`: the e-book mode. `AUSTEN` holds the sample passage (Pride and Prejudice, ch. 42 to the start of ch. 43). `ebookText()` measures each word once with canvas `measureText()` (in ems), and `layoutEbook()` wraps it into lines and columns. The preview draws exactly those lines, and the card's words, lines and characters per line come from the same layout, so they always agree and don't change with zoom.
 - `dprOf(dev)`: estimates each device's display scaling (CSS pixels) for the website previews.
 - `renderCards`: the info card for each selected screen.
 - `shareUrl` / `fromShare`: share links in the form `#s=<base64url JSON>`.
@@ -44,7 +45,8 @@ Inside `index.html`, all state lives in one object, `S`, and is saved to `localS
 - **PDFs never leave the browser.** pdf.js renders them locally. It loads on demand because most visitors never open a PDF, and it is the biggest download (about 90 KB plus a 290 KB worker, compressed). It is hosted in the repo, not on a CDN, so the site depends on no outside service.
 - **The website previews are generic and unbranded** (news, search, social, shop, wiki) to avoid trademark trouble and to stay original.
 - **The default first visit shows only two screens:** iPad mini (A20 Pro) and iPad Pro 11" (M5), both portrait, with a Letter page fit. A short page suits phone visitors.
-- **Lorem text is drawn as real SVG `<text>`, ragged right.** `textLength` justification made redraws about 10× slower. `PROSE_EM` measures the browser's real serif width so that lines wrap correctly. Below 3.5 px, the text turns into gray bars.
+- **Lorem text is drawn as real SVG `<text>`, ragged right.** `textLength` justification made redraws about 10× slower. `PROSE_EM` measures the browser's real serif width so that lines wrap correctly. Below 3.5 px, the text turns into gray bars (in e-book mode, bars the length of the real lines).
+- **E-book auto columns aim for 45–75 characters per line.** Auto lays the text out in one and two columns and picks the one whose real line length is closer to that range, so it reacts to font size and screen width. The passage repeats from the start if a huge screen at a tiny size runs out. The letter heights on the cards use the font's real cap height and x-height where the browser reports them (0.7 and 0.47 em otherwise).
 - **Unreleased devices are left out** (for example, the iPad 12th gen as of Nov 2026).
 - **The device list is sorted** by category (Tablets, Phones, E-readers, Tablet PCs, Laptops, Monitors, Paper), then by brand (Apple, Samsung, Microsoft, Lenovo, Google, then others, then generic), with product families kept together and the newest models first.
 
@@ -74,7 +76,7 @@ The working copies sit outside the repo, in a Claude project folder (`/mnt/proje
 - **"Compare with my screen" is a best guess.** It uses `screen.width × devicePixelRatio`, which display scaling and browser zoom can change. On a Mac it only matches by aspect ratio, then filters to Apple models.
 - **The `dprOf()` display-scaling values are approximations**, so website previews show roughly what each device fits, not exactly.
 - **Diagonals are rounded marketing figures**, and some panels have rounded corners or notches. The sizes are accurate to about 1–2%.
-- **Lorem text width depends on the visitor's serif font.** Because `PROSE_EM` measures it, the wrapping stays sensible, but the line breaks differ between devices.
+- **Sample text width depends on the visitor's serif font.** Because it is measured, the wrapping stays sensible, but line breaks and e-book counts differ a little between devices (Georgia on iPhone versus Times on Linux, for example).
 - **The project folder adds C2PA metadata to SVG files written there**, which bloated `favicon.svg` from 316 bytes to 8 KB. Edit `favicon.svg` in the repo itself and don't copy it back from that folder.
 - **The README's device count is updated by hand.**
 

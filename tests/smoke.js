@@ -85,6 +85,24 @@ async function run(browser, base, label, ctxOptions) {
   for (const v of ["video", "ebook", "site", "none", "page"]) {
     await p.click(`${content} button[data-v="${v}"]`);
     check(`content mode "${v}" draws`, (await shapeCount(p)) > 5);
+    if (v === "ebook" && !phone) {
+      // the cards' word counts match the words drawn, and don't change with the preview's zoom
+      const ebookStats = () => p.evaluate(() => {
+        const dd = name => [...document.querySelectorAll("#cards dt")].filter(d => d.textContent === name).map(d => d.nextElementSibling.textContent);
+        const words = dd("Words per screen").reduce((n, t) => n + +t.replace(/\D/g, ""), 0);
+        const drawn = [...document.querySelectorAll("#stage .prose text")].reduce((n, t) => n + t.textContent.split(" ").filter(Boolean).length, 0);
+        return { words, drawn, all: [...document.querySelectorAll("#cards dl")].map(d => d.textContent).join("|") };
+      });
+      const setZoom = z => p.$eval("#zoom", (el, z) => { el.value = z; el.dispatchEvent(new Event("input", { bubbles: true })); }, z);
+      await setZoom(120);
+      const a = await ebookStats();
+      check("e-book word counts match the drawn text", a.words > 100 && a.words === a.drawn, `${a.words} counted, ${a.drawn} drawn`);
+      await setZoom(200);
+      const b = await ebookStats();
+      check("e-book counts don't change with zoom", a.all === b.all && b.words === b.drawn);
+      check("e-book cards show capital and x-height", a.all.includes("Capital letter height (px)") && a.all.includes("Lowercase x-height (px)"));
+      await setZoom(50);
+    }
   }
   for (const v of ["overlay", "arrange", "side"]) {
     await p.click(`#mode button[data-v="${v}"]`);

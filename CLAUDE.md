@@ -18,6 +18,7 @@ The site is static, with no build step, no framework, no backend and no npm depe
 | `index.html` | The whole app: HTML, CSS and JS in one file (about 1,500 lines) |
 | `devices.csv` | Built-in screens and paper sizes, loaded with `fetch()` at startup |
 | `manifest.webmanifest`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` | "Add to Home Screen" support |
+| `sw.js` | Service worker for offline use. The page and `devices.csv` load fresh when online (3-second limit, then the saved copy). Everything else is saved on first load. Registered only in the GitHub copy, by `wrap.sh` |
 | `favicon.svg`, `og-image.png` | Tab icon and link-preview image |
 | `pdfjs/` | pdf.js 3.11.174 (`pdf.min.js`, `pdf.worker.min.js`, Apache-2.0 `LICENSE`), copied unchanged from the `pdfjs-dist` npm package |
 | `README.md`, `LICENSE` | Public description and the MIT license (© 2026 DidymusMonk) |
@@ -53,6 +54,7 @@ Inside `index.html`, all state lives in one object, `S`, and is saved to `localS
 - Every user-facing string is plain English in sentence case. Avoid jargon, or explain it in the glossary.
 - Accessibility is required. Text contrast must be at least 4.5:1 in both themes, every control must work by keyboard, and the SVG stage has an `aria-label`. Arrange mode announces changes through `#sr-live`, and focus is restored after redraws. Check changes with axe-core.
 - Phone layout (≤700 px): sticky `#quickbar`, a "More options" toggle, touch targets of at least 44 px, and 16 px inputs so iOS doesn't zoom in.
+- If a change to `sw.js` itself, or to a file it saves on first load (icons, `pdfjs/`), must reach visitors who already have it saved, bump `VERSION` in `sw.js`. Changes to `index.html` and `devices.csv` show up without that.
 - Device rows in the CSV are `name,type,diagonal,width,height`. Paper rows leave `diagonal` empty and give inches. Keep the README's device count in sync.
 - Commit straight to `main` with a short, plain-English message.
 
@@ -61,7 +63,7 @@ Inside `index.html`, all state lives in one object, `S`, and is saved to `localS
 The working copies sit outside the repo, in a Claude project folder (`/mnt/project-files/screen-compare/`):
 
 - `index.html` there is the **Artifact preview source**. It has no `<!doctype>`/`<head>` wrapper. Preview: https://claude.ai/artifact/WhqeFfcgT7a4HBnUySpaFa (publish it with `devices.csv` as an extra file).
-- `wrap.sh` builds the repo's `index.html` from that source. It adds the doctype, meta description, Open Graph and Twitter tags, favicon, canonical link, manifest and Apple tags, theme color, and the GoatCounter script (in the GitHub copy only). Always rebuild with it. Don't hand-edit the two copies separately.
+- `wrap.sh` builds the repo's `index.html` from that source. It adds the doctype, meta description, Open Graph and Twitter tags, favicon, canonical link, manifest and Apple tags, theme color, and the service worker registration and the GoatCounter script (both in the GitHub copy only). Always rebuild with it. Don't hand-edit the two copies separately.
 - `gen_csv.py` + `raw.json` generate and sort `devices.csv`.
 - Tests are throwaway Playwright scripts (phone emulation, touch drag, axe scans, share-link round trips), run against `python3 -m http.server`.
 
@@ -78,6 +80,5 @@ The working copies sit outside the repo, in a Claude project folder (`/mnt/proje
 ## Next steps (ideas, not commitments)
 
 - Add new devices as they ship (iPad 12th gen when it's released, 2027 phones).
-- Offline support (a service worker) so the Home Screen app works without signal.
 - A search for "devices similar in size to X".
 - Keep a small saved Playwright smoke test in the repo, so checks don't have to be rewritten each time.

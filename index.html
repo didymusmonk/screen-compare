@@ -1533,6 +1533,7 @@ loadDevices().catch(err => {
 });
 })();
 </script>
+<script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));</script>
 <script data-goatcounter="https://didymusmonk.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
 </body>

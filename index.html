@@ -507,15 +507,15 @@ const VIDEOS = [
 ];
 const EBOOK_PTS = [[8, "8 pt (very small)"], [10, "10 pt (small, mass-market paperback)"], [12, "12 pt (medium, typical book)"], [14, "14 pt"], [16, "16 pt (large)"], [18, "18 pt"], [20, "20 pt (extra large)"], [24, "24 pt"], [28, "28 pt (largest)"]];
 const EBOOK_MARGIN = 0.3; // inches on every side
-function videoFit(g) {
-  const ar = (VIDEOS.find(v => v[0] === S.video) || VIDEOS[0])[2];
+function videoFit(g, ratio = S.video) {
+  const ar = (VIDEOS.find(v => v[0] === ratio) || VIDEOS[0])[2];
   const vw = Math.min(g.w, g.h * ar), vh = vw / ar;
   return { vw, vh, ar, used: (vw * vh) / (g.w * g.h), barsTB: (g.h - vh) / 2, barsLR: (g.w - vw) / 2 };
 }
 const EBOOK_GAP = 0.5; // inches between columns
 const colsOf = sel => sel.cols || S.ebookCols;
-function ebookFit(g, mode = S.ebookCols) {
-  const em = S.ebookPt / 72, lh = em * 1.5; // inches
+function ebookFit(g, mode = S.ebookCols, pt = S.ebookPt) {
+  const em = pt / 72, lh = em * 1.5; // inches
   const th = Math.max(0, g.h - 2 * EBOOK_MARGIN), lines = Math.floor(th / lh); // lines per column
   const twOf = n => Math.max(0, (g.w - 2 * EBOOK_MARGIN - (n - 1) * EBOOK_GAP) / n);
   const lay1 = n => layoutEbook(twOf(n) / em, lines, n);
@@ -1192,6 +1192,7 @@ function dprOf(dev) {
   if (dev.c === "monitor") return q(ppi / 110); // Windows' recommended scaling for desktop monitors
   return q(ppi / 130); // laptops and tablet PCs, viewed closer
 }
+const SITE_LAYOUT_NAMES = { mobile: "Mobile", tablet: "Tablet", desktop: "Desktop" };
 function siteView(dev, g) {
   if (!g.ppi) return null;
   const dpr = dprOf(dev), vw = Math.round(g.pxW / dpr), vh = Math.round(g.pxH / dpr);
@@ -1360,21 +1361,20 @@ function ruler(x, y, totalIn, s) {
 const trunc = (t, n) => t.length > n ? t.slice(0, n - 1) + "…" : t;
 
 // ---------- Cards ----------
-// The numbers behind one card, for the content shown now. The reference table reads the same numbers,
-// so the two can never disagree. Paper sheets get only their size.
-function statsOf(s, dev, paper, content = S.content) {
+// Calculates the numbers used by device cards and reference comparisons. Paper sheets get only their size.
+function statsOf(s, dev, paper, content = S.content, ebookPt = S.ebookPt) {
   const g = geom(dev, s.flip), ppi = g.ppi;
   // megapixels come from the native pixel count, so turning the screen, zoom, calibration and display scaling can't change them
   const st = { g, ppi, area: g.area, diag: dev.sheet ? null : dev.d, mp: dev.sheet || dev.aspectOnly ? null : dev.w * dev.h / 1e6 };
   if (dev.sheet) return st;
   if (paper) {
-    const fit = fitOf(s), f = pageFit(g, spreadOf(s, paper), fit);
-    st.page = { fit, f, pt: 12 * f.k, eff: ppi ? ppi * f.k : null, shown: f.shown };
+    const fit = fitOf(s), spread = spreadOf(s, paper), f = pageFit(g, spread, fit);
+    st.page = { fit, spread, f, pt: 12 * f.k, eff: ppi ? ppi * f.k : null, shown: f.shown };
   } else if (content === "video") {
     const v = videoFit(g), pxW = ppi ? Math.round(v.vw * ppi) : null, pxH = ppi ? Math.round(v.vh * ppi) : null;
     st.video = { v, diag: Math.hypot(v.vw, v.vh), area: v.vw * v.vh, pxW, pxH, px: ppi ? pxW * pxH : null };
   } else if (content === "ebook") {
-    const cm = colsOf(s), e = ebookFit(g, cm);
+    const cm = colsOf(s), e = ebookFit(g, cm, ebookPt);
     st.ebook = { cm, e, lines: e.lines * e.cols };
   } else if (content === "site") st.site = siteView(dev, g);
   return st;
@@ -1433,9 +1433,9 @@ function renderCards() {
       </dl></div>`;
     }
     else if (!x.dev.sheet && S.content === "site") {
-      const v = st.site, NM = { mobile: "Mobile", tablet: "Tablet", desktop: "Desktop" };
+      const v = st.site;
       pdfHtml = v ? `<div class="pdfbox"><div><strong>${esc(SITES.find(t => t[0] === S.site)[1])}</strong></div><dl>
-        <dt>Layout</dt><dd>${NM[v.mode]}${v.mode !== v.natural ? ` (forced, would be ${NM[v.natural].toLowerCase()})` : ""}</dd>
+        <dt>Layout</dt><dd>${SITE_LAYOUT_NAMES[v.mode]}${v.mode !== v.natural ? ` (forced, would be ${SITE_LAYOUT_NAMES[v.natural].toLowerCase()})` : ""}</dd>
         <dt>Browser width</dt><dd>${v.vw} × ${v.vh} CSS px</dd>
         <dt>Display scaling</dt><dd>${v.dpr}× (${Math.round(v.dpr * 100)}%)</dd>
         <dt>16 px body text</dt><dd>looks like ${v.bodyPt.toFixed(1)} pt print</dd>
@@ -1470,8 +1470,8 @@ function renderCards() {
 }
 
 // ---------- Reference table ----------
-// Pick one card as the reference and every other screen is shown as a percentage of it. Each column reads a number
-// that statsOf() already worked out for the cards; "v" gives the number compared, "t" the text shown.
+// Each column defines its heading, numeric comparison and text. A null comparison means text only.
+const REF_EBOOK_PT = 12;
 const REF_COLS = {
   screen: ["Screen size", [
     ["Width", st => st.g.w, st => fmtLen(st.g.w)],
@@ -1480,26 +1480,37 @@ const REF_COLS = {
     ["Area", st => st.area, st => areaTxt(st.area)],
     ["PPI", st => st.ppi, st => String(Math.round(st.ppi))],
     ["Megapixels", st => st.mp, st => st.mp.toFixed(2)],
+    ["Native resolution", st => st.mp, st => `${st.g.pxW} × ${st.g.pxH}`],
+    ["Aspect ratio", st => Math.max(st.g.pxW, st.g.pxH) / Math.min(st.g.pxW, st.g.pxH), st => aspectLabel(st.g.pxW, st.g.pxH)],
   ]],
   page: ["Pages", [
-    ["12 pt text looks like", st => st.page && st.page.pt, st => st.page.pt.toFixed(1) + " pt"],
-    ["Pixels per page inch", st => st.page && st.page.eff, st => String(Math.round(st.page.eff))],
+    ...[["page", "Fit page"], ["width", "Fit width"]].map(([fit, label]) => [
+      `12 pt text · ${label}`, st => st.page && 12 * pageFit(st.g, st.page.spread, fit).k,
+      (_, pt) => pt.toFixed(1) + " pt",
+    ]),
     ["Page visible at once", st => st.page && st.page.shown, st => Math.round(st.page.shown * 100) + "%"],
   ]],
   video: ["Video", [
     ["Picture diagonal", st => st.video && st.video.diag, st => fmtLen(st.video.diag)],
     ["Picture area", st => st.video && st.video.area, st => areaTxt(st.video.area)],
     ["Picture pixels", st => st.video && st.video.px, st => `${st.video.pxW} × ${st.video.pxH}`],
+    ...["16:9", "2.39:1", "4:3", "9:16"].map(ratio => [
+      `Screen used · ${ratio}`, st => st.video && videoFit(st.g, ratio).used,
+      (_, used) => Math.round(used * 100) + "%",
+    ]),
   ]],
   ebook: ["E-book", [
     ["Words per screen", st => st.ebook && st.ebook.e.words, st => st.ebook.e.words.toLocaleString()],
     ["Characters per line", st => st.ebook && st.ebook.e.cpl, st => String(st.ebook.e.cpl)],
     ["Lines per screen", st => st.ebook && st.ebook.lines, st => String(st.ebook.lines)],
+    ["Columns", st => st.ebook && st.ebook.e.cols, st => String(st.ebook.e.cols)],
   ]],
   site: ["Website", [
     ["Browser width (CSS px)", st => st.site && st.site.vw, st => String(st.site.vw)],
     ["Browser height (CSS px)", st => st.site && st.site.vh, st => String(st.site.vh)],
-    ["Browser area (CSS px²)", st => st.site && st.site.vw * st.site.vh, st => (st.site.vw * st.site.vh).toLocaleString()],
+    ["Estimated display scaling", st => st.site && st.site.dpr, st => `${st.site.dpr}×`],
+    ["16 CSS px body text", st => st.site && st.site.bodyPt, st => st.site.bodyPt.toFixed(1) + " pt"],
+    ["Layout", null, st => st.site && SITE_LAYOUT_NAMES[st.site.mode]],
   ]],
 };
 // ((value / reference) − 1) × 100, or null when there is nothing fair to compare (a missing, zero or broken number)
@@ -1524,8 +1535,8 @@ function renderRef(items, previewPaper) {
   const modes = Object.keys(REF_COLS);
   const focusedTab = box.contains(document.activeElement) && document.activeElement.dataset.refTab;
   const paper = mode === S.content ? previewPaper : paperDims(mode);
-  const comparison = mode === S.content || mode === "screen"
-    ? items : items.map(x => ({ ...x, st: statsOf(x.s, x.dev, paper, mode) }));
+  const useCardStats = mode === "screen" || (mode === S.content && (mode !== "ebook" || S.ebookPt === REF_EBOOK_PT));
+  const comparison = useCardStats ? items : items.map(x => ({ ...x, st: statsOf(x.s, x.dev, paper, mode, REF_EBOOK_PT) }));
   const comparisonRef = comparison.find(x => x.s.uid === S.ref);
   const tabs = modes.map(key => `<button type="button" role="tab" id="ref-tab-${key}" data-ref-tab="${key}" aria-controls="ref-view-${key}" aria-selected="${key === mode}" tabindex="${key === mode ? 0 : -1}">${REF_COLS[key][0]}</button>`).join("");
   const panels = modes.map(key => `<div role="tabpanel" id="ref-view-${key}" aria-labelledby="ref-tab-${key}"${key === mode ? "" : " hidden"}>${key === mode ? refTable(comparison, comparisonRef, mode, paper) : ""}</div>`).join("");
@@ -1561,21 +1572,33 @@ function refTable(items, ref, mode, paper) {
   const [title, cols] = REF_COLS[mode];
   const val = (c, st) => { const v = c[1](st); return typeof v === "number" && Number.isFinite(v) ? v : null; };
   const head = cols.map(c => `<th scope="col">${c[0]}</th>`).join("");
+  const referenceValues = cols.map(c => c[1] ? val(c, ref.st) : null);
+  const unavailable = `<td><span class="rv">–</span><span class="sr-only">not available</span></td>`;
   const rows = items.map(x => {
     const me = x === ref;
-    const cells = cols.map(c => {
-      const v = val(c, x.st), r = val(c, ref.st);
-      if (v == null) return `<td><span class="rv">–</span><span class="sr-only">not available</span></td>`;
-      const p = refPct(v, r);
+    const cells = cols.map((c, i) => {
+      if (!c[1]) {
+        const label = c[2](x.st);
+        return label ? `<td><span class="rv">${esc(label)}</span></td>` : unavailable;
+      }
+      const v = me ? referenceValues[i] : val(c, x.st);
+      if (v == null) return unavailable;
+      const p = refPct(v, referenceValues[i]);
       const pct = fmtPct(p);
       const signClass = pct.startsWith("+") ? " positive" : pct.startsWith("−") ? " negative" : "";
       const d = me ? `<span class="rd">baseline</span>` : p == null ? `<span class="rd" title="No reference value to compare with">–</span>` : `<span class="rd${signClass}">${pct}</span>`;
-      return `<td><span class="rv">${c[2](x.st)}</span>${d}</td>`;
+      return `<td><span class="rv">${c[2](x.st, v)}</span>${d}</td>`;
     }).join("");
     return `<tr${me ? ` class="is-ref"` : ""}><th scope="row"><span class="swatch" style="color:var(${x.color})" aria-hidden="true"></span><span class="rn">${esc(x.dev.n)}${me ? `<small>Reference</small>` : ""}</span></th>${cells}</tr>`;
   }).join("");
   const twoCol = mode === "ebook" && items.some(x => x.st.ebook && x.st.ebook.e.cols > 1);
-  return `<p class="hint">Each percentage shows how much higher or lower a value is than on the reference screen. They describe size, not which is better.${twoCol ? " Lines per screen count every column." : ""}</p>
+  const details = {
+    screen: " Native resolution is compared by total pixel count.",
+    page: " Page visibility uses each screen’s selected fit.",
+    video: ` Picture dimensions and pixels use the ${S.video} preview ratio.`,
+    ebook: ` E-book values use ${REF_EBOOK_PT} pt (medium).${twoCol ? " Lines per screen count every column." : ""}`,
+  };
+  return `<p class="hint">Each percentage shows how much higher or lower a value is than on the reference screen. They describe size, not which is better.${details[mode] || ""}</p>
     <div class="ref-scroll" role="region" aria-labelledby="ref-title" tabindex="0"><table class="ref-table">
       <caption class="sr-only">${title} of each screen, with the difference from ${esc(ref.dev.n)} in percent</caption>
       <thead><tr><th scope="col">Screen</th>${head}</tr></thead><tbody>${rows}</tbody>
